@@ -5,6 +5,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import { Link, useLocation } from "react-router-dom";
 
 import { NavUser } from "@/components/nav-user"
 import {
@@ -27,46 +28,34 @@ const data = {
   },
 }
 
+export type NavItem = {
+  title: string;
+  url?: string; // The route path
+  items?: NavItem[]; // Nested sub-items
+};
 
-const data1= {
-  changes: [
-    {
-      file: "README.md",
-      state: "M",
-    },
-    {
-      file: "api/hello/route.ts",
-      state: "U",
-    },
-    {
-      file: "app/layout.tsx",
-      state: "M",
-    },
-  ],
-  tree: [
-    [
-      "Users and Permissions",
-      [
-        "Users",
-        "Users",
-      ],
-      ["Permissions",
-       "Permission Sets",
-       "Projection Grants",
-      ]
+const navData: NavItem[] = [
+  {
+    title: "Users and Permissions",
+    items: [
+      { title: "Users", url: "/users" },
+      {title: "Permissions",
+       items: [
+        { title: "Permission Sets", url: "/permission-sets" },
+        { title: "Projection Grants", url: "/projection-grants" },
+       ]
+      }
     ],
-    [
-      "Sites",
-      [
-        "Sites",
-      ],
-      [
-        "Sites Per User",
-      ]
+  },
+  {
+    title: "Sites",
+    items: [
+      { title: "Sites", url: "/sites" },
+      { title: "Sites Per User", url: "/sites-per-user" },
+    ],
+  },
+];
 
-    ]
-  ],
-}
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar
@@ -90,7 +79,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {data1.tree.map((item, index) => (
+          {navData.map((item, index) => (
             <Tree key={index} item={item} />
           ))}
         </SidebarMenu>
@@ -102,18 +91,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   )
 }
 
+function Tree({ item }: { item: NavItem }) {
+  const location = useLocation();
 
-type TreeItem = string | TreeItem[]
-function Tree({ item }: { item: TreeItem }) {
-  const [name, ...items] = Array.isArray(item) ? item : [item]
-  if (!items.length) {
+  if (!item.items?.length) {
+    const isActive = location.pathname === item.url;
+    
     return (
-      <SidebarMenuButton
-        isActive={name === "button.tsx"}
-        className="data-[active=true]:bg-transparent"
-      >
-        <File />
-        {name}
+      <SidebarMenuButton 
+          isActive={isActive} 
+          className="data-[active=true]:bg-transparent"
+          render={<Link to={item.url || "#"} />}
+        >
+        <File/>{item.title}
       </SidebarMenuButton>
     )
   }
@@ -121,17 +111,17 @@ function Tree({ item }: { item: TreeItem }) {
     <SidebarMenuItem>
       <Collapsible
         className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
-        defaultOpen={name === "components" || name === "ui"}
+        defaultOpen={true} // Or logic based on active child route
       >
         <CollapsibleTrigger render={<SidebarMenuButton />}>
           <ChevronRight className="transition-transform" />
           <Folder />
-          {name}
+          <span>{item.title}</span>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub>
-            {items.map((subItem, index) => (
-              <Tree key={index} item={subItem} />
+            {item.items.map((subItem, index) => (
+              <Tree key={index} item={subItem} /> // Recursion!
             ))}
           </SidebarMenuSub>
         </CollapsibleContent>

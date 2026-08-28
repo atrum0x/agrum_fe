@@ -1,28 +1,32 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
-import Dashboard from "./pages/Dashboard";
+import { Users } from "./pages/Users"; // Your new users page
 import ProtectedRoute from "./components/ProtectedRoute";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import DashboardLayout from "./layout/DashboardLayout";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Navigate to="/dashboard" replace />, // Auto-redirect root to dashboard
+    element: <Navigate to="/dashboard" replace />,
   },
   {
     path: "/login",
     element: <Login />,
   },
   {
-    // Every route inside this block requires the user to be logged in
     element: <ProtectedRoute />,
     children: [
       {
-        path: "/dashboard",
-        element: <Dashboard />,
+        path: "/",
+        element: <DashboardLayout />,
+        children: [
+          {
+            path: "users",
+            element: <Users />, 
+          },
+        ],
       },
-      // You can add more secure routes here later:
-      // { path: "/users", element: <UsersPage /> }
     ],
   },
 ]);

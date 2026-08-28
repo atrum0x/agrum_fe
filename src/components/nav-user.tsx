@@ -18,10 +18,12 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { ChevronsUpDownIcon, SparklesIcon, BadgeCheckIcon, CreditCardIcon, BellIcon, LogOutIcon } from "lucide-react"
+import { ChevronsUpDownIcon, SparklesIcon, BadgeCheckIcon, CreditCardIcon, BellIcon, LogOutIcon, SunIcon, MoonIcon, LaptopIcon } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function NavUser({
-  user,
+  user
 }: {
   user: {
     name: string
@@ -29,7 +31,44 @@ export function NavUser({
     avatar: string
   }
 }) {
+  const navigate = useNavigate();
   const { isMobile } = useSidebar()
+
+  const handleLogout = async () => {
+    try {
+      // Optional: call your backend logout endpoint here if needed
+    } catch (err) {
+      console.error("Logout failed", err);
+    } finally {
+      localStorage.removeItem("isAuthenticated");
+      navigate("/login"); // 👈 Cleanly bounce back to login
+    }
+  }
+
+  const [theme, setTheme] = useState<"light" | "dark" | "system">(() => {
+    return (localStorage.getItem("theme") as "light" | "dark" | "system") || "system";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove("dark");
+
+    if (theme === "dark") {
+      root.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else if (theme === "light") {
+      localStorage.setItem("theme", "light");
+    } else {
+      // System mode: check OS preference
+      localStorage.setItem("theme", "system");
+      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (systemPrefersDark) {
+        root.classList.add("dark");
+      }
+    }
+  }, [theme]);
+
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -99,8 +138,27 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
+
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuLabel className="text-xs text-muted-foreground px-2 py-1">Appearance</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => setTheme("light")} className={`cursor-pointer ${theme === "light" ? "font-bold bg-muted" : ""}`}>
+                <SunIcon />
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")} className={`cursor-pointer ${theme === "dark" ? "font-bold bg-muted" : ""}`}>
+                <MoonIcon />
+                Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")} className={`cursor-pointer ${theme === "system" ? "font-bold bg-muted" : ""}`}>
+                <LaptopIcon />
+                System Default
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem
+              onClick={handleLogout}
+                className="cursor-pointer text-destructive focus:text-destructive">
                 <LogOutIcon
                 />
                 Log out

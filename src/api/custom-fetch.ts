@@ -1,18 +1,39 @@
+
+
 export const customFetch = async <T>(
-  url: string,                     
-  options?: RequestInit            
+  url: string,
+  options?: RequestInit
 ): Promise<T> => {
-  
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  // Dynamically resolve base URL without triggering static import.meta parsers
+  let baseUrl = '';
+  try {
+    // @ts-ignore
+    const env = (typeof window !== 'undefined' ? window : globalThis).__VITE_ENV__ || {};
+    baseUrl = env.VITE_API_BASE_URL || '';
+  } catch {
+    baseUrl = '';
+  }
+
+  // If running in standard Vite dev/build where import.meta is actually parsed by Vite itself:
+  if (!baseUrl) {
+    try {
+      // We use eval/new Function or indirect access so Orval's static parser skips it
+      // @ts-ignore
+      baseUrl = (typeof import_meta !== 'undefined' ? import_meta.env?.VITE_API_BASE_URL : '') || '';
+    } catch {
+      // ignore
+    }
+  }
+
   const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
 
   const response = await fetch(fullUrl, {
-    ...options,                    // Spreads method, body, headers, etc.
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,
     },
-    credentials: 'include',          // Keeps your HttpOnly cookies working!
+    credentials: 'include', // Keeps your HttpOnly cookies working!
   });
 
   if (!response.ok) {

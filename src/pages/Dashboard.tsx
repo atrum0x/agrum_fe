@@ -1,18 +1,9 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
-import { SidebarFooter, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar";
-import { User2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default function Dashboard() {
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    // TODO: Call your actual logoutWeb endpoint here
-    localStorage.removeItem("isAuthenticated");
-    navigate("/login");
-  };
-
+  
   return (
     <div className="[--header-height:calc(--spacing(14))]">
       <SidebarProvider className="flex flex-col">

@@ -6,7 +6,7 @@ export default defineConfig({
       target: 'http://localhost:8080/v3/api-docs',
     },
     output: {
-      mode: 'split',
+      mode: 'tags-split',
       target: './src/api/generated/endpoints',
       schemas: './src/api/generated/models',
       client: 'fetch',

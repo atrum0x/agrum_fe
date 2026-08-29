@@ -37,8 +37,23 @@ export const customFetch = async <T>(
   });
 
   if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(errorBody || `API Error (${response.status})`);
+    let errorMessage = `API Error (${response.status})`;
+    
+    try {
+      const errorData = await response.json();
+      if (errorData && errorData.message) {
+        errorMessage = errorData.message;
+      }
+    } catch {
+      try {
+        const errorText = await response.text();
+        if (errorText) errorMessage = errorText;
+      } catch {
+        // ignore
+      }
+    }
+    
+    throw new Error(errorMessage); 
   }
 
   if (response.status === 204) {

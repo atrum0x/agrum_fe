@@ -19,14 +19,8 @@ import {
   SidebarMenuSub,
 } from "@/components/ui/sidebar"
 import { TerminalIcon } from "lucide-react"
+import { useAuth } from "@/context/AuthContext";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-}
 
 export type NavItem = {
   title: string;
@@ -58,6 +52,17 @@ const navData: NavItem[] = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
+
+  // 👇 1. Call useAuth INSIDE the component body (fixes the hook error)
+  const { user } = useAuth();
+
+  // 👇 2. Map user data inside with fallbacks to satisfy NavUser's required strings
+  const sidebarUserData = {
+    name: user?.username ?? "",
+    email: user?.email ?? "",
+    avatar: "/avatars/shadcn.jpg",
+  };
+  
   return (
     <Sidebar
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
@@ -86,7 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={sidebarUserData} />
       </SidebarFooter>
     </Sidebar>
   )

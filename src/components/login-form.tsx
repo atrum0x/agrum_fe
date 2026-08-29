@@ -8,7 +8,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { loginWeb } from "@/api/generated/endpoints/auth-controller/auth-controller";
+import { useLoginWeb } from "@/api/generated/endpoints/auth-controller/auth-controller";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function LoginForm({
   className,
@@ -16,24 +17,23 @@ export function LoginForm({
 }: React.ComponentProps<"form">) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const { mutate: doLogin, isPending, error } = useLoginWeb();
+
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
 
-    try {
-      await loginWeb({ username, password });
-      localStorage.setItem("isAuthenticated", "true");
-      navigate("/landing");
-    } catch (err: any) {
-      setError(err.message || "Invalid credentials. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
+    doLogin(
+      { data: { username, password } },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries();
+          navigate("/landing");
+        }
+      }
+    );
   };
 
   return (
@@ -45,9 +45,9 @@ export function LoginForm({
             Enter your credentials below to access the admin dashboard
           </p>
         </div>
-        {error && (
+        {error instanceof Error && (
           <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive text-center">
-            {error}
+            {error && <p className="text-red-500">{error.message}</p>}
           </div>
         )}
         <Field>
@@ -80,8 +80,8 @@ export function LoginForm({
           />
         </Field>
         <Field>
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Signing in..." : "Login"}
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? "Signing in..." : "Login"}
           </Button>
         </Field>
         

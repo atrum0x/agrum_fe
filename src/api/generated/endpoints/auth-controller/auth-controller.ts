@@ -22,18 +22,17 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
-  GetCurrentUser200,
-  LoginMobile200,
+  CurrentUserProfileResponse,
   LoginRequest,
   LoginWeb200,
   LogoutMobile200,
   LogoutRequest,
   LogoutWeb200,
-  RefreshMobile200,
   RefreshRequest,
   RefreshWeb200,
   Register200,
   RegisterRequest,
+  TokenResponse,
 } from "../../models";
 
 import { customFetch } from "../../../custom-fetch";
@@ -261,7 +260,7 @@ export const useRefreshWeb = <TError = unknown, TContext = unknown>(
   return useMutation(getRefreshWebMutationOptions(options), queryClient);
 };
 export type refreshMobileResponse200 = {
-  data: RefreshMobile200;
+  data: TokenResponse;
   status: 200;
 };
 
@@ -665,7 +664,7 @@ export const useLoginWeb = <TError = unknown, TContext = unknown>(
   return useMutation(getLoginWebMutationOptions(options), queryClient);
 };
 export type loginMobileResponse200 = {
-  data: LoginMobile200;
+  data: TokenResponse;
   status: 200;
 };
 
@@ -766,7 +765,7 @@ export const useLoginMobile = <TError = unknown, TContext = unknown>(
   return useMutation(getLoginMobileMutationOptions(options), queryClient);
 };
 export type getCurrentUserResponse200 = {
-  data: GetCurrentUser200;
+  data: CurrentUserProfileResponse;
   status: 200;
 };
 

@@ -18,6 +18,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { useAuth } from "@/context/AuthContext";
 import { ChevronsUpDownIcon, SparklesIcon, BadgeCheckIcon, CreditCardIcon, BellIcon, LogOutIcon, SunIcon, MoonIcon, LaptopIcon } from "lucide-react"
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -33,15 +34,13 @@ export function NavUser({
 }) {
   const navigate = useNavigate();
   const { isMobile } = useSidebar()
+  const { logout } = useAuth();
 
   const handleLogout = async () => {
     try {
-      // Optional: call your backend logout endpoint here if needed
+      logout(); // 👈 3. Call it! It handles cache clearing and navigation automatically
     } catch (err) {
       console.error("Logout failed", err);
-    } finally {
-      localStorage.removeItem("isAuthenticated");
-      navigate("/login"); // 👈 Cleanly bounce back to login
     }
   }
 

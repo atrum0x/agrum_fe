@@ -8,8 +8,8 @@ export const customFetch = async <T>(
   let baseUrl = '';
   try {
     // @ts-ignore
-    const env = (typeof window !== 'undefined' ? window : globalThis).__VITE_ENV__ || {};
-    baseUrl = env.VITE_API_BASE_URL || '';
+    baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+    console.log(baseUrl);
   } catch {
     baseUrl = '';
   }

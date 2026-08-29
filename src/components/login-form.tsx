@@ -28,7 +28,7 @@ export function LoginForm({
     try {
       await loginWeb({ username, password });
       localStorage.setItem("isAuthenticated", "true");
-      navigate("/dashboard");
+      navigate("/landing");
     } catch (err: any) {
       setError(err.message || "Invalid credentials. Please try again.");
     } finally {

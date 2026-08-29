@@ -1,15 +1,12 @@
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "./pages/Login";
 import { Users } from "./pages/Users"; // Your new users page
 import ProtectedRoute from "./components/ProtectedRoute";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import DashboardLayout from "./layout/DashboardLayout";
+import MainLayout from "./layout/MainLayout";
+import Landing from "./pages/Landing";
 
 const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <Navigate to="/dashboard" replace />,
-  },
   {
     path: "/login",
     element: <Login />,
@@ -19,8 +16,11 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <DashboardLayout />,
+        element: <MainLayout />,
         children: [
+          {path: "landing",
+            element: <Landing/>
+          },
           {
             path: "users",
             element: <Users />, 

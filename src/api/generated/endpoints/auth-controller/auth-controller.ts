@@ -5,6 +5,22 @@
  * Powered By Atrum
  * OpenAPI spec version: 1.0.0
  */
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult,
+} from "@tanstack/react-query";
+
 import type {
   GetCurrentUser200,
   LoginMobile200,
@@ -21,6 +37,26 @@ import type {
 } from "../../models";
 
 import { customFetch } from "../../../custom-fetch";
+
+type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+const withQueryKey = <T extends object, K>(
+  query: T,
+  queryKey: K,
+): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === "queryKey") continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
+};
 
 export type registerResponse200 = {
   data: Register200;
@@ -59,6 +95,70 @@ export const register = async (
   });
 };
 
+export const getRegisterMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof register>>,
+    TError,
+    RegisterMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof register>>,
+  TError,
+  RegisterMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["register"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof register>>,
+    RegisterMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return register(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RegisterMutationResult = NonNullable<
+  Awaited<ReturnType<typeof register>>
+>;
+export type RegisterMutationBody = RegisterRequest;
+export type RegisterMutationError = unknown;
+export type RegisterMutationVariables = { data: RegisterRequest };
+
+export const useRegister = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof register>>,
+      TError,
+      RegisterMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof register>>,
+  TError,
+  RegisterMutationVariables,
+  TContext
+> => {
+  return useMutation(getRegisterMutationOptions(options), queryClient);
+};
 export type refreshWebResponse200 = {
   data: RefreshWeb200;
   status: 200;
@@ -96,6 +196,70 @@ export const refreshWeb = async (
   });
 };
 
+export const getRefreshWebMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof refreshWeb>>,
+    TError,
+    RefreshWebMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof refreshWeb>>,
+  TError,
+  RefreshWebMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["refreshWeb"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof refreshWeb>>,
+    RefreshWebMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return refreshWeb(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RefreshWebMutationResult = NonNullable<
+  Awaited<ReturnType<typeof refreshWeb>>
+>;
+export type RefreshWebMutationBody = RefreshRequest;
+export type RefreshWebMutationError = unknown;
+export type RefreshWebMutationVariables = { data: RefreshRequest };
+
+export const useRefreshWeb = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof refreshWeb>>,
+      TError,
+      RefreshWebMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof refreshWeb>>,
+  TError,
+  RefreshWebMutationVariables,
+  TContext
+> => {
+  return useMutation(getRefreshWebMutationOptions(options), queryClient);
+};
 export type refreshMobileResponse200 = {
   data: RefreshMobile200;
   status: 200;
@@ -133,6 +297,70 @@ export const refreshMobile = async (
   });
 };
 
+export const getRefreshMobileMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof refreshMobile>>,
+    TError,
+    RefreshMobileMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof refreshMobile>>,
+  TError,
+  RefreshMobileMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["refreshMobile"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof refreshMobile>>,
+    RefreshMobileMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return refreshMobile(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RefreshMobileMutationResult = NonNullable<
+  Awaited<ReturnType<typeof refreshMobile>>
+>;
+export type RefreshMobileMutationBody = RefreshRequest;
+export type RefreshMobileMutationError = unknown;
+export type RefreshMobileMutationVariables = { data: RefreshRequest };
+
+export const useRefreshMobile = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof refreshMobile>>,
+      TError,
+      RefreshMobileMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof refreshMobile>>,
+  TError,
+  RefreshMobileMutationVariables,
+  TContext
+> => {
+  return useMutation(getRefreshMobileMutationOptions(options), queryClient);
+};
 export type logoutWebResponse200 = {
   data: LogoutWeb200;
   status: 200;
@@ -170,6 +398,70 @@ export const logoutWeb = async (
   });
 };
 
+export const getLogoutWebMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof logoutWeb>>,
+    TError,
+    LogoutWebMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof logoutWeb>>,
+  TError,
+  LogoutWebMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["logoutWeb"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof logoutWeb>>,
+    LogoutWebMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return logoutWeb(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LogoutWebMutationResult = NonNullable<
+  Awaited<ReturnType<typeof logoutWeb>>
+>;
+export type LogoutWebMutationBody = LogoutRequest;
+export type LogoutWebMutationError = unknown;
+export type LogoutWebMutationVariables = { data: LogoutRequest };
+
+export const useLogoutWeb = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof logoutWeb>>,
+      TError,
+      LogoutWebMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof logoutWeb>>,
+  TError,
+  LogoutWebMutationVariables,
+  TContext
+> => {
+  return useMutation(getLogoutWebMutationOptions(options), queryClient);
+};
 export type logoutMobileResponse200 = {
   data: LogoutMobile200;
   status: 200;
@@ -207,6 +499,70 @@ export const logoutMobile = async (
   });
 };
 
+export const getLogoutMobileMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof logoutMobile>>,
+    TError,
+    LogoutMobileMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof logoutMobile>>,
+  TError,
+  LogoutMobileMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["logoutMobile"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof logoutMobile>>,
+    LogoutMobileMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return logoutMobile(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LogoutMobileMutationResult = NonNullable<
+  Awaited<ReturnType<typeof logoutMobile>>
+>;
+export type LogoutMobileMutationBody = LogoutRequest;
+export type LogoutMobileMutationError = unknown;
+export type LogoutMobileMutationVariables = { data: LogoutRequest };
+
+export const useLogoutMobile = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof logoutMobile>>,
+      TError,
+      LogoutMobileMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof logoutMobile>>,
+  TError,
+  LogoutMobileMutationVariables,
+  TContext
+> => {
+  return useMutation(getLogoutMobileMutationOptions(options), queryClient);
+};
 export type loginWebResponse200 = {
   data: LoginWeb200;
   status: 200;
@@ -244,6 +600,70 @@ export const loginWeb = async (
   });
 };
 
+export const getLoginWebMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof loginWeb>>,
+    TError,
+    LoginWebMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof loginWeb>>,
+  TError,
+  LoginWebMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["loginWeb"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof loginWeb>>,
+    LoginWebMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return loginWeb(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LoginWebMutationResult = NonNullable<
+  Awaited<ReturnType<typeof loginWeb>>
+>;
+export type LoginWebMutationBody = LoginRequest;
+export type LoginWebMutationError = unknown;
+export type LoginWebMutationVariables = { data: LoginRequest };
+
+export const useLoginWeb = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof loginWeb>>,
+      TError,
+      LoginWebMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof loginWeb>>,
+  TError,
+  LoginWebMutationVariables,
+  TContext
+> => {
+  return useMutation(getLoginWebMutationOptions(options), queryClient);
+};
 export type loginMobileResponse200 = {
   data: LoginMobile200;
   status: 200;
@@ -281,6 +701,70 @@ export const loginMobile = async (
   });
 };
 
+export const getLoginMobileMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof loginMobile>>,
+    TError,
+    LoginMobileMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof loginMobile>>,
+  TError,
+  LoginMobileMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["loginMobile"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof loginMobile>>,
+    LoginMobileMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return loginMobile(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LoginMobileMutationResult = NonNullable<
+  Awaited<ReturnType<typeof loginMobile>>
+>;
+export type LoginMobileMutationBody = LoginRequest;
+export type LoginMobileMutationError = unknown;
+export type LoginMobileMutationVariables = { data: LoginRequest };
+
+export const useLoginMobile = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof loginMobile>>,
+      TError,
+      LoginMobileMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof loginMobile>>,
+  TError,
+  LoginMobileMutationVariables,
+  TContext
+> => {
+  return useMutation(getLoginMobileMutationOptions(options), queryClient);
+};
 export type getCurrentUserResponse200 = {
   data: GetCurrentUser200;
   status: 200;
@@ -303,3 +787,119 @@ export const getCurrentUser = async (
     method: "GET",
   });
 };
+
+export const getGetCurrentUserQueryKey = () => {
+  return [`/api/auth/me/web`] as const;
+};
+
+export const getGetCurrentUserQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCurrentUserQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCurrentUser>>> = ({
+    signal,
+  }) => getCurrentUser({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCurrentUser>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetCurrentUserQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCurrentUser>>
+>;
+export type GetCurrentUserQueryError = unknown;
+
+export function useGetCurrentUser<
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCurrentUser>>,
+          TError,
+          Awaited<ReturnType<typeof getCurrentUser>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCurrentUser<
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCurrentUser>>,
+          TError,
+          Awaited<ReturnType<typeof getCurrentUser>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCurrentUser<
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetCurrentUser<
+  TData = Awaited<ReturnType<typeof getCurrentUser>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetCurrentUserQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}

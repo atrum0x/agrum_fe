@@ -9,7 +9,7 @@ export default defineConfig({
       mode: 'tags-split',
       target: './src/api/generated/endpoints',
       schemas: './src/api/generated/models',
-      client: 'fetch',
+      client: 'react-query',
       override: {
         mutator: {
           path: './src/api/custom-fetch.ts',

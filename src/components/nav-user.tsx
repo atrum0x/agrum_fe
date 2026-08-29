@@ -21,7 +21,6 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { ChevronsUpDownIcon, SparklesIcon, BadgeCheckIcon, CreditCardIcon, BellIcon, LogOutIcon, SunIcon, MoonIcon, LaptopIcon } from "lucide-react"
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 export function NavUser({
   user
@@ -32,7 +31,7 @@ export function NavUser({
     avatar: string
   }
 }) {
-  const navigate = useNavigate();
+
   const { isMobile } = useSidebar()
   const { logout } = useAuth();
 

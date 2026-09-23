@@ -7,6 +7,7 @@ import MainLayout from "./layout/MainLayout";
 import Landing from "./pages/Landing";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext";
+import { PermissionSets } from "./pages/PermissionSets";
 
 
 const queryClient = new QueryClient({
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
               { index: true, element: <Navigate to="/landing" replace /> },
               { path: "landing", element: <Landing /> },
               { path: "users", element: <Users /> },
+              { path: "permission-sets", element: <PermissionSets /> },
             ],
           },
         ],

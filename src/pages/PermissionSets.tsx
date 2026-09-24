@@ -48,6 +48,7 @@ import {
     IconGripVertical,
     IconLayoutColumns,
     IconLoader,
+    IconSearch,
 } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge"
 
@@ -287,6 +288,8 @@ function DraggableRow({
 
 import permissionSetData from "./data.json"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
 
 export const PermissionSets = () => {
 
@@ -305,6 +308,13 @@ export const PermissionSets = () => {
         pageIndex: 0,
         pageSize: 10,
     })
+    const [selectedItemId, setSelectedItemId] = React.useState<number | null>(initialData[0]?.id ?? null)
+    const [searchTerm, setSearchTerm] = React.useState("")
+    const filteredData = React.useMemo(() => {
+        return data.filter((item) =>
+            item.header.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+    }, [data, searchTerm])
     const sortableId = React.useId()
     const sensors = useSensors(
         useSensor(MouseSensor, {}),
@@ -347,220 +357,300 @@ export const PermissionSets = () => {
     }
 
     return <div>
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="aspect-video rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
-            <div className="aspect-video rounded-xl bg-muted/50" />
-          </div>
-          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-        </div>
-        <Tabs
-            defaultValue="outline"
-            className="min-h-0 w-full flex-col justify-start gap-6"
-        >
-            <div className="flex items-center justify-between px-4 lg:px-6">
-                <Label htmlFor="view-selector" className="sr-only">
-                    View
-                </Label>
-                <Select defaultValue="outline">
-                    <SelectTrigger
-                        className="flex w-fit @4xl/main:hidden"
-                        size="sm"
-                        id="view-selector"
-                    >
-                        <SelectValue placeholder="Select a view" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="outline">Outline</SelectItem>
-                        <SelectItem value="past-performance">Past Performance</SelectItem>
-                        <SelectItem value="key-personnel">Key Personnel</SelectItem>
-                        <SelectItem value="focus-documents">Focus Documents</SelectItem>
-                    </SelectContent>
-                </Select>
-                <TabsList className="hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:px-1 @4xl/main:flex">
-                    <TabsTrigger value="outline">Outline</TabsTrigger>
-                    <TabsTrigger value="past-performance">
-                        Past Performance <Badge variant="secondary">3</Badge>
-                    </TabsTrigger>
-                    <TabsTrigger value="key-personnel">
-                        Key Personnel <Badge variant="secondary">2</Badge>
-                    </TabsTrigger>
-                    <TabsTrigger value="focus-documents">Focus Documents</TabsTrigger>
-                </TabsList>
-                <div className="flex items-center gap-2">
-                    <DropdownMenu>
-                        <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg border px-3 py-1 text-sm font-medium hover:bg-muted">
-                            <IconLayoutColumns />
-                            <span className="hidden lg:inline">Customize Columns</span>
-                            <span className="lg:hidden">Columns</span>
-                            <IconChevronDown />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56">
-                            {table
-                                .getAllColumns()
-                                .filter(
-                                    (column) =>
-                                        typeof column.accessorFn !== "undefined" &&
-                                        column.getCanHide()
-                                )
-                                .map((column) => {
-                                    return (
-                                        <DropdownMenuCheckboxItem
-                                            key={column.id}
-                                            className="capitalize"
-                                            checked={column.getIsVisible()}
-                                            onCheckedChange={(value) =>
-                                                column.toggleVisibility(!!value)
-                                            }
-                                        >
-                                            {column.id}
-                                        </DropdownMenuCheckboxItem>
-                                    )
-                                })}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-            </div>
-            <TabsContent
-                value="outline"
-                className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-auto px-4 lg:px-6"
-            >
-                <div className="overflow-hidden rounded-lg border">
-                    <DndContext
-                        collisionDetection={closestCenter}
-                        modifiers={[restrictToVerticalAxis]}
-                        onDragEnd={handleDragEnd}
-                        sensors={sensors}
-                        id={sortableId}
-                    >
-                        <Table>
-                            <TableHeader className="sticky top-0 z-10 bg-muted">
-                                {table.getHeaderGroups().map((headerGroup) => (
-                                    <TableRow key={headerGroup.id}>
-                                        {headerGroup.headers.map((header) => {
-                                            return (
-                                                <TableHead key={header.id} colSpan={header.colSpan}>
-                                                    {header.isPlaceholder ? null : (
-                                                        <FlexRender header={header} />
-                                                    )}
-                                                </TableHead>
-                                            )
-                                        })}
-                                    </TableRow>
-                                ))}
-                            </TableHeader>
-                            <TableBody className="**:data-[slot=table-cell]:first:w-8">
-                                {table.getRowModel().rows?.length ? (
-                                    <SortableContext
-                                        items={dataIds}
-                                        strategy={verticalListSortingStrategy}
-                                    >
-                                        {table.getRowModel().rows.map((row) => (
-                                            <DraggableRow key={row.id} row={row} />
-                                        ))}
-                                    </SortableContext>
-                                ) : (
-                                    <TableRow>
-                                        <TableCell
-                                            colSpan={columns.length}
-                                            className="h-24 text-center"
-                                        >
-                                            No results.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </DndContext>
-                </div>
-                <div className="flex items-center justify-between px-4">
-                    <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
-                        {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                        {table.getFilteredRowModel().rows.length} row(s) selected.
-                    </div>
-                    <div className="flex w-full items-center gap-8 lg:w-fit">
-                        <div className="hidden items-center gap-2 lg:flex">
-                            <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                                Rows per page
-                            </Label>
-                            <Select
-                                value={`${table.state.pagination.pageSize}`}
-                                onValueChange={(value) => {
-                                    table.setPageSize(Number(value))
-                                }}
-                            >
-                                <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-                                    <SelectValue placeholder={table.state.pagination.pageSize} />
-                                </SelectTrigger>
-                                <SelectContent side="top">
-                                    {[10, 20, 30, 40, 50].map((pageSize) => (
-                                        <SelectItem key={pageSize} value={`${pageSize}`}>
-                                            {pageSize}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="flex w-fit items-center justify-center text-sm font-medium">
-                            Page {table.state.pagination.pageIndex + 1} of{" "}
-                            {table.getPageCount()}
-                        </div>
-                        <div className="ml-auto flex items-center gap-2 lg:ml-0">
-                            <Button
-                                variant="outline"
-                                className="hidden h-8 w-8 p-0 lg:flex"
-                                type="button"
-                                onClick={() => table.setPageIndex(0)}
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                <span className="sr-only">Go to first page</span>
-                                <IconChevronsLeft />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="size-8"
-                                size="icon"
-                                type="button"
-                                onClick={() =>
-                                    table.setPageIndex(
-                                        Math.max(0, table.state.pagination.pageIndex - 1)
-                                    )
-                                }
-                                disabled={!table.getCanPreviousPage()}
-                            >
-                                <span className="sr-only">Go to previous page</span>
-                                <IconChevronLeft />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="size-8"
-                                size="icon"
-                                type="button"
-                                onClick={() =>
-                                    table.setPageIndex(table.state.pagination.pageIndex + 1)
-                                }
-                                disabled={!table.getCanNextPage()}
-                            >
-                                <span className="sr-only">Go to next page</span>
-                                <IconChevronRight />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="hidden size-8 lg:flex"
-                                size="icon"
-                                type="button"
-                                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                                disabled={!table.getCanNextPage()}
-                            >
-                                <span className="sr-only">Go to last page</span>
-                                <IconChevronsRight />
-                            </Button>
-                        </div>
+        <div className="flex h-screen w-full overflow-hidden">
+            <aside className="flex w-64 flex-col border-r bg-background">
+                {/* Search Bar Header */}
+                <div className="p-4 border-b">
+                    <div className="relative">
+                        <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="search"
+                            placeholder="Search Permission Sets"
+                            className="pl-8"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                 </div>
 
-            </TabsContent>
-        </Tabs>
+                {/* Selectable Items List */}
+                <ScrollArea className="flex-1 overflow-y-auto">
+                    {filteredData.map((item) => {
+                        const isSelected = selectedItemId === item.id
+                        return (
+                            <>  
+                            <div className={`w-full text-left px-3 py-2 text-sm ${isSelected
+                                ? "bg-accent text-accent-foreground font-medium"
+                                : "hover:bg-muted/50 text-muted-foreground"
+                                }`}
+                                onClick={() => setSelectedItemId(item.id)}>
+                                <p className="truncate">{item.header}</p>
+                                <p className={` truncate pt-1 text-xs text-muted-foreground ${isSelected ? "font-medium" : ""}`}>
+                                    {item.reviewer}
+                                </p>
+                            </div>
+                            <Separator />
+                            </>
+                        )
+                    })}
+                    {filteredData.length === 0 && (
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                            No items found.
+                        </div>
+                    )}
+                </ScrollArea>
+            </aside>
+
+            <main className="flex-1 overflow-y-auto flex flex-col gap-2 pt-4">
+                <div className="flex flex-1 flex-col gap-6 pt-0 px-4 lg:px-6">
+                    <div className="grid auto-rows-min gap-4 sm:grid-cols-2 md:grid-cols-6 rounded-xl bg-muted/50 p-4 ">
+                        <div className="relative min-w-0 group">
+                            <p className="text-sm text-muted-foreground">Label</p>
+                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
+                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+                            </p>
+                        </div>
+                        <div className="relative min-w-0 group">
+                            <p className="text-sm text-muted-foreground">Label</p>
+                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
+                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+                            </p>
+                        </div>
+                        <div className="relative min-w-0 group">
+                            <p className="text-sm text-muted-foreground">Label</p>
+                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
+                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+                            </p>
+                        </div>
+                        <div className="relative min-w-0 group">
+                            <p className="text-sm text-muted-foreground">Label</p>
+                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
+                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+                            </p>
+                        </div>
+                        <div className="relative min-w-0 group">
+                            <p className="text-sm text-muted-foreground">Label</p>
+                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
+                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+                            </p>
+                        </div>
+                        <div className="relative min-w-0 group">
+                            <p className="text-sm text-muted-foreground">Label</p>
+                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
+                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+                            </p>
+                        </div>
+                        <div className="relative min-w-0 group">
+                            <p className="text-sm text-muted-foreground">Label</p>
+                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
+                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                    </div>
+                </div>
+                <Tabs
+                    defaultValue="outline"
+                    className="min-h-0 w-full flex-col justify-start gap-2"
+                >
+                    <div className="flex items-center justify-between px-4 lg:px-6">
+                        <Label htmlFor="view-selector" className="sr-only">
+                            View
+                        </Label>
+                        <Select defaultValue="outline">
+                            <SelectTrigger
+                                className="flex w-fit @4xl/main:hidden"
+                                size="sm"
+                                id="view-selector"
+                            >
+                                <SelectValue placeholder="Select a view" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="outline">Granted</SelectItem>
+                                <SelectItem value="past-performance">Revoked</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <TabsList className="hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:px-1 @4xl/main:flex">
+                            <TabsTrigger value="outline">Granted</TabsTrigger>
+                            <TabsTrigger value="past-performance">
+                                Revoked <Badge variant="secondary">3</Badge>
+                            </TabsTrigger>
+                        </TabsList>
+                        <div className="flex items-center gap-2">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger className="flex items-center gap-2 rounded-lg border px-3 py-1 text-sm font-medium hover:bg-muted">
+                                    <IconLayoutColumns />
+                                    <span className="hidden lg:inline">Customize Columns</span>
+                                    <span className="lg:hidden">Columns</span>
+                                    <IconChevronDown />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56">
+                                    {table
+                                        .getAllColumns()
+                                        .filter(
+                                            (column) =>
+                                                typeof column.accessorFn !== "undefined" &&
+                                                column.getCanHide()
+                                        )
+                                        .map((column) => {
+                                            return (
+                                                <DropdownMenuCheckboxItem
+                                                    key={column.id}
+                                                    className="capitalize"
+                                                    checked={column.getIsVisible()}
+                                                    onCheckedChange={(value) =>
+                                                        column.toggleVisibility(!!value)
+                                                    }
+                                                >
+                                                    {column.id}
+                                                </DropdownMenuCheckboxItem>
+                                            )
+                                        })}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    </div>
+                    <TabsContent
+                        value="outline"
+                        className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-auto px-4 lg:px-6"
+                    >
+                        <div className="overflow-hidden rounded-lg border">
+                            <DndContext
+                                collisionDetection={closestCenter}
+                                modifiers={[restrictToVerticalAxis]}
+                                onDragEnd={handleDragEnd}
+                                sensors={sensors}
+                                id={sortableId}
+                            >
+                                <Table>
+                                    <TableHeader className="sticky top-0 z-10 bg-muted">
+                                        {table.getHeaderGroups().map((headerGroup) => (
+                                            <TableRow key={headerGroup.id}>
+                                                {headerGroup.headers.map((header) => {
+                                                    return (
+                                                        <TableHead key={header.id} colSpan={header.colSpan}>
+                                                            {header.isPlaceholder ? null : (
+                                                                <FlexRender header={header} />
+                                                            )}
+                                                        </TableHead>
+                                                    )
+                                                })}
+                                            </TableRow>
+                                        ))}
+                                    </TableHeader>
+                                    <TableBody className="**:data-[slot=table-cell]:first:w-8">
+                                        {table.getRowModel().rows?.length ? (
+                                            <SortableContext
+                                                items={dataIds}
+                                                strategy={verticalListSortingStrategy}
+                                            >
+                                                {table.getRowModel().rows.map((row) => (
+                                                    <DraggableRow key={row.id} row={row} />
+                                                ))}
+                                            </SortableContext>
+                                        ) : (
+                                            <TableRow>
+                                                <TableCell
+                                                    colSpan={columns.length}
+                                                    className="h-24 text-center"
+                                                >
+                                                    No results.
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </DndContext>
+                        </div>
+                        <div className="flex items-center justify-between px-4">
+                            <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
+                                {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                                {table.getFilteredRowModel().rows.length} row(s) selected.
+                            </div>
+                            <div className="flex w-full items-center gap-8 lg:w-fit">
+                                <div className="hidden items-center gap-2 lg:flex">
+                                    <Label htmlFor="rows-per-page" className="text-sm font-medium">
+                                        Rows per page
+                                    </Label>
+                                    <Select
+                                        value={`${table.state.pagination.pageSize}`}
+                                        onValueChange={(value) => {
+                                            table.setPageSize(Number(value))
+                                        }}
+                                    >
+                                        <SelectTrigger size="sm" className="w-20" id="rows-per-page">
+                                            <SelectValue placeholder={table.state.pagination.pageSize} />
+                                        </SelectTrigger>
+                                        <SelectContent side="top">
+                                            {[10, 20, 30, 40, 50].map((pageSize) => (
+                                                <SelectItem key={pageSize} value={`${pageSize}`}>
+                                                    {pageSize}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="flex w-fit items-center justify-center text-sm font-medium">
+                                    Page {table.state.pagination.pageIndex + 1} of{" "}
+                                    {table.getPageCount()}
+                                </div>
+                                <div className="ml-auto flex items-center gap-2 lg:ml-0">
+                                    <Button
+                                        variant="outline"
+                                        className="hidden h-8 w-8 p-0 lg:flex"
+                                        type="button"
+                                        onClick={() => table.setPageIndex(0)}
+                                        disabled={!table.getCanPreviousPage()}
+                                    >
+                                        <span className="sr-only">Go to first page</span>
+                                        <IconChevronsLeft />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="size-8"
+                                        size="icon"
+                                        type="button"
+                                        onClick={() =>
+                                            table.setPageIndex(
+                                                Math.max(0, table.state.pagination.pageIndex - 1)
+                                            )
+                                        }
+                                        disabled={!table.getCanPreviousPage()}
+                                    >
+                                        <span className="sr-only">Go to previous page</span>
+                                        <IconChevronLeft />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="size-8"
+                                        size="icon"
+                                        type="button"
+                                        onClick={() =>
+                                            table.setPageIndex(table.state.pagination.pageIndex + 1)
+                                        }
+                                        disabled={!table.getCanNextPage()}
+                                    >
+                                        <span className="sr-only">Go to next page</span>
+                                        <IconChevronRight />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="hidden size-8 lg:flex"
+                                        size="icon"
+                                        type="button"
+                                        onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+                                        disabled={!table.getCanNextPage()}
+                                    >
+                                        <span className="sr-only">Go to last page</span>
+                                        <IconChevronsRight />
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            </main>
+        </div>
     </div>
 }

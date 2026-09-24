@@ -12,7 +12,7 @@ export default function MainLayout() {
         <div className="flex flex-1">
           <AppSidebar />
           <SidebarInset>
-            <div className="@container/main flex flex-1 flex-col gap-4 p-4">
+            <div className="@container/main flex flex-1 flex-col gap-4">
               <Outlet /> 
             </div>
           </SidebarInset>

@@ -327,7 +327,7 @@ export const PermissionSets = () => {
     )
     const table = useTable({
         features,
-        data,
+        data: filteredData,
         columns,
         state: {
             sorting,
@@ -356,9 +356,9 @@ export const PermissionSets = () => {
         }
     }
 
-    return <div>
-        <div className="flex h-screen w-full overflow-hidden">
-            <aside className="flex w-64 flex-col border-r bg-background">
+    return (
+        <div className="flex h-full w-full overflow-hidden">
+            <aside className="flex w-64 h-full shrink-0 flex-col border-r bg-background">
                 {/* Search Bar Header */}
                 <div className="p-4 border-b">
                     <div className="relative">
@@ -378,18 +378,18 @@ export const PermissionSets = () => {
                     {filteredData.map((item) => {
                         const isSelected = selectedItemId === item.id
                         return (
-                            <>  
-                            <div className={`w-full text-left px-3 py-2 text-sm ${isSelected
-                                ? "bg-accent text-accent-foreground font-medium"
-                                : "hover:bg-muted/50 text-muted-foreground"
-                                }`}
-                                onClick={() => setSelectedItemId(item.id)}>
-                                <p className="truncate">{item.header}</p>
-                                <p className={` truncate pt-1 text-xs text-muted-foreground ${isSelected ? "font-medium" : ""}`}>
-                                    {item.reviewer}
-                                </p>
-                            </div>
-                            <Separator />
+                            <>
+                                <div className={`w-full text-left px-3 py-2 text-sm ${isSelected
+                                    ? "bg-accent text-accent-foreground font-medium"
+                                    : "hover:bg-muted/50 text-muted-foreground"
+                                    }`}
+                                    onClick={() => setSelectedItemId(item.id)}>
+                                    <p className="truncate">{item.header}</p>
+                                    <p className={` truncate pt-1 text-xs text-muted-foreground ${isSelected ? "font-medium" : ""}`}>
+                                        {item.reviewer}
+                                    </p>
+                                </div>
+                                <Separator />
                             </>
                         )
                     })}
@@ -401,8 +401,8 @@ export const PermissionSets = () => {
                 </ScrollArea>
             </aside>
 
-            <main className="flex-1 overflow-y-auto flex flex-col gap-2 pt-4">
-                <div className="flex flex-1 flex-col gap-6 pt-0 px-4 lg:px-6">
+            <main className="flex-1 overflow-y-auto bg-background p-4 lg:p-6">
+                <div className="flex flex-col gap-6 pt-0 px-4 lg:px-6 shrink-0">
                     <div className="grid auto-rows-min gap-4 sm:grid-cols-2 md:grid-cols-6 rounded-xl bg-muted/50 p-4 ">
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Label</p>
@@ -452,7 +452,7 @@ export const PermissionSets = () => {
                 </div>
                 <Tabs
                     defaultValue="outline"
-                    className="min-h-0 w-full flex-col justify-start gap-2"
+                    className="flex flex-col w-full justify-start gap-4"
                 >
                     <div className="flex items-center justify-between px-4 lg:px-6">
                         <Label htmlFor="view-selector" className="sr-only">
@@ -513,9 +513,9 @@ export const PermissionSets = () => {
                     </div>
                     <TabsContent
                         value="outline"
-                        className="relative flex min-h-0 flex-1 flex-col gap-4 overflow-auto px-4 lg:px-6"
+                        className="flex flex-col gap-4 px-4 lg:px-6 pb-8 outline-none"
                     >
-                        <div className="overflow-hidden rounded-lg border">
+                        <div className="rounded-lg border bg-background relative">
                             <DndContext
                                 collisionDetection={closestCenter}
                                 modifiers={[restrictToVerticalAxis]}
@@ -563,7 +563,7 @@ export const PermissionSets = () => {
                                 </Table>
                             </DndContext>
                         </div>
-                        <div className="flex items-center justify-between px-4">
+                        <div className="flex items-center justify-between px-4 shrink-0">
                             <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
                                 {table.getFilteredSelectedRowModel().rows.length} of{" "}
                                 {table.getFilteredRowModel().rows.length} row(s) selected.
@@ -651,6 +651,5 @@ export const PermissionSets = () => {
                     </TabsContent>
                 </Tabs>
             </main>
-        </div>
-    </div>
+        </div>)
 }

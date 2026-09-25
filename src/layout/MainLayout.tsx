@@ -6,15 +6,13 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default function MainLayout() {
   return (
-    <div className="[--header-height:calc(--spacing(14))]">
-      <SidebarProvider className="flex flex-col">
-        <SiteHeader />
-        <div className="flex flex-1">
+    <div className="[--header-height:calc(var(--spacing)*14)] flex h-screen flex-col overflow-hidden bg-background">
+      <SidebarProvider className="flex h-full flex-col overflow-hidden">
+        <SiteHeader/>
+        <div className="flex flex-1 min-h-0 overflow-hidden">
           <AppSidebar />
-          <SidebarInset>
-            <div className="@container/main flex flex-1 flex-col gap-4">
-              <Outlet /> 
-            </div>
+          <SidebarInset className="flex-1 min-h-0 overflow-hidden">
+            <Outlet /> 
           </SidebarInset>
         </div>
       </SidebarProvider>

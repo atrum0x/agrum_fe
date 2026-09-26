@@ -11,4 +11,6 @@ export interface PermissionSet {
   id?: string;
   description?: string;
   projections?: Projection[];
+  modified?: string;
+  modifiedBy?: string;
 }

@@ -100,7 +100,7 @@ const columns = columnHelper.columns([
         enableHiding: false,
     }),
     columnHelper.accessor("header", {
-        header: "Header",
+        header: "Projection",
         cell: ({ row }) => <div className="w-32">{row.original.header}</div>,
         enableHiding: false,
     }),
@@ -349,47 +349,30 @@ export const PermissionSets = () => {
                 <div className="flex flex-col gap-6 pt-0 px-4 lg:px-6 shrink-0">
                     <div className="grid auto-rows-min gap-4 sm:grid-cols-2 md:grid-cols-6 rounded-xl bg-muted/50 p-4 ">
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Label</p>
+                            <p className="text-sm text-muted-foreground">Permission Set</p>
                             <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+                                Value
                             </p>
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Label</p>
+                            <p className="text-sm text-muted-foreground">Description</p>
                             <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+                                Value
                             </p>
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Label</p>
+                            <p className="text-sm text-muted-foreground">Modified</p>
                             <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+                                Value
                             </p>
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Label</p>
+                            <p className="text-sm text-muted-foreground">Modified By</p>
                             <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+                                Value
                             </p>
                         </div>
-                        <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Label</p>
-                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-                            </p>
-                        </div>
-                        <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Label</p>
-                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-                            </p>
-                        </div>
-                        <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Label</p>
-                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                Valuehhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
-                            </p>
-                        </div>
+                        
                     </div>
                     <div>
                     </div>

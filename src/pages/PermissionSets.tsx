@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import {
     Select,
     SelectContent,
@@ -9,34 +8,11 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { CSS } from "@dnd-kit/utilities"
 import * as React from "react"
-import {
-    closestCenter,
-    DndContext,
-    KeyboardSensor,
-    MouseSensor,
-    TouchSensor,
-    useSensor,
-    useSensors,
-    type DragEndEvent,
-    type UniqueIdentifier,
-} from "@dnd-kit/core"
-
 import { toast } from "sonner"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-
-
-
-import {
-    arrayMove,
-    useSortable,
-    SortableContext,
-    verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
-
 import {
     IconChevronDown,
     IconChevronLeft,
@@ -45,7 +21,6 @@ import {
     IconChevronsRight,
     IconCircleCheckFilled,
     IconDotsVertical,
-    IconGripVertical,
     IconLayoutColumns,
     IconLoader,
     IconSearch,
@@ -67,7 +42,6 @@ import {
     useTable,
     type ColumnFiltersState,
     type ColumnVisibilityState,
-    type Row,
     type SortingState,
 } from "@tanstack/react-table"
 import { z } from "zod"
@@ -127,10 +101,7 @@ const columns = columnHelper.columns([
     }),
     columnHelper.accessor("header", {
         header: "Header",
-        cell: ({ row }) => {
-            //   return <TableCellViewer item={row.original} />
-            return <div className="w-32">{row.original.header}</div>
-        },
+        cell: ({ row }) => <div className="w-32">{row.original.header}</div>,
         enableHiding: false,
     }),
     columnHelper.accessor("type", {
@@ -257,35 +228,6 @@ const columns = columnHelper.columns([
         ),
     }),
 ])
-
-function DraggableRow({
-    row,
-}: {
-    row: Row<typeof features, z.infer<typeof schema>>
-}) {
-    const { transform, transition, setNodeRef, isDragging } = useSortable({
-        id: row.original.id,
-    })
-    return (
-        <TableRow
-            data-state={row.getIsSelected() && "selected"}
-            data-dragging={isDragging}
-            ref={setNodeRef}
-            className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
-            style={{
-                transform: CSS.Transform.toString(transform),
-                transition: transition,
-            }}
-        >
-            {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
-                    <FlexRender cell={cell} />
-                </TableCell>
-            ))}
-        </TableRow>
-    )
-}
-
 import permissionSetData from "./data.json"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -295,8 +237,7 @@ export const PermissionSets = () => {
 
     const initialData = permissionSetData as z.infer<typeof schema>[]
 
-
-    const [data, setData] = React.useState(() => initialData)
+    const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
     const [rowSelection, setRowSelection] = React.useState({})
     const [columnVisibility, setColumnVisibility] =
         React.useState<ColumnVisibilityState>({})
@@ -310,21 +251,12 @@ export const PermissionSets = () => {
     })
     const [selectedItemId, setSelectedItemId] = React.useState<number | null>(initialData[0]?.id ?? null)
     const [searchTerm, setSearchTerm] = React.useState("")
+    const [view, setView] = React.useState("Granted")
     const filteredData = React.useMemo(() => {
-        return data.filter((item) =>
+        return initialData.filter((item) =>
             item.header.toLowerCase().includes(searchTerm.toLowerCase())
         )
-    }, [data, searchTerm])
-    const sortableId = React.useId()
-    const sensors = useSensors(
-        useSensor(MouseSensor, {}),
-        useSensor(TouchSensor, {}),
-        useSensor(KeyboardSensor, {})
-    )
-    const dataIds = React.useMemo<UniqueIdentifier[]>(
-        () => data?.map(({ id }) => id) || [],
-        [data]
-    )
+    }, [initialData, searchTerm])
     const table = useTable({
         features,
         data: filteredData,
@@ -345,21 +277,22 @@ export const PermissionSets = () => {
         onPaginationChange: setPagination,
     })
 
-    function handleDragEnd(event: DragEndEvent) {
-        const { active, over } = event
-        if (active && over && active.id !== over.id) {
-            setData((data) => {
-                const oldIndex = dataIds.indexOf(active.id)
-                const newIndex = dataIds.indexOf(over.id)
-                return arrayMove(data, oldIndex, newIndex)
-            })
-        }
-    }
-
     return (
         <div className="flex h-full w-full overflow-hidden">
-            <aside className="flex w-64 h-full shrink-0 flex-col border-r bg-background">
-                {/* Search Bar Header */}
+
+            {isSidebarOpen && (
+                <div
+                    className="absolute inset-0 z-20 bg-background/80 backdrop-blur-sm lg:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
+            <aside className={`
+                absolute inset-y-0 left-0 z-30 flex h-full w-64 shrink-0 flex-col border-r bg-background 
+                transition-transform duration-300 ease-in-out
+                lg:static lg:translate-x-0
+                ${isSidebarOpen ? "translate-x-0 shadow-xl" : "-translate-x-full"}
+            `}>
                 <div className="p-4 border-b">
                     <div className="relative">
                         <IconSearch className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -373,7 +306,6 @@ export const PermissionSets = () => {
                     </div>
                 </div>
 
-                {/* Selectable Items List */}
                 <ScrollArea className="flex-1 overflow-y-auto">
                     {filteredData.map((item) => {
                         const isSelected = selectedItemId === item.id
@@ -402,6 +334,18 @@ export const PermissionSets = () => {
             </aside>
 
             <main className="flex-1 overflow-y-auto bg-background p-4 lg:p-6">
+                {/* MOBILE TOGGLE BUTTON (Hidden on Desktop) */}
+                <div className="mb-6 flex lg:hidden">
+                    <Button
+                        variant="outline"
+                        className="w-full flex items-center justify-start gap-2 text-muted-foreground"
+                        onClick={() => setIsSidebarOpen(true)}
+                    >
+                        <IconSearch className="h-4 w-4" />
+                        <span>Browse Permission Sets...</span>
+                    </Button>
+                </div>
+
                 <div className="flex flex-col gap-6 pt-0 px-4 lg:px-6 shrink-0">
                     <div className="grid auto-rows-min gap-4 sm:grid-cols-2 md:grid-cols-6 rounded-xl bg-muted/50 p-4 ">
                         <div className="relative min-w-0 group">
@@ -451,31 +395,35 @@ export const PermissionSets = () => {
                     </div>
                 </div>
                 <Tabs
-                    defaultValue="outline"
+                    value={view}
+                    onValueChange={setView}
                     className="flex flex-col w-full justify-start gap-4"
                 >
                     <div className="flex items-center justify-between px-4 lg:px-6">
                         <Label htmlFor="view-selector" className="sr-only">
                             View
                         </Label>
-                        <Select defaultValue="outline">
+                        <Select
+                            value={view}
+                            onValueChange={(value) => {
+                                if (value !== null) setView(value)
+                            }}
+                        >
                             <SelectTrigger
-                                className="flex w-fit @4xl/main:hidden"
+                                className="flex w-fit lg:hidden"
                                 size="sm"
                                 id="view-selector"
                             >
                                 <SelectValue placeholder="Select a view" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="outline">Granted</SelectItem>
-                                <SelectItem value="past-performance">Revoked</SelectItem>
+                                <SelectItem value="Granted">Granted</SelectItem>
+                                <SelectItem value="Revoked">Revoked</SelectItem>
                             </SelectContent>
                         </Select>
-                        <TabsList className="hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:px-1 @4xl/main:flex">
-                            <TabsTrigger value="outline">Granted</TabsTrigger>
-                            <TabsTrigger value="past-performance">
-                                Revoked <Badge variant="secondary">3</Badge>
-                            </TabsTrigger>
+                        <TabsList className="hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:px-1 lg:flex">
+                            <TabsTrigger value="Granted">Granted</TabsTrigger>
+                            <TabsTrigger value="Revoked">Revoked</TabsTrigger>
                         </TabsList>
                         <div className="flex items-center gap-2">
                             <DropdownMenu>
@@ -512,56 +460,49 @@ export const PermissionSets = () => {
                         </div>
                     </div>
                     <TabsContent
-                        value="outline"
+                        value="Granted"
                         className="flex flex-col gap-4 px-4 lg:px-6 pb-8 outline-none"
                     >
                         <div className="rounded-lg border bg-background relative">
-                            <DndContext
-                                collisionDetection={closestCenter}
-                                modifiers={[restrictToVerticalAxis]}
-                                onDragEnd={handleDragEnd}
-                                sensors={sensors}
-                                id={sortableId}
-                            >
-                                <Table>
-                                    <TableHeader className="sticky top-0 z-10 bg-muted">
-                                        {table.getHeaderGroups().map((headerGroup) => (
-                                            <TableRow key={headerGroup.id}>
-                                                {headerGroup.headers.map((header) => {
-                                                    return (
-                                                        <TableHead key={header.id} colSpan={header.colSpan}>
-                                                            {header.isPlaceholder ? null : (
-                                                                <FlexRender header={header} />
-                                                            )}
-                                                        </TableHead>
-                                                    )
-                                                })}
-                                            </TableRow>
-                                        ))}
-                                    </TableHeader>
-                                    <TableBody className="**:data-[slot=table-cell]:first:w-8">
-                                        {table.getRowModel().rows?.length ? (
-                                            <SortableContext
-                                                items={dataIds}
-                                                strategy={verticalListSortingStrategy}
-                                            >
-                                                {table.getRowModel().rows.map((row) => (
-                                                    <DraggableRow key={row.id} row={row} />
+                            <Table>
+                                <TableHeader className="sticky top-0 z-10 bg-muted">
+                                    {table.getHeaderGroups().map((headerGroup) => (
+                                        <TableRow key={headerGroup.id}>
+                                            {headerGroup.headers.map((header) => {
+                                                return (
+                                                    <TableHead key={header.id} colSpan={header.colSpan}>
+                                                        {header.isPlaceholder ? null : (
+                                                            <FlexRender header={header} />
+                                                        )}
+                                                    </TableHead>
+                                                )
+                                            })}
+                                        </TableRow>
+                                    ))}
+                                </TableHeader>
+                                <TableBody className="**:data-[slot=table-cell]:first:w-8">
+                                    {table.getRowModel().rows?.length ? (
+                                        table.getRowModel().rows.map((row) => (
+                                            <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                                                {row.getVisibleCells().map((cell) => (
+                                                    <TableCell key={cell.id}>
+                                                        <FlexRender cell={cell} />
+                                                    </TableCell>
                                                 ))}
-                                            </SortableContext>
-                                        ) : (
-                                            <TableRow>
-                                                <TableCell
-                                                    colSpan={columns.length}
-                                                    className="h-24 text-center"
-                                                >
-                                                    No results.
-                                                </TableCell>
                                             </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </DndContext>
+                                        ))
+                                    ) : (
+                                        <TableRow>
+                                            <TableCell
+                                                colSpan={columns.length}
+                                                className="h-24 text-center"
+                                            >
+                                                No results.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
                         </div>
                         <div className="flex items-center justify-between px-4 shrink-0">
                             <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">

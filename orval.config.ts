@@ -15,6 +15,20 @@ export default defineConfig({
           path: './src/api/custom-fetch.ts',
           name: 'customFetch',
         },
+        operations: {
+          getGrantedProjections: {
+            paramsSerializer: {
+              path: './src/api/params-serializer.ts',
+              name: 'serializeQueryParams',
+            },
+          },
+          getUnassignedProjections: {
+            paramsSerializer: {
+              path: './src/api/params-serializer.ts',
+              name: 'serializeQueryParams',
+            },
+          },
+        },
       },
     },
     hooks: {

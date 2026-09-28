@@ -9,7 +9,6 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import * as React from "react"
-import { toast } from "sonner"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -19,13 +18,22 @@ import {
     IconChevronRight,
     IconChevronsLeft,
     IconChevronsRight,
-    IconCircleCheckFilled,
     IconDotsVertical,
     IconLayoutColumns,
-    IconLoader,
     IconSearch,
 } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge"
+import {
+    getGetGrantedProjectionsQueryKey,
+    getGetUnassignedProjectionsQueryKey,
+    useGetAllPermissionSets,
+    useGetGrantedProjections,
+    useGetUnassignedProjections,
+    useGrantProjectionsToPermissionSet,
+    useRevokeProjectionsFromPermissionSet,
+} from "@/api/generated/endpoints/permission-controller/permission-controller"
+import type { PermissionSetDto, ProjectionDto } from "@/api/generated/models"
+import { useQueryClient } from "@tanstack/react-query"
 
 import {
     columnFilteringFeature,
@@ -44,8 +52,6 @@ import {
     type ColumnVisibilityState,
     type SortingState,
 } from "@tanstack/react-table"
-import { z } from "zod"
-
 const features = tableFeatures({
     columnFilteringFeature,
     columnVisibilityFeature,
@@ -59,20 +65,24 @@ const features = tableFeatures({
 
 const columnHelper = createColumnHelper<
     typeof features,
-    z.infer<typeof schema>
+    PermissionSetTableRow
 >()
 
-export const schema = z.object({
-    id: z.number(),
-    header: z.string(),
-    type: z.string(),
-    status: z.string(),
-    target: z.string(),
-    limit: z.string(),
-    reviewer: z.string(),
-})
+type PermissionSetTableRow = {
+    id: string
+    header: string
+    httpMethod: string
+    urlPath: string
+    description: string
+}
 
-const columns = columnHelper.columns([
+const createColumns = (
+    showActions: boolean,
+    projectionSearchOpen: boolean,
+    projectionSearch: string,
+    onProjectionSearchToggle: () => void,
+    onProjectionSearchChange: (value: string) => void,
+) => columnHelper.columns([
     columnHelper.display({
         id: "select",
         header: ({ table }) => (
@@ -100,113 +110,53 @@ const columns = columnHelper.columns([
         enableHiding: false,
     }),
     columnHelper.accessor("header", {
-        header: "Projection",
+        header: () => (
+            <div className="flex items-center gap-1">
+                {projectionSearchOpen ? (
+                    <Input
+                        autoFocus
+                        type="search"
+                        placeholder="Search projections"
+                        value={projectionSearch}
+                        onChange={(event) => onProjectionSearchChange(event.target.value)}
+                        className="h-7 w-40"
+                        aria-label="Search projections"
+                    />
+                ) : (
+                    "Projection"
+                )}
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-7"
+                    onClick={onProjectionSearchToggle}
+                    aria-label={projectionSearchOpen ? "Close projection search" : "Search projections"}
+                >
+                    <IconSearch />
+                </Button>
+            </div>
+        ),
         cell: ({ row }) => <div className="w-32">{row.original.header}</div>,
         enableHiding: false,
     }),
-    columnHelper.accessor("type", {
-        header: "Section Type",
-        cell: ({ row }) => (
-            <div className="w-32">
-                <Badge variant="outline" className="px-1.5 text-muted-foreground">
-                    {row.original.type}
-                </Badge>
-            </div>
-        ),
-    }),
-    columnHelper.accessor("status", {
-        header: "Status",
+    columnHelper.accessor("httpMethod", {
+        header: "HTTP Method",
         cell: ({ row }) => (
             <Badge variant="outline" className="px-1.5 text-muted-foreground">
-                {row.original.status === "Done" ? (
-                    <IconCircleCheckFilled className="fill-green-500 dark:fill-green-400" />
-                ) : (
-                    <IconLoader />
-                )}
-                {row.original.status}
+                {row.original.httpMethod}
             </Badge>
         ),
     }),
-    columnHelper.accessor("target", {
-        header: () => <div className="w-full text-right">Target</div>,
-        cell: ({ row }) => (
-            <form
-                onSubmit={(e) => {
-                    e.preventDefault()
-                    toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-                        loading: `Saving ${row.original.header}`,
-                        success: "Done",
-                        error: "Error",
-                    })
-                }}
-            >
-                <Label htmlFor={`${row.original.id}-target`} className="sr-only">
-                    Target
-                </Label>
-                <Input
-                    className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
-                    defaultValue={row.original.target}
-                    id={`${row.original.id}-target`}
-                />
-            </form>
-        ),
+    columnHelper.accessor("urlPath", {
+        header: "URL Path",
+        cell: ({ row }) => <div className="w-32">{row.original.urlPath}</div>,
     }),
-    columnHelper.accessor("limit", {
-        header: () => <div className="w-full text-right">Limit</div>,
-        cell: ({ row }) => (
-            <form
-                onSubmit={(e) => {
-                    e.preventDefault()
-                    toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
-                        loading: `Saving ${row.original.header}`,
-                        success: "Done",
-                        error: "Error",
-                    })
-                }}
-            >
-                <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
-                    Limit
-                </Label>
-                <Input
-                    className="h-8 w-16 border-transparent bg-transparent text-right shadow-none hover:bg-input/30 focus-visible:border focus-visible:bg-background dark:bg-transparent dark:hover:bg-input/30 dark:focus-visible:bg-input/30"
-                    defaultValue={row.original.limit}
-                    id={`${row.original.id}-limit`}
-                />
-            </form>
-        ),
+    columnHelper.accessor("description", {
+        header: "Description",
+        cell: ({ row }) => <div className="max-w-xs truncate">{row.original.description}</div>,
     }),
-    columnHelper.accessor("reviewer", {
-        header: "Reviewer",
-        cell: ({ row }) => {
-            const isAssigned = row.original.reviewer !== "Assign reviewer"
-            if (isAssigned) {
-                return row.original.reviewer
-            }
-            return (
-                <>
-                    <Label htmlFor={`${row.original.id}-reviewer`} className="sr-only">
-                        Reviewer
-                    </Label>
-                    <Select>
-                        <SelectTrigger
-                            className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
-                            size="sm"
-                            id={`${row.original.id}-reviewer`}
-                        >
-                            <SelectValue placeholder="Assign reviewer" />
-                        </SelectTrigger>
-                        <SelectContent align="end">
-                            <SelectItem value="Eddie Lake">Eddie Lake</SelectItem>
-                            <SelectItem value="Jamik Tashpulatov">
-                                Jamik Tashpulatov
-                            </SelectItem>
-                        </SelectContent>
-                    </Select>
-                </>
-            )
-        },
-    }),
-    columnHelper.display({
+    ...(showActions ? [columnHelper.display({
         id: "actions",
         cell: () => (
             <DropdownMenu>
@@ -226,17 +176,14 @@ const columns = columnHelper.columns([
                 </DropdownMenuContent>
             </DropdownMenu>
         ),
-    }),
+    })] : []),
 ])
-import permissionSetData from "./data.json"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 
 export const PermissionSets = () => {
-
-    const initialData = permissionSetData as z.infer<typeof schema>[]
-
+    const queryClient = useQueryClient()
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
     const [rowSelection, setRowSelection] = React.useState({})
     const [columnVisibility, setColumnVisibility] =
@@ -249,18 +196,114 @@ export const PermissionSets = () => {
         pageIndex: 0,
         pageSize: 10,
     })
-    const [selectedItemId, setSelectedItemId] = React.useState<number | null>(initialData[0]?.id ?? null)
+    const [selectedItemId, setSelectedItemId] = React.useState<string | null>(null)
     const [searchTerm, setSearchTerm] = React.useState("")
+    const [projectionSearchOpen, setProjectionSearchOpen] = React.useState(false)
+    const [projectionSearch, setProjectionSearch] = React.useState("")
     const [view, setView] = React.useState("Granted")
-    const filteredData = React.useMemo(() => {
-        return initialData.filter((item) =>
-            item.header.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-    }, [initialData, searchTerm])
+    const { mutate: grantProjections, isPending: isGranting } = useGrantProjectionsToPermissionSet()
+    const { mutate: revokeProjections, isPending: isRevoking } = useRevokeProjectionsFromPermissionSet()
+    const { data: permissionSetsResponse } = useGetAllPermissionSets({ search: searchTerm })
+    const permissionSets = React.useMemo<PermissionSetDto[]>(() => {
+        const response = permissionSetsResponse as unknown
+        if (Array.isArray(response)) return response as PermissionSetDto[]
+        if (response && typeof response === "object" && "data" in response) {
+            return Array.isArray(response.data) ? response.data as PermissionSetDto[] : []
+        }
+        return []
+    }, [permissionSetsResponse])
+    const activeSelectedItemId = permissionSets.some(
+        (item) => item.permissionSetId === selectedItemId
+    )
+        ? selectedItemId
+        : permissionSets[0]?.permissionSetId ?? null
+    const selectedPermissionSet = permissionSets.find(
+        (item) => item.permissionSetId === activeSelectedItemId
+    )
+
+    const projectionParams = {
+        search: projectionSearch || undefined,
+        pageable: {
+            page: pagination.pageIndex,
+            size: pagination.pageSize,
+        },
+    }
+    const { data: grantedProjectionsResponse } = useGetGrantedProjections(
+        activeSelectedItemId ?? "",
+        projectionParams,
+        { query: { enabled: Boolean(activeSelectedItemId) } }
+    )
+    const { data: revokedProjectionsResponse } = useGetUnassignedProjections(
+        activeSelectedItemId ?? "",
+        projectionParams,
+        { query: { enabled: Boolean(activeSelectedItemId) } }
+    )
+    const getProjectionPage = React.useCallback((response: unknown) => {
+        if (response && typeof response === "object" && "data" in response) {
+            const data = response.data
+            if (data && typeof data === "object" && "content" in data) {
+                return data as {
+                    content?: ProjectionDto[]
+                    totalPages?: number
+                    totalElements?: number
+                    number?: number
+                }
+            }
+        }
+        if (response && typeof response === "object" && "content" in response) {
+            return response as {
+                content?: ProjectionDto[]
+                totalPages?: number
+                totalElements?: number
+                number?: number
+            }
+        }
+        return {}
+    }, [])
+    const projectionPage = React.useMemo(
+        () => getProjectionPage(view === "Granted" ? grantedProjectionsResponse : revokedProjectionsResponse),
+        [getProjectionPage, grantedProjectionsResponse, revokedProjectionsResponse, view]
+    )
+    const tableData = React.useMemo(() => {
+        const projections = projectionPage.content ?? []
+        return projections.map((projection) => ({
+            id: String(projection.id ?? ""),
+            header: projection.urlPath ?? "",
+            httpMethod: projection.httpMethod ?? "",
+            urlPath: projection.urlPath ?? "",
+            description: projection.description ?? "",
+        }))
+    }, [projectionPage])
+    const totalPages = projectionPage.totalElements !== undefined
+        ? Math.ceil(projectionPage.totalElements / pagination.pageSize)
+        : projectionPage.totalPages ?? 0
+    const canGoToPreviousPage = pagination.pageIndex > 0
+    const canGoToNextPage = pagination.pageIndex + 1 < totalPages
+    const columns = React.useMemo(
+        () => createColumns(
+            view === "Granted",
+            projectionSearchOpen,
+            projectionSearch,
+            () => {
+                setProjectionSearchOpen((isOpen) => !isOpen)
+                if (projectionSearchOpen) {
+                    setProjectionSearch("")
+                    setPagination((current) => ({ ...current, pageIndex: 0 }))
+                }
+            },
+            (value) => {
+                setProjectionSearch(value)
+                setPagination((current) => ({ ...current, pageIndex: 0 }))
+            },
+        ),
+        [projectionSearchOpen, projectionSearch, view]
+    )
     const table = useTable({
         features,
-        data: filteredData,
+        data: tableData,
         columns,
+        manualPagination: true,
+        pageCount: totalPages,
         state: {
             sorting,
             columnVisibility,
@@ -276,6 +319,30 @@ export const PermissionSets = () => {
         onColumnVisibilityChange: setColumnVisibility,
         onPaginationChange: setPagination,
     })
+    const selectedProjectionIds = table.getSelectedRowModel().rows.map(
+        (row) => row.original.id
+    )
+    const hasSelectedProjections = selectedProjectionIds.length > 0
+    const isUpdatingProjections = isGranting || isRevoking
+    const refreshProjectionQueries = () => {
+        if (!activeSelectedItemId) return
+
+        void Promise.all([
+            queryClient.invalidateQueries({
+                queryKey: getGetGrantedProjectionsQueryKey(
+                    activeSelectedItemId,
+                    projectionParams,
+                ),
+            }),
+            queryClient.invalidateQueries({
+                queryKey: getGetUnassignedProjectionsQueryKey(
+                    activeSelectedItemId,
+                    projectionParams,
+                ),
+            }),
+        ])
+        setRowSelection({})
+    }
 
     return (
         <div className="flex h-full w-full overflow-hidden">
@@ -307,25 +374,28 @@ export const PermissionSets = () => {
                 </div>
 
                 <ScrollArea className="flex-1 overflow-y-auto">
-                    {filteredData.map((item) => {
-                        const isSelected = selectedItemId === item.id
+                    {permissionSets.map((item) => {
+                        const isSelected = activeSelectedItemId === item.permissionSetId
                         return (
-                            <>
+                            <React.Fragment key={item.permissionSetId}>
                                 <div className={`w-full text-left px-3 py-2 text-sm ${isSelected
                                     ? "bg-accent text-accent-foreground font-medium"
                                     : "hover:bg-muted/50 text-muted-foreground"
                                     }`}
-                                    onClick={() => setSelectedItemId(item.id)}>
-                                    <p className="truncate">{item.header}</p>
+                                    onClick={() => {
+                                        setSelectedItemId(item.permissionSetId ?? null)
+                                        setPagination((current) => ({ ...current, pageIndex: 0 }))
+                                    }}>
+                                    <p className="truncate">{item.permissionSetId}</p>
                                     <p className={` truncate pt-1 text-xs text-muted-foreground ${isSelected ? "font-medium" : ""}`}>
-                                        {item.reviewer}
+                                        {item.description}
                                     </p>
                                 </div>
                                 <Separator />
-                            </>
+                            </React.Fragment>
                         )
                     })}
-                    {filteredData.length === 0 && (
+                    {permissionSets.length === 0 && (
                         <div className="p-4 text-center text-sm text-muted-foreground">
                             No items found.
                         </div>
@@ -351,25 +421,25 @@ export const PermissionSets = () => {
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Permission Set</p>
                             <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                Value
+                                {selectedPermissionSet?.permissionSetId ?? "-"}
                             </p>
                         </div>
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Description</p>
                             <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                Value
+                                {selectedPermissionSet?.description ?? "-"}
                             </p>
                         </div>
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Modified</p>
                             <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                Value
+                                {selectedPermissionSet?.modified ?? "-"}
                             </p>
                         </div>
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Modified By</p>
                             <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                Value
+                                {selectedPermissionSet?.modifiedBy ?? "-"}
                             </p>
                         </div>
                         
@@ -379,7 +449,10 @@ export const PermissionSets = () => {
                 </div>
                 <Tabs
                     value={view}
-                    onValueChange={setView}
+                    onValueChange={(nextView) => {
+                        setView(nextView)
+                        setPagination((current) => ({ ...current, pageIndex: 0 }))
+                    }}
                     className="flex flex-col w-full justify-start gap-4"
                 >
                     <div className="flex items-center justify-between px-4 lg:px-6">
@@ -443,10 +516,32 @@ export const PermissionSets = () => {
                         </div>
                     </div>
                     <TabsContent
-                        value="Granted"
+                        value={view}
                         className="flex flex-col gap-4 px-4 lg:px-6 pb-8 outline-none"
                     >
                         <div className="rounded-lg border bg-background relative">
+                            {hasSelectedProjections && (
+                                <div className="flex items-center gap-2 border-b px-4 py-3">
+                                    <Button
+                                        type="button"
+                                        disabled={isUpdatingProjections}
+                                        onClick={() => {
+                                            const mutation = view === "Granted"
+                                                ? revokeProjections
+                                                : grantProjections
+                                            mutation(
+                                                {
+                                                    permissionSetId: activeSelectedItemId ?? "",
+                                                    data: { projectionIds: selectedProjectionIds },
+                                                },
+                                                { onSuccess: refreshProjectionQueries }
+                                            )
+                                        }}
+                                    >
+                                        {view === "Granted" ? "Revoke selected" : "Grant selected"}
+                                    </Button>
+                                </div>
+                            )}
                             <Table>
                                 <TableHeader className="sticky top-0 z-10 bg-muted">
                                     {table.getHeaderGroups().map((headerGroup) => (
@@ -500,7 +595,10 @@ export const PermissionSets = () => {
                                     <Select
                                         value={`${table.state.pagination.pageSize}`}
                                         onValueChange={(value) => {
-                                            table.setPageSize(Number(value))
+                                            setPagination({
+                                                pageIndex: 0,
+                                                pageSize: Number(value),
+                                            })
                                         }}
                                     >
                                         <SelectTrigger size="sm" className="w-20" id="rows-per-page">
@@ -516,16 +614,15 @@ export const PermissionSets = () => {
                                     </Select>
                                 </div>
                                 <div className="flex w-fit items-center justify-center text-sm font-medium">
-                                    Page {table.state.pagination.pageIndex + 1} of{" "}
-                                    {table.getPageCount()}
+                                    Page {pagination.pageIndex + 1} of {Math.max(totalPages, 1)}
                                 </div>
                                 <div className="ml-auto flex items-center gap-2 lg:ml-0">
                                     <Button
                                         variant="outline"
                                         className="hidden h-8 w-8 p-0 lg:flex"
                                         type="button"
-                                        onClick={() => table.setPageIndex(0)}
-                                        disabled={!table.getCanPreviousPage()}
+                                        onClick={() => setPagination((current) => ({ ...current, pageIndex: 0 }))}
+                                        disabled={!canGoToPreviousPage}
                                     >
                                         <span className="sr-only">Go to first page</span>
                                         <IconChevronsLeft />
@@ -535,12 +632,11 @@ export const PermissionSets = () => {
                                         className="size-8"
                                         size="icon"
                                         type="button"
-                                        onClick={() =>
-                                            table.setPageIndex(
-                                                Math.max(0, table.state.pagination.pageIndex - 1)
-                                            )
-                                        }
-                                        disabled={!table.getCanPreviousPage()}
+                                        onClick={() => setPagination((current) => ({
+                                            ...current,
+                                            pageIndex: Math.max(0, current.pageIndex - 1),
+                                        }))}
+                                        disabled={!canGoToPreviousPage}
                                     >
                                         <span className="sr-only">Go to previous page</span>
                                         <IconChevronLeft />
@@ -550,10 +646,11 @@ export const PermissionSets = () => {
                                         className="size-8"
                                         size="icon"
                                         type="button"
-                                        onClick={() =>
-                                            table.setPageIndex(table.state.pagination.pageIndex + 1)
-                                        }
-                                        disabled={!table.getCanNextPage()}
+                                        onClick={() => setPagination((current) => ({
+                                            ...current,
+                                            pageIndex: current.pageIndex + 1,
+                                        }))}
+                                        disabled={!canGoToNextPage}
                                     >
                                         <span className="sr-only">Go to next page</span>
                                         <IconChevronRight />
@@ -563,8 +660,11 @@ export const PermissionSets = () => {
                                         className="hidden size-8 lg:flex"
                                         size="icon"
                                         type="button"
-                                        onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                                        disabled={!table.getCanNextPage()}
+                                        onClick={() => setPagination((current) => ({
+                                            ...current,
+                                            pageIndex: Math.max(0, totalPages - 1),
+                                        }))}
+                                        disabled={!canGoToNextPage}
                                     >
                                         <span className="sr-only">Go to last page</span>
                                         <IconChevronsRight />

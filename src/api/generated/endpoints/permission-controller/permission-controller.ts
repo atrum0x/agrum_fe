@@ -24,14 +24,16 @@ import type {
 import type {
   GetAllPermissionSetsParams,
   GetGrantedProjectionsParams,
+  GetUnassignedProjectionsParams,
+  PageProjectionDto,
   PermissionSet,
   PermissionSetDto,
   Projection,
-  ProjectionDto,
-  ProjectionRequest,
+  ProjectionsRequest,
 } from "../../models";
 
 import { customFetch } from "../../../custom-fetch";
+import { serializeQueryParams } from "../../../params-serializer";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
@@ -53,6 +55,144 @@ const withQueryKey = <T extends object, K>(
   return result;
 };
 
+export type grantProjectionsToPermissionSetResponse200 = {
+  data: string;
+  status: 200;
+};
+
+export type grantProjectionsToPermissionSetResponseSuccess =
+  grantProjectionsToPermissionSetResponse200 & {
+    headers: Headers;
+  };
+export type grantProjectionsToPermissionSetResponse =
+  grantProjectionsToPermissionSetResponseSuccess;
+
+export const getGrantProjectionsToPermissionSetUrl = (
+  permissionSetId: string,
+) => {
+  return `/api/permissionSet/${permissionSetId}/grantProjections`;
+};
+
+export const grantProjectionsToPermissionSet = async (
+  permissionSetId: string,
+  projectionsRequest: ProjectionsRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<grantProjectionsToPermissionSetResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return customFetch<grantProjectionsToPermissionSetResponse>(
+    getGrantProjectionsToPermissionSetUrl(permissionSetId),
+    {
+      ...options,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(projectionsRequest),
+    },
+  );
+};
+
+export const getGrantProjectionsToPermissionSetMutationKey = () =>
+  ["grantProjectionsToPermissionSet"] as const;
+
+export const getGrantProjectionsToPermissionSetMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof grantProjectionsToPermissionSet>>,
+    TError,
+    GrantProjectionsToPermissionSetMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof grantProjectionsToPermissionSet>>,
+  TError,
+  GrantProjectionsToPermissionSetMutationVariables,
+  TContext
+> => {
+  const mutationKey = getGrantProjectionsToPermissionSetMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof grantProjectionsToPermissionSet>>,
+    GrantProjectionsToPermissionSetMutationVariables
+  > = (props) => {
+    const { permissionSetId, data } = props ?? {};
+
+    return grantProjectionsToPermissionSet(
+      permissionSetId,
+      data,
+      requestOptions,
+    );
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GrantProjectionsToPermissionSetMutationResult = NonNullable<
+  Awaited<ReturnType<typeof grantProjectionsToPermissionSet>>
+>;
+export type GrantProjectionsToPermissionSetMutationBody = ProjectionsRequest;
+export type GrantProjectionsToPermissionSetMutationError = unknown;
+export type GrantProjectionsToPermissionSetMutationVariables = {
+  permissionSetId: string;
+  data: ProjectionsRequest;
+};
+
+export const useGrantProjectionsToPermissionSet = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof grantProjectionsToPermissionSet>>,
+      TError,
+      GrantProjectionsToPermissionSetMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof grantProjectionsToPermissionSet>>,
+  TError,
+  GrantProjectionsToPermissionSetMutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getGrantProjectionsToPermissionSetMutationOptions(options),
+    queryClient,
+  );
+};
 export type grantPermissionSetToUserResponse200 = {
   data: string;
   status: 200;
@@ -283,144 +423,6 @@ export const useCreatePermissionSet = <TError = unknown, TContext = unknown>(
     queryClient,
   );
 };
-export type grantProjectionToPermissionSetResponse200 = {
-  data: string;
-  status: 200;
-};
-
-export type grantProjectionToPermissionSetResponseSuccess =
-  grantProjectionToPermissionSetResponse200 & {
-    headers: Headers;
-  };
-export type grantProjectionToPermissionSetResponse =
-  grantProjectionToPermissionSetResponseSuccess;
-
-export const getGrantProjectionToPermissionSetUrl = (
-  permissionSetId: string,
-) => {
-  return `/api/permissionSet/permission-sets/${permissionSetId}/projections`;
-};
-
-export const grantProjectionToPermissionSet = async (
-  permissionSetId: string,
-  projectionRequest: ProjectionRequest,
-  options?: Parameters<typeof customFetch>[1],
-): Promise<grantProjectionToPermissionSetResponse> => {
-  const getHeaders = (
-    h?: NonNullable<RequestInit["headers"]>,
-  ): Record<string, string | readonly string[]> => {
-    if (!h) return {};
-    if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
-  };
-  return customFetch<grantProjectionToPermissionSetResponse>(
-    getGrantProjectionToPermissionSetUrl(permissionSetId),
-    {
-      ...options,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...getHeaders(options?.headers),
-      },
-      body: JSON.stringify(projectionRequest),
-    },
-  );
-};
-
-export const getGrantProjectionToPermissionSetMutationKey = () =>
-  ["grantProjectionToPermissionSet"] as const;
-
-export const getGrantProjectionToPermissionSetMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof grantProjectionToPermissionSet>>,
-    TError,
-    GrantProjectionToPermissionSetMutationVariables,
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof grantProjectionToPermissionSet>>,
-  TError,
-  GrantProjectionToPermissionSetMutationVariables,
-  TContext
-> => {
-  const mutationKey = getGrantProjectionToPermissionSetMutationKey();
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof grantProjectionToPermissionSet>>,
-    GrantProjectionToPermissionSetMutationVariables
-  > = (props) => {
-    const { permissionSetId, data } = props ?? {};
-
-    return grantProjectionToPermissionSet(
-      permissionSetId,
-      data,
-      requestOptions,
-    );
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type GrantProjectionToPermissionSetMutationResult = NonNullable<
-  Awaited<ReturnType<typeof grantProjectionToPermissionSet>>
->;
-export type GrantProjectionToPermissionSetMutationBody = ProjectionRequest;
-export type GrantProjectionToPermissionSetMutationError = unknown;
-export type GrantProjectionToPermissionSetMutationVariables = {
-  permissionSetId: string;
-  data: ProjectionRequest;
-};
-
-export const useGrantProjectionToPermissionSet = <
-  TError = unknown,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof grantProjectionToPermissionSet>>,
-      TError,
-      GrantProjectionToPermissionSetMutationVariables,
-      TContext
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof grantProjectionToPermissionSet>>,
-  TError,
-  GrantProjectionToPermissionSetMutationVariables,
-  TContext
-> => {
-  return useMutation(
-    getGrantProjectionToPermissionSetMutationOptions(options),
-    queryClient,
-  );
-};
 export type getAllPermissionSetsResponse200 = {
   data: PermissionSetDto[];
   status: 200;
@@ -610,6 +612,212 @@ export function useGetAllPermissionSets<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+export type getUnassignedProjectionsResponse200 = {
+  data: PageProjectionDto;
+  status: 200;
+};
+
+export type getUnassignedProjectionsResponseSuccess =
+  getUnassignedProjectionsResponse200 & {
+    headers: Headers;
+  };
+export type getUnassignedProjectionsResponse =
+  getUnassignedProjectionsResponseSuccess;
+
+export const getGetUnassignedProjectionsUrl = (
+  permissionSetId: string,
+  params: GetUnassignedProjectionsParams,
+) => {
+  const stringifiedParams = serializeQueryParams(params);
+
+  return stringifiedParams.length > 0
+    ? `/api/permissionSet/revokedProjections/${permissionSetId}?${stringifiedParams}`
+    : `/api/permissionSet/revokedProjections/${permissionSetId}`;
+};
+
+export const getUnassignedProjections = async (
+  permissionSetId: string,
+  params: GetUnassignedProjectionsParams,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getUnassignedProjectionsResponse> => {
+  return customFetch<getUnassignedProjectionsResponse>(
+    getGetUnassignedProjectionsUrl(permissionSetId, params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetUnassignedProjectionsQueryKey = (
+  permissionSetId: string,
+  params?: GetUnassignedProjectionsParams,
+) => {
+  return [
+    `/api/permissionSet/revokedProjections/${permissionSetId}`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetUnassignedProjectionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getUnassignedProjections>>,
+  TError = unknown,
+>(
+  permissionSetId: string,
+  params: GetUnassignedProjectionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedProjections>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetUnassignedProjectionsQueryKey(permissionSetId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getUnassignedProjections>>
+  > = ({ signal }) =>
+    getUnassignedProjections(permissionSetId, params, {
+      signal,
+      ...requestOptions,
+    });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: permissionSetId !== null && permissionSetId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getUnassignedProjections>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetUnassignedProjectionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getUnassignedProjections>>
+>;
+export type GetUnassignedProjectionsQueryError = unknown;
+
+export function useGetUnassignedProjections<
+  TData = Awaited<ReturnType<typeof getUnassignedProjections>>,
+  TError = unknown,
+>(
+  permissionSetId: string,
+  params: GetUnassignedProjectionsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedProjections>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUnassignedProjections>>,
+          TError,
+          Awaited<ReturnType<typeof getUnassignedProjections>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUnassignedProjections<
+  TData = Awaited<ReturnType<typeof getUnassignedProjections>>,
+  TError = unknown,
+>(
+  permissionSetId: string,
+  params: GetUnassignedProjectionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedProjections>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUnassignedProjections>>,
+          TError,
+          Awaited<ReturnType<typeof getUnassignedProjections>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUnassignedProjections<
+  TData = Awaited<ReturnType<typeof getUnassignedProjections>>,
+  TError = unknown,
+>(
+  permissionSetId: string,
+  params: GetUnassignedProjectionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedProjections>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetUnassignedProjections<
+  TData = Awaited<ReturnType<typeof getUnassignedProjections>>,
+  TError = unknown,
+>(
+  permissionSetId: string,
+  params: GetUnassignedProjectionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedProjections>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetUnassignedProjectionsQueryOptions(
+    permissionSetId,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 export type getAllProjectionsResponse200 = {
   data: Projection[];
   status: 200;
@@ -770,7 +978,7 @@ export function useGetAllProjections<
 }
 
 export type getGrantedProjectionsResponse200 = {
-  data: ProjectionDto[];
+  data: PageProjectionDto;
   status: 200;
 };
 
@@ -785,15 +993,7 @@ export const getGetGrantedProjectionsUrl = (
   permissionSetId: string,
   params: GetGrantedProjectionsParams,
 ) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? "null" : String(value));
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
+  const stringifiedParams = serializeQueryParams(params);
 
   return stringifiedParams.length > 0
     ? `/api/permissionSet/grantedProjections/${permissionSetId}?${stringifiedParams}`
@@ -982,3 +1182,142 @@ export function useGetGrantedProjections<
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+export type revokeProjectionsFromPermissionSetResponse200 = {
+  data: string;
+  status: 200;
+};
+
+export type revokeProjectionsFromPermissionSetResponseSuccess =
+  revokeProjectionsFromPermissionSetResponse200 & {
+    headers: Headers;
+  };
+export type revokeProjectionsFromPermissionSetResponse =
+  revokeProjectionsFromPermissionSetResponseSuccess;
+
+export const getRevokeProjectionsFromPermissionSetUrl = (
+  permissionSetId: string,
+) => {
+  return `/api/permissionSet/${permissionSetId}/revokeProjections`;
+};
+
+export const revokeProjectionsFromPermissionSet = async (
+  permissionSetId: string,
+  projectionsRequest: ProjectionsRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<revokeProjectionsFromPermissionSetResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return customFetch<revokeProjectionsFromPermissionSetResponse>(
+    getRevokeProjectionsFromPermissionSetUrl(permissionSetId),
+    {
+      ...options,
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(projectionsRequest),
+    },
+  );
+};
+
+export const getRevokeProjectionsFromPermissionSetMutationKey = () =>
+  ["revokeProjectionsFromPermissionSet"] as const;
+
+export const getRevokeProjectionsFromPermissionSetMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof revokeProjectionsFromPermissionSet>>,
+    TError,
+    RevokeProjectionsFromPermissionSetMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof revokeProjectionsFromPermissionSet>>,
+  TError,
+  RevokeProjectionsFromPermissionSetMutationVariables,
+  TContext
+> => {
+  const mutationKey = getRevokeProjectionsFromPermissionSetMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof revokeProjectionsFromPermissionSet>>,
+    RevokeProjectionsFromPermissionSetMutationVariables
+  > = (props) => {
+    const { permissionSetId, data } = props ?? {};
+
+    return revokeProjectionsFromPermissionSet(
+      permissionSetId,
+      data,
+      requestOptions,
+    );
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RevokeProjectionsFromPermissionSetMutationResult = NonNullable<
+  Awaited<ReturnType<typeof revokeProjectionsFromPermissionSet>>
+>;
+export type RevokeProjectionsFromPermissionSetMutationBody = ProjectionsRequest;
+export type RevokeProjectionsFromPermissionSetMutationError = unknown;
+export type RevokeProjectionsFromPermissionSetMutationVariables = {
+  permissionSetId: string;
+  data: ProjectionsRequest;
+};
+
+export const useRevokeProjectionsFromPermissionSet = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof revokeProjectionsFromPermissionSet>>,
+      TError,
+      RevokeProjectionsFromPermissionSetMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof revokeProjectionsFromPermissionSet>>,
+  TError,
+  RevokeProjectionsFromPermissionSetMutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getRevokeProjectionsFromPermissionSetMutationOptions(options),
+    queryClient,
+  );
+};

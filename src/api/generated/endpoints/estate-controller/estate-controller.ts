@@ -70,8 +70,21 @@ export const assignEstatesToUser = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Array.isArray(h)) return Object.fromEntries(h);
-    return h;
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
   };
   return customFetch<assignEstatesToUserResponse>(
     getAssignEstatesToUserUrl(username),
@@ -86,6 +99,9 @@ export const assignEstatesToUser = async (
     },
   );
 };
+
+export const getAssignEstatesToUserMutationKey = () =>
+  ["assignEstatesToUser"] as const;
 
 export const getAssignEstatesToUserMutationOptions = <
   TError = unknown,
@@ -104,7 +120,7 @@ export const getAssignEstatesToUserMutationOptions = <
   AssignEstatesToUserMutationVariables,
   TContext
 > => {
-  const mutationKey = ["assignEstatesToUser"];
+  const mutationKey = getAssignEstatesToUserMutationKey();
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -319,8 +335,21 @@ export const createEstate = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Array.isArray(h)) return Object.fromEntries(h);
-    return h;
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
   };
   return customFetch<createEstateResponse>(getCreateEstateUrl(), {
     ...options,
@@ -332,6 +361,8 @@ export const createEstate = async (
     body: JSON.stringify(estate),
   });
 };
+
+export const getCreateEstateMutationKey = () => ["createEstate"] as const;
 
 export const getCreateEstateMutationOptions = <
   TError = unknown,
@@ -350,7 +381,7 @@ export const getCreateEstateMutationOptions = <
   CreateEstateMutationVariables,
   TContext
 > => {
-  const mutationKey = ["createEstate"];
+  const mutationKey = getCreateEstateMutationKey();
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&

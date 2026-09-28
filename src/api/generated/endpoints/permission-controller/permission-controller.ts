@@ -86,6 +86,9 @@ export const grantPermissionSetToUser = async (
   );
 };
 
+export const getGrantPermissionSetToUserMutationKey = () =>
+  ["grantPermissionSetToUser"] as const;
+
 export const getGrantPermissionSetToUserMutationOptions = <
   TError = unknown,
   TContext = unknown,
@@ -103,7 +106,7 @@ export const getGrantPermissionSetToUserMutationOptions = <
   GrantPermissionSetToUserMutationVariables,
   TContext
 > => {
-  const mutationKey = ["grantPermissionSetToUser"];
+  const mutationKey = getGrantPermissionSetToUserMutationKey();
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -183,8 +186,21 @@ export const createPermissionSet = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Array.isArray(h)) return Object.fromEntries(h);
-    return h;
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
   };
   return customFetch<createPermissionSetResponse>(getCreatePermissionSetUrl(), {
     ...options,
@@ -196,6 +212,9 @@ export const createPermissionSet = async (
     body: JSON.stringify(permissionSet),
   });
 };
+
+export const getCreatePermissionSetMutationKey = () =>
+  ["createPermissionSet"] as const;
 
 export const getCreatePermissionSetMutationOptions = <
   TError = unknown,
@@ -214,7 +233,7 @@ export const getCreatePermissionSetMutationOptions = <
   CreatePermissionSetMutationVariables,
   TContext
 > => {
-  const mutationKey = ["createPermissionSet"];
+  const mutationKey = getCreatePermissionSetMutationKey();
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -292,8 +311,21 @@ export const grantProjectionToPermissionSet = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Array.isArray(h)) return Object.fromEntries(h);
-    return h;
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
   };
   return customFetch<grantProjectionToPermissionSetResponse>(
     getGrantProjectionToPermissionSetUrl(permissionSetId),
@@ -308,6 +340,9 @@ export const grantProjectionToPermissionSet = async (
     },
   );
 };
+
+export const getGrantProjectionToPermissionSetMutationKey = () =>
+  ["grantProjectionToPermissionSet"] as const;
 
 export const getGrantProjectionToPermissionSetMutationOptions = <
   TError = unknown,
@@ -326,7 +361,7 @@ export const getGrantProjectionToPermissionSetMutationOptions = <
   GrantProjectionToPermissionSetMutationVariables,
   TContext
 > => {
-  const mutationKey = ["grantProjectionToPermissionSet"];
+  const mutationKey = getGrantProjectionToPermissionSetMutationKey();
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&

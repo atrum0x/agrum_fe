@@ -27,12 +27,14 @@ import {
     getGetGrantedProjectionsQueryKey,
     getGetUnassignedProjectionsQueryKey,
     useGetAllPermissionSets,
+    useGetGrantedAppUsers,
     useGetGrantedProjections,
+    useGetUnassignedAppUsers,
     useGetUnassignedProjections,
     useGrantProjectionsToPermissionSet,
     useRevokeProjectionsFromPermissionSet,
 } from "@/api/generated/endpoints/permission-controller/permission-controller"
-import type { PermissionSetDto, ProjectionDto } from "@/api/generated/models"
+import type { AppUserDto, PermissionSetDto, ProjectionDto } from "@/api/generated/models"
 import { useQueryClient } from "@tanstack/react-query"
 
 import {
@@ -181,6 +183,14 @@ const createColumns = (
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet"
 
 export const PermissionSets = () => {
     const queryClient = useQueryClient()
@@ -200,6 +210,9 @@ export const PermissionSets = () => {
     const [searchTerm, setSearchTerm] = React.useState("")
     const [projectionSearchOpen, setProjectionSearchOpen] = React.useState(false)
     const [projectionSearch, setProjectionSearch] = React.useState("")
+    const [userSearch, setUserSearch] = React.useState("")
+    const [isUnassignedUsersOpen, setIsUnassignedUsersOpen] = React.useState(false)
+    const [unassignedUserSearch, setUnassignedUserSearch] = React.useState("")
     const [view, setView] = React.useState("Granted")
     const { mutate: grantProjections, isPending: isGranting } = useGrantProjectionsToPermissionSet()
     const { mutate: revokeProjections, isPending: isRevoking } = useRevokeProjectionsFromPermissionSet()
@@ -238,6 +251,32 @@ export const PermissionSets = () => {
         projectionParams,
         { query: { enabled: Boolean(activeSelectedItemId) } }
     )
+    const { data: grantedUsersResponse } = useGetGrantedAppUsers(
+        activeSelectedItemId ?? "",
+        { search: userSearch || undefined },
+        { query: { enabled: Boolean(activeSelectedItemId) } }
+    )
+    const grantedUsers = React.useMemo<AppUserDto[]>(() => {
+        const response = grantedUsersResponse as unknown
+        if (Array.isArray(response)) return response as AppUserDto[]
+        if (response && typeof response === "object" && "data" in response) {
+            return Array.isArray(response.data) ? response.data as AppUserDto[] : []
+        }
+        return []
+    }, [grantedUsersResponse])
+        const { data: unassignedUsersResponse } = useGetUnassignedAppUsers(
+            activeSelectedItemId ?? "",
+            { search: unassignedUserSearch || undefined },
+            { query: { enabled: Boolean(activeSelectedItemId) && isUnassignedUsersOpen } }
+        )
+        const unassignedUsers = React.useMemo<AppUserDto[]>(() => {
+            const response = unassignedUsersResponse as unknown
+            if (Array.isArray(response)) return response as AppUserDto[]
+            if (response && typeof response === "object" && "data" in response) {
+                return Array.isArray(response.data) ? response.data as AppUserDto[] : []
+            }
+            return []
+        }, [unassignedUsersResponse])
     const getProjectionPage = React.useCallback((response: unknown) => {
         if (response && typeof response === "object" && "data" in response) {
             const data = response.data
@@ -475,11 +514,13 @@ export const PermissionSets = () => {
                             <SelectContent>
                                 <SelectItem value="Granted">Granted</SelectItem>
                                 <SelectItem value="Revoked">Revoked</SelectItem>
+                                <SelectItem value="Users">Users</SelectItem>
                             </SelectContent>
                         </Select>
                         <TabsList className="hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:px-1 lg:flex">
                             <TabsTrigger value="Granted">Granted</TabsTrigger>
                             <TabsTrigger value="Revoked">Revoked</TabsTrigger>
+                            <TabsTrigger value="Users">Users</TabsTrigger>
                         </TabsList>
                         <div className="flex items-center gap-2">
                             <DropdownMenu>
@@ -515,6 +556,87 @@ export const PermissionSets = () => {
                             </DropdownMenu>
                         </div>
                     </div>
+                    {view === "Users" ? (
+                        <TabsContent
+                            value="Users"
+                            className="flex flex-col gap-4 px-4 lg:px-6 pb-8 outline-none"
+                        >
+                            <div className="flex items-center justify-between gap-4">
+                                <Input
+                                    type="search"
+                                    placeholder="Search users"
+                                    value={userSearch}
+                                    onChange={(event) => setUserSearch(event.target.value)}
+                                    className="max-w-sm"
+                                    aria-label="Search users"
+                                />
+                                <Sheet open={isUnassignedUsersOpen} onOpenChange={setIsUnassignedUsersOpen}>
+                                    <SheetTrigger
+                                        render={<Button type="button" variant="outline" />}
+                                    >
+                                        Unassigned users
+                                    </SheetTrigger>
+                                    <SheetContent side="right">
+                                        <SheetHeader>
+                                            <SheetTitle>Unassigned users</SheetTitle>
+                                            <SheetDescription>
+                                                Users without access to this permission set.
+                                            </SheetDescription>
+                                        </SheetHeader>
+                                        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4">
+                                            <Input
+                                                type="search"
+                                                placeholder="Search unassigned users"
+                                                value={unassignedUserSearch}
+                                                onChange={(event) => setUnassignedUserSearch(event.target.value)}
+                                                aria-label="Search unassigned users"
+                                            />
+                                            <div className="rounded-lg border">
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead>Username</TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {unassignedUsers.length ? unassignedUsers.map((user) => (
+                                                            <TableRow key={user.username}>
+                                                                <TableCell>{user.username ?? "-"}</TableCell>
+                                                            </TableRow>
+                                                        )) : (
+                                                            <TableRow>
+                                                                <TableCell className="h-24 text-center">No results.</TableCell>
+                                                            </TableRow>
+                                                        )}
+                                                    </TableBody>
+                                                </Table>
+                                            </div>
+                                        </div>
+                                    </SheetContent>
+                                </Sheet>
+                            </div>
+                            <div className="rounded-lg border bg-background relative">
+                                <Table>
+                                    <TableHeader className="sticky top-0 z-10 bg-muted">
+                                        <TableRow>
+                                            <TableHead>Username</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {grantedUsers.length ? grantedUsers.map((user) => (
+                                            <TableRow key={user.username}>
+                                                <TableCell>{user.username ?? "-"}</TableCell>
+                                            </TableRow>
+                                        )) : (
+                                            <TableRow>
+                                                <TableCell className="h-24 text-center">No results.</TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </TabsContent>
+                    ) : (
                     <TabsContent
                         value={view}
                         className="flex flex-col gap-4 px-4 lg:px-6 pb-8 outline-none"
@@ -673,6 +795,7 @@ export const PermissionSets = () => {
                             </div>
                         </div>
                     </TabsContent>
+                    )}
                 </Tabs>
             </main>
         </div>)

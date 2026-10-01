@@ -22,8 +22,11 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AppUserDto,
   GetAllPermissionSetsParams,
+  GetGrantedAppUsersParams,
   GetGrantedProjectionsParams,
+  GetUnassignedAppUsersParams,
   GetUnassignedProjectionsParams,
   PageProjectionDto,
   PermissionSet,
@@ -612,6 +615,217 @@ export function useGetAllPermissionSets<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+export type getUnassignedAppUsersResponse200 = {
+  data: AppUserDto[];
+  status: 200;
+};
+
+export type getUnassignedAppUsersResponseSuccess =
+  getUnassignedAppUsersResponse200 & {
+    headers: Headers;
+  };
+export type getUnassignedAppUsersResponse =
+  getUnassignedAppUsersResponseSuccess;
+
+export const getGetUnassignedAppUsersUrl = (
+  permissionID: string,
+  params?: GetUnassignedAppUsersParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/permissionSet/unassignedUsers/${permissionID}?${stringifiedParams}`
+    : `/api/permissionSet/unassignedUsers/${permissionID}`;
+};
+
+export const getUnassignedAppUsers = async (
+  permissionID: string,
+  params?: GetUnassignedAppUsersParams,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getUnassignedAppUsersResponse> => {
+  return customFetch<getUnassignedAppUsersResponse>(
+    getGetUnassignedAppUsersUrl(permissionID, params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetUnassignedAppUsersQueryKey = (
+  permissionID: string,
+  params?: GetUnassignedAppUsersParams,
+) => {
+  return [
+    `/api/permissionSet/unassignedUsers/${permissionID}`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetUnassignedAppUsersQueryOptions = <
+  TData = Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+  TError = unknown,
+>(
+  permissionID: string,
+  params?: GetUnassignedAppUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetUnassignedAppUsersQueryKey(permissionID, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getUnassignedAppUsers>>
+  > = ({ signal }) =>
+    getUnassignedAppUsers(permissionID, params, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: permissionID !== null && permissionID !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetUnassignedAppUsersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getUnassignedAppUsers>>
+>;
+export type GetUnassignedAppUsersQueryError = unknown;
+
+export function useGetUnassignedAppUsers<
+  TData = Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+  TError = unknown,
+>(
+  permissionID: string,
+  params: undefined | GetUnassignedAppUsersParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+          TError,
+          Awaited<ReturnType<typeof getUnassignedAppUsers>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUnassignedAppUsers<
+  TData = Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+  TError = unknown,
+>(
+  permissionID: string,
+  params?: GetUnassignedAppUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+          TError,
+          Awaited<ReturnType<typeof getUnassignedAppUsers>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUnassignedAppUsers<
+  TData = Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+  TError = unknown,
+>(
+  permissionID: string,
+  params?: GetUnassignedAppUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetUnassignedAppUsers<
+  TData = Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+  TError = unknown,
+>(
+  permissionID: string,
+  params?: GetUnassignedAppUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedAppUsers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetUnassignedAppUsersQueryOptions(
+    permissionID,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 export type getUnassignedProjectionsResponse200 = {
   data: PageProjectionDto;
   status: 200;
@@ -968,6 +1182,216 @@ export function useGetAllProjections<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetAllProjectionsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type getGrantedAppUsersResponse200 = {
+  data: AppUserDto[];
+  status: 200;
+};
+
+export type getGrantedAppUsersResponseSuccess =
+  getGrantedAppUsersResponse200 & {
+    headers: Headers;
+  };
+export type getGrantedAppUsersResponse = getGrantedAppUsersResponseSuccess;
+
+export const getGetGrantedAppUsersUrl = (
+  permissionID: string,
+  params?: GetGrantedAppUsersParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/permissionSet/grantedUsers/${permissionID}?${stringifiedParams}`
+    : `/api/permissionSet/grantedUsers/${permissionID}`;
+};
+
+export const getGrantedAppUsers = async (
+  permissionID: string,
+  params?: GetGrantedAppUsersParams,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getGrantedAppUsersResponse> => {
+  return customFetch<getGrantedAppUsersResponse>(
+    getGetGrantedAppUsersUrl(permissionID, params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetGrantedAppUsersQueryKey = (
+  permissionID: string,
+  params?: GetGrantedAppUsersParams,
+) => {
+  return [
+    `/api/permissionSet/grantedUsers/${permissionID}`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetGrantedAppUsersQueryOptions = <
+  TData = Awaited<ReturnType<typeof getGrantedAppUsers>>,
+  TError = unknown,
+>(
+  permissionID: string,
+  params?: GetGrantedAppUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getGrantedAppUsers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetGrantedAppUsersQueryKey(permissionID, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getGrantedAppUsers>>
+  > = ({ signal }) =>
+    getGrantedAppUsers(permissionID, params, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: permissionID !== null && permissionID !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getGrantedAppUsers>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetGrantedAppUsersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getGrantedAppUsers>>
+>;
+export type GetGrantedAppUsersQueryError = unknown;
+
+export function useGetGrantedAppUsers<
+  TData = Awaited<ReturnType<typeof getGrantedAppUsers>>,
+  TError = unknown,
+>(
+  permissionID: string,
+  params: undefined | GetGrantedAppUsersParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getGrantedAppUsers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getGrantedAppUsers>>,
+          TError,
+          Awaited<ReturnType<typeof getGrantedAppUsers>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetGrantedAppUsers<
+  TData = Awaited<ReturnType<typeof getGrantedAppUsers>>,
+  TError = unknown,
+>(
+  permissionID: string,
+  params?: GetGrantedAppUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getGrantedAppUsers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getGrantedAppUsers>>,
+          TError,
+          Awaited<ReturnType<typeof getGrantedAppUsers>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetGrantedAppUsers<
+  TData = Awaited<ReturnType<typeof getGrantedAppUsers>>,
+  TError = unknown,
+>(
+  permissionID: string,
+  params?: GetGrantedAppUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getGrantedAppUsers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetGrantedAppUsers<
+  TData = Awaited<ReturnType<typeof getGrantedAppUsers>>,
+  TError = unknown,
+>(
+  permissionID: string,
+  params?: GetGrantedAppUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getGrantedAppUsers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetGrantedAppUsersQueryOptions(
+    permissionID,
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

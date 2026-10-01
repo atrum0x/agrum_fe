@@ -6,12 +6,15 @@
  * OpenAPI spec version: 1.0.0
  */
 
+export * from "./appUserDto";
 export * from "./currentUserProfileResponse";
 export * from "./division";
 export * from "./estate";
 export * from "./getAllPermissionSetsParams";
 export * from "./getCurrentUser200";
+export * from "./getGrantedAppUsersParams";
 export * from "./getGrantedProjectionsParams";
+export * from "./getUnassignedAppUsersParams";
 export * from "./getUnassignedProjectionsParams";
 export * from "./loginMobile200";
 export * from "./loginRequest";

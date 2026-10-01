@@ -8,5 +8,4 @@
 
 export interface CurrentUserProfileResponse {
   username?: string;
-  email?: string;
 }

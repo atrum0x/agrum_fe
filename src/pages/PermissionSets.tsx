@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
     Select,
@@ -18,20 +18,24 @@ import {
     IconChevronRight,
     IconChevronsLeft,
     IconChevronsRight,
-    IconDotsVertical,
     IconLayoutColumns,
     IconSearch,
 } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
+    getGetGrantedAppUsersQueryKey,
     getGetGrantedProjectionsQueryKey,
+    getGetUnassignedAppUsersQueryKey,
     getGetUnassignedProjectionsQueryKey,
     useGetAllPermissionSets,
     useGetGrantedAppUsers,
     useGetGrantedProjections,
     useGetUnassignedAppUsers,
     useGetUnassignedProjections,
+    useGrantPermissionSetToUser,
     useGrantProjectionsToPermissionSet,
+    useRevokePermissionSetToUser,
     useRevokeProjectionsFromPermissionSet,
 } from "@/api/generated/endpoints/permission-controller/permission-controller"
 import type { AppUserDto, PermissionSetDto, ProjectionDto } from "@/api/generated/models"
@@ -78,12 +82,16 @@ type PermissionSetTableRow = {
     description: string
 }
 
+const TruncatedCell = ({ value, className = "max-w-xs" }: { value: string; className?: string }) => (
+    <Tooltip>
+        <TooltipTrigger render={<div className={`${className} truncate`} />}>{value || "-"}</TooltipTrigger>
+        <TooltipContent className="max-w-[min(32rem,calc(100vw-2rem))] whitespace-normal wrap-break-word">
+            {value || "-"}
+        </TooltipContent>
+    </Tooltip>
+)
+
 const createColumns = (
-    showActions: boolean,
-    projectionSearchOpen: boolean,
-    projectionSearch: string,
-    onProjectionSearchToggle: () => void,
-    onProjectionSearchChange: (value: string) => void,
 ) => columnHelper.columns([
     columnHelper.display({
         id: "select",
@@ -111,35 +119,14 @@ const createColumns = (
         enableSorting: false,
         enableHiding: false,
     }),
+    columnHelper.accessor("id", {
+        header: "ID",
+        cell: ({ row }) => <TruncatedCell value={row.original.id} className="max-w-40" />,
+        enableHiding: false,
+    }),
     columnHelper.accessor("header", {
-        header: () => (
-            <div className="flex items-center gap-1">
-                {projectionSearchOpen ? (
-                    <Input
-                        autoFocus
-                        type="search"
-                        placeholder="Search projections"
-                        value={projectionSearch}
-                        onChange={(event) => onProjectionSearchChange(event.target.value)}
-                        className="h-7 w-40"
-                        aria-label="Search projections"
-                    />
-                ) : (
-                    "Projection"
-                )}
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-7"
-                    onClick={onProjectionSearchToggle}
-                    aria-label={projectionSearchOpen ? "Close projection search" : "Search projections"}
-                >
-                    <IconSearch />
-                </Button>
-            </div>
-        ),
-        cell: ({ row }) => <div className="w-32">{row.original.header}</div>,
+        header: "Projection",
+        cell: ({ row }) => <TruncatedCell value={row.original.header} className="max-w-48" />,
         enableHiding: false,
     }),
     columnHelper.accessor("httpMethod", {
@@ -150,35 +137,10 @@ const createColumns = (
             </Badge>
         ),
     }),
-    columnHelper.accessor("urlPath", {
-        header: "URL Path",
-        cell: ({ row }) => <div className="w-32">{row.original.urlPath}</div>,
-    }),
     columnHelper.accessor("description", {
         header: "Description",
-        cell: ({ row }) => <div className="max-w-xs truncate">{row.original.description}</div>,
+        cell: ({ row }) => <TruncatedCell value={row.original.description} className="max-w-64" />,
     }),
-    ...(showActions ? [columnHelper.display({
-        id: "actions",
-        cell: () => (
-            <DropdownMenu>
-                <DropdownMenuTrigger
-                    className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
-                    aria-label="Open menu"
-                >
-                    <IconDotsVertical />
-                    <span className="sr-only">Open menu</span>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-32">
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
-                    <DropdownMenuItem>Make a copy</DropdownMenuItem>
-                    <DropdownMenuItem>Favorite</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
-    })] : []),
 ])
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -208,12 +170,15 @@ export const PermissionSets = () => {
     })
     const [selectedItemId, setSelectedItemId] = React.useState<string | null>(null)
     const [searchTerm, setSearchTerm] = React.useState("")
-    const [projectionSearchOpen, setProjectionSearchOpen] = React.useState(false)
     const [projectionSearch, setProjectionSearch] = React.useState("")
     const [userSearch, setUserSearch] = React.useState("")
     const [isUnassignedUsersOpen, setIsUnassignedUsersOpen] = React.useState(false)
     const [unassignedUserSearch, setUnassignedUserSearch] = React.useState("")
+    const [selectedGrantedUsernames, setSelectedGrantedUsernames] = React.useState<string[]>([])
+    const [selectedUnassignedUsernames, setSelectedUnassignedUsernames] = React.useState<string[]>([])
     const [view, setView] = React.useState("Granted")
+    const { mutate: grantUsers, isPending: isGrantingUsers } = useGrantPermissionSetToUser()
+    const { mutate: revokeUsers, isPending: isRevokingUsers } = useRevokePermissionSetToUser()
     const { mutate: grantProjections, isPending: isGranting } = useGrantProjectionsToPermissionSet()
     const { mutate: revokeProjections, isPending: isRevoking } = useRevokeProjectionsFromPermissionSet()
     const { data: permissionSetsResponse } = useGetAllPermissionSets({ search: searchTerm })
@@ -267,7 +232,7 @@ export const PermissionSets = () => {
         const { data: unassignedUsersResponse } = useGetUnassignedAppUsers(
             activeSelectedItemId ?? "",
             { search: unassignedUserSearch || undefined },
-            { query: { enabled: Boolean(activeSelectedItemId) && isUnassignedUsersOpen } }
+            { query: { enabled: Boolean(activeSelectedItemId) } }
         )
         const unassignedUsers = React.useMemo<AppUserDto[]>(() => {
             const response = unassignedUsersResponse as unknown
@@ -319,23 +284,8 @@ export const PermissionSets = () => {
     const canGoToPreviousPage = pagination.pageIndex > 0
     const canGoToNextPage = pagination.pageIndex + 1 < totalPages
     const columns = React.useMemo(
-        () => createColumns(
-            view === "Granted",
-            projectionSearchOpen,
-            projectionSearch,
-            () => {
-                setProjectionSearchOpen((isOpen) => !isOpen)
-                if (projectionSearchOpen) {
-                    setProjectionSearch("")
-                    setPagination((current) => ({ ...current, pageIndex: 0 }))
-                }
-            },
-            (value) => {
-                setProjectionSearch(value)
-                setPagination((current) => ({ ...current, pageIndex: 0 }))
-            },
-        ),
-        [projectionSearchOpen, projectionSearch, view]
+        () => createColumns(),
+        []
     )
     const table = useTable({
         features,
@@ -363,6 +313,25 @@ export const PermissionSets = () => {
     )
     const hasSelectedProjections = selectedProjectionIds.length > 0
     const isUpdatingProjections = isGranting || isRevoking
+    const isUpdatingUsers = isGrantingUsers || isRevokingUsers
+    const refreshUserQueries = () => {
+        if (!activeSelectedItemId) return
+
+        void Promise.all([
+            queryClient.invalidateQueries({
+                queryKey: getGetGrantedAppUsersQueryKey(activeSelectedItemId, {
+                    search: userSearch || undefined,
+                }),
+            }),
+            queryClient.invalidateQueries({
+                queryKey: getGetUnassignedAppUsersQueryKey(activeSelectedItemId, {
+                    search: unassignedUserSearch || undefined,
+                }),
+            }),
+        ])
+        setSelectedGrantedUsernames([])
+        setSelectedUnassignedUsernames([])
+    }
     const refreshProjectionQueries = () => {
         if (!activeSelectedItemId) return
 
@@ -459,27 +428,19 @@ export const PermissionSets = () => {
                     <div className="grid auto-rows-min gap-4 sm:grid-cols-2 md:grid-cols-6 rounded-xl bg-muted/50 p-4 ">
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Permission Set</p>
-                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                {selectedPermissionSet?.permissionSetId ?? "-"}
-                            </p>
+                            <TruncatedCell value={selectedPermissionSet?.permissionSetId ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Description</p>
-                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                {selectedPermissionSet?.description ?? "-"}
-                            </p>
+                            <TruncatedCell value={selectedPermissionSet?.description ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Modified</p>
-                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                {selectedPermissionSet?.modified ?? "-"}
-                            </p>
+                            <TruncatedCell value={selectedPermissionSet?.modified ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Modified By</p>
-                            <p className="truncate group-hover:absolute group-hover:top-6 group-hover:left-0 group-hover:z-20 group-hover:max-w-xs group-hover:rounded group-hover:bg-popover group-hover:p-2 group-hover:shadow-md group-hover:whitespace-normal group-hover:break-all">
-                                {selectedPermissionSet?.modifiedBy ?? "-"}
-                            </p>
+                            <TruncatedCell value={selectedPermissionSet?.modifiedBy ?? "-"} />
                         </div>
                         
                     </div>
@@ -591,21 +552,67 @@ export const PermissionSets = () => {
                                                 onChange={(event) => setUnassignedUserSearch(event.target.value)}
                                                 aria-label="Search unassigned users"
                                             />
+                                            {selectedUnassignedUsernames.length > 0 && (
+                                                <Button
+                                                    type="button"
+                                                    disabled={isUpdatingUsers}
+                                                    onClick={() => {
+                                                        grantUsers(
+                                                            {
+                                                                permissionSetId: activeSelectedItemId ?? "",
+                                                                data: selectedUnassignedUsernames,
+                                                            },
+                                                            { onSuccess: refreshUserQueries },
+                                                        )
+                                                    }}
+                                                >
+                                                    {isGrantingUsers ? "Granting..." : "Grant selected"}
+                                                </Button>
+                                            )}
                                             <div className="rounded-lg border">
                                                 <Table>
                                                     <TableHeader>
                                                         <TableRow>
+                                                            <TableHead className="w-8">
+                                                                <Checkbox
+                                                                    checked={
+                                                                        unassignedUsers.length > 0 &&
+                                                                        unassignedUsers.every((user) => user.username && selectedUnassignedUsernames.includes(user.username))
+                                                                    }
+                                                                    onCheckedChange={(checked) => {
+                                                                        const usernames = unassignedUsers
+                                                                            .map((user) => user.username)
+                                                                            .filter((username): username is string => Boolean(username))
+                                                                        setSelectedUnassignedUsernames((current) => checked
+                                                                            ? [...new Set([...current, ...usernames])]
+                                                                            : current.filter((username) => !usernames.includes(username)))
+                                                                    }}
+                                                                    aria-label="Select all unassigned users"
+                                                                />
+                                                            </TableHead>
                                                             <TableHead>Username</TableHead>
                                                         </TableRow>
                                                     </TableHeader>
                                                     <TableBody>
                                                         {unassignedUsers.length ? unassignedUsers.map((user) => (
                                                             <TableRow key={user.username}>
+                                                                <TableCell>
+                                                                    <Checkbox
+                                                                        checked={Boolean(user.username && selectedUnassignedUsernames.includes(user.username))}
+                                                                        onCheckedChange={(checked) => {
+                                                                            if (!user.username) return
+                                                                            setSelectedUnassignedUsernames((current) => checked
+                                                                                ? [...new Set([...current, user.username as string])]
+                                                                                : current.filter((username) => username !== user.username))
+                                                                        }}
+                                                                        aria-label={`Select ${user.username ?? "user"}`}
+                                                                    />
+                                                                </TableCell>
                                                                 <TableCell>{user.username ?? "-"}</TableCell>
                                                             </TableRow>
                                                         )) : (
                                                             <TableRow>
-                                                                <TableCell className="h-24 text-center">No results.</TableCell>
+                                                                <TableCell colSpan={2} className="h-24 text-center">No results.</TableCell>
                                                             </TableRow>
                                                         )}
                                                     </TableBody>
@@ -616,20 +623,68 @@ export const PermissionSets = () => {
                                 </Sheet>
                             </div>
                             <div className="rounded-lg border bg-background relative">
+                                {selectedGrantedUsernames.length > 0 && (
+                                    <div className="flex items-center gap-2 border-b px-4 py-3">
+                                        <Button
+                                            type="button"
+                                            disabled={isUpdatingUsers}
+                                            onClick={() => {
+                                                revokeUsers(
+                                                    {
+                                                        permissionSetId: activeSelectedItemId ?? "",
+                                                        data: selectedGrantedUsernames,
+                                                    },
+                                                    { onSuccess: refreshUserQueries },
+                                                )
+                                            }}
+                                        >
+                                            {isRevokingUsers ? "Revoking..." : "Revoke selected"}
+                                        </Button>
+                                    </div>
+                                )}
                                 <Table>
                                     <TableHeader className="sticky top-0 z-10 bg-muted">
                                         <TableRow>
+                                            <TableHead className="w-8">
+                                                <Checkbox
+                                                    checked={
+                                                        grantedUsers.length > 0 &&
+                                                        grantedUsers.every((user) => user.username && selectedGrantedUsernames.includes(user.username))
+                                                    }
+                                                    onCheckedChange={(checked) => {
+                                                        const usernames = grantedUsers
+                                                            .map((user) => user.username)
+                                                            .filter((username): username is string => Boolean(username))
+                                                        setSelectedGrantedUsernames((current) => checked
+                                                            ? [...new Set([...current, ...usernames])]
+                                                            : current.filter((username) => !usernames.includes(username)))
+                                                    }}
+                                                    aria-label="Select all granted users"
+                                                />
+                                            </TableHead>
                                             <TableHead>Username</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                         {grantedUsers.length ? grantedUsers.map((user) => (
                                             <TableRow key={user.username}>
+                                                <TableCell>
+                                                    <Checkbox
+                                                        checked={Boolean(user.username && selectedGrantedUsernames.includes(user.username))}
+                                                        onCheckedChange={(checked) => {
+                                                            if (!user.username) return
+                                                            setSelectedGrantedUsernames((current) => checked
+                                                                ? [...new Set([...current, user.username as string])]
+                                                                : current.filter((username) => username !== user.username))
+                                                        }}
+                                                        aria-label={`Select ${user.username ?? "user"}`}
+                                                    />
+                                                </TableCell>
                                                 <TableCell>{user.username ?? "-"}</TableCell>
                                             </TableRow>
                                         )) : (
                                             <TableRow>
-                                                <TableCell className="h-24 text-center">No results.</TableCell>
+                                                <TableCell colSpan={2} className="h-24 text-center">No results.</TableCell>
                                             </TableRow>
                                         )}
                                     </TableBody>
@@ -641,6 +696,17 @@ export const PermissionSets = () => {
                         value={view}
                         className="flex flex-col gap-4 px-4 lg:px-6 pb-8 outline-none"
                     >
+                        <Input
+                            type="search"
+                            placeholder="Search projections"
+                            value={projectionSearch}
+                            onChange={(event) => {
+                                setProjectionSearch(event.target.value)
+                                setPagination((current) => ({ ...current, pageIndex: 0 }))
+                            }}
+                            className="max-w-sm"
+                            aria-label="Search projections"
+                        />
                         <div className="rounded-lg border bg-background relative">
                             {hasSelectedProjections && (
                                 <div className="flex items-center gap-2 border-b px-4 py-3">

@@ -58,6 +58,270 @@ const withQueryKey = <T extends object, K>(
   return result;
 };
 
+export type revokePermissionSetToUserResponse200 = {
+  data: string;
+  status: 200;
+};
+
+export type revokePermissionSetToUserResponseSuccess =
+  revokePermissionSetToUserResponse200 & {
+    headers: Headers;
+  };
+export type revokePermissionSetToUserResponse =
+  revokePermissionSetToUserResponseSuccess;
+
+export const getRevokePermissionSetToUserUrl = (permissionSetId: string) => {
+  return `/api/permissionSet/${permissionSetId}/revokeUsers`;
+};
+
+export const revokePermissionSetToUser = async (
+  permissionSetId: string,
+  revokePermissionSetToUserBody: string[],
+  options?: Parameters<typeof customFetch>[1],
+): Promise<revokePermissionSetToUserResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return customFetch<revokePermissionSetToUserResponse>(
+    getRevokePermissionSetToUserUrl(permissionSetId),
+    {
+      ...options,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(revokePermissionSetToUserBody),
+    },
+  );
+};
+
+export const getRevokePermissionSetToUserMutationKey = () =>
+  ["revokePermissionSetToUser"] as const;
+
+export const getRevokePermissionSetToUserMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof revokePermissionSetToUser>>,
+    TError,
+    RevokePermissionSetToUserMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof revokePermissionSetToUser>>,
+  TError,
+  RevokePermissionSetToUserMutationVariables,
+  TContext
+> => {
+  const mutationKey = getRevokePermissionSetToUserMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof revokePermissionSetToUser>>,
+    RevokePermissionSetToUserMutationVariables
+  > = (props) => {
+    const { permissionSetId, data } = props ?? {};
+
+    return revokePermissionSetToUser(permissionSetId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RevokePermissionSetToUserMutationResult = NonNullable<
+  Awaited<ReturnType<typeof revokePermissionSetToUser>>
+>;
+export type RevokePermissionSetToUserMutationBody = string[];
+export type RevokePermissionSetToUserMutationError = unknown;
+export type RevokePermissionSetToUserMutationVariables = {
+  permissionSetId: string;
+  data: string[];
+};
+
+export const useRevokePermissionSetToUser = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof revokePermissionSetToUser>>,
+      TError,
+      RevokePermissionSetToUserMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof revokePermissionSetToUser>>,
+  TError,
+  RevokePermissionSetToUserMutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getRevokePermissionSetToUserMutationOptions(options),
+    queryClient,
+  );
+};
+export type grantPermissionSetToUserResponse200 = {
+  data: string;
+  status: 200;
+};
+
+export type grantPermissionSetToUserResponseSuccess =
+  grantPermissionSetToUserResponse200 & {
+    headers: Headers;
+  };
+export type grantPermissionSetToUserResponse =
+  grantPermissionSetToUserResponseSuccess;
+
+export const getGrantPermissionSetToUserUrl = (permissionSetId: string) => {
+  return `/api/permissionSet/${permissionSetId}/grantUsers`;
+};
+
+export const grantPermissionSetToUser = async (
+  permissionSetId: string,
+  grantPermissionSetToUserBody: string[],
+  options?: Parameters<typeof customFetch>[1],
+): Promise<grantPermissionSetToUserResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(
+          h as Iterable<Iterable<string>>,
+          (entry) => Array.from(entry) as [string, string],
+        ),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<
+      string | readonly string[] | undefined
+    >(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+  return customFetch<grantPermissionSetToUserResponse>(
+    getGrantPermissionSetToUserUrl(permissionSetId),
+    {
+      ...options,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(grantPermissionSetToUserBody),
+    },
+  );
+};
+
+export const getGrantPermissionSetToUserMutationKey = () =>
+  ["grantPermissionSetToUser"] as const;
+
+export const getGrantPermissionSetToUserMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof grantPermissionSetToUser>>,
+    TError,
+    GrantPermissionSetToUserMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof grantPermissionSetToUser>>,
+  TError,
+  GrantPermissionSetToUserMutationVariables,
+  TContext
+> => {
+  const mutationKey = getGrantPermissionSetToUserMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof grantPermissionSetToUser>>,
+    GrantPermissionSetToUserMutationVariables
+  > = (props) => {
+    const { permissionSetId, data } = props ?? {};
+
+    return grantPermissionSetToUser(permissionSetId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GrantPermissionSetToUserMutationResult = NonNullable<
+  Awaited<ReturnType<typeof grantPermissionSetToUser>>
+>;
+export type GrantPermissionSetToUserMutationBody = string[];
+export type GrantPermissionSetToUserMutationError = unknown;
+export type GrantPermissionSetToUserMutationVariables = {
+  permissionSetId: string;
+  data: string[];
+};
+
+export const useGrantPermissionSetToUser = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof grantPermissionSetToUser>>,
+      TError,
+      GrantPermissionSetToUserMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof grantPermissionSetToUser>>,
+  TError,
+  GrantPermissionSetToUserMutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getGrantPermissionSetToUserMutationOptions(options),
+    queryClient,
+  );
+};
 export type grantProjectionsToPermissionSetResponse200 = {
   data: string;
   status: 200;
@@ -193,115 +457,6 @@ export const useGrantProjectionsToPermissionSet = <
 > => {
   return useMutation(
     getGrantProjectionsToPermissionSetMutationOptions(options),
-    queryClient,
-  );
-};
-export type grantPermissionSetToUserResponse200 = {
-  data: string;
-  status: 200;
-};
-
-export type grantPermissionSetToUserResponseSuccess =
-  grantPermissionSetToUserResponse200 & {
-    headers: Headers;
-  };
-export type grantPermissionSetToUserResponse =
-  grantPermissionSetToUserResponseSuccess;
-
-export const getGrantPermissionSetToUserUrl = (
-  username: string,
-  permissionSetId: string,
-) => {
-  return `/api/permissionSet/users/${username}/permission-sets/${permissionSetId}`;
-};
-
-export const grantPermissionSetToUser = async (
-  username: string,
-  permissionSetId: string,
-  options?: Parameters<typeof customFetch>[1],
-): Promise<grantPermissionSetToUserResponse> => {
-  return customFetch<grantPermissionSetToUserResponse>(
-    getGrantPermissionSetToUserUrl(username, permissionSetId),
-    {
-      ...options,
-      method: "POST",
-    },
-  );
-};
-
-export const getGrantPermissionSetToUserMutationKey = () =>
-  ["grantPermissionSetToUser"] as const;
-
-export const getGrantPermissionSetToUserMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof grantPermissionSetToUser>>,
-    TError,
-    GrantPermissionSetToUserMutationVariables,
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof grantPermissionSetToUser>>,
-  TError,
-  GrantPermissionSetToUserMutationVariables,
-  TContext
-> => {
-  const mutationKey = getGrantPermissionSetToUserMutationKey();
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof grantPermissionSetToUser>>,
-    GrantPermissionSetToUserMutationVariables
-  > = (props) => {
-    const { username, permissionSetId } = props ?? {};
-
-    return grantPermissionSetToUser(username, permissionSetId, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type GrantPermissionSetToUserMutationResult = NonNullable<
-  Awaited<ReturnType<typeof grantPermissionSetToUser>>
->;
-
-export type GrantPermissionSetToUserMutationError = unknown;
-export type GrantPermissionSetToUserMutationVariables = {
-  username: string;
-  permissionSetId: string;
-};
-
-export const useGrantPermissionSetToUser = <
-  TError = unknown,
-  TContext = unknown,
->(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof grantPermissionSetToUser>>,
-      TError,
-      GrantPermissionSetToUserMutationVariables,
-      TContext
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof grantPermissionSetToUser>>,
-  TError,
-  GrantPermissionSetToUserMutationVariables,
-  TContext
-> => {
-  return useMutation(
-    getGrantPermissionSetToUserMutationOptions(options),
     queryClient,
   );
 };

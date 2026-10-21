@@ -36,7 +36,6 @@ const navData: NavItem[] = [
       {title: "Permissions",
        items: [
         { title: "Permission Sets", url: "/permission-sets" },
-        { title: "Projection Grants", url: "/projection-grants" },
        ]
       }
     ],

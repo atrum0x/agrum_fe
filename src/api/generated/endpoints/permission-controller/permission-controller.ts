@@ -23,16 +23,17 @@ import type {
 
 import type {
   AppUserDto,
+  CreatePermissionSetRequest,
   GetAllPermissionSetsParams,
   GetGrantedAppUsersParams,
   GetGrantedProjectionsParams,
   GetUnassignedAppUsersParams,
   GetUnassignedProjectionsParams,
   PageProjectionDto,
-  PermissionSet,
   PermissionSetDto,
   Projection,
   ProjectionsRequest,
+  UpdatePermissionSetRequest,
 } from "../../models";
 
 import { customFetch } from "../../../custom-fetch";
@@ -58,6 +59,118 @@ const withQueryKey = <T extends object, K>(
   return result;
 };
 
+export type updatePermissionSetResponse200 = {
+  data: PermissionSetDto;
+  status: 200;
+};
+
+export type updatePermissionSetResponseSuccess =
+  updatePermissionSetResponse200 & {
+    headers: Headers;
+  };
+export type updatePermissionSetResponse = updatePermissionSetResponseSuccess;
+
+export const getUpdatePermissionSetUrl = (permissionSetId: string) => {
+  return `/api/permissionSet/${permissionSetId}`;
+};
+
+export const updatePermissionSet = async (
+  permissionSetId: string,
+  updatePermissionSetRequest: UpdatePermissionSetRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<updatePermissionSetResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<updatePermissionSetResponse>(
+    getUpdatePermissionSetUrl(permissionSetId),
+    {
+      ...options,
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(updatePermissionSetRequest),
+    },
+  );
+};
+
+export const getUpdatePermissionSetMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updatePermissionSet>>,
+    TError,
+    UpdatePermissionSetMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updatePermissionSet>>,
+  TError,
+  UpdatePermissionSetMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["updatePermissionSet"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updatePermissionSet>>,
+    UpdatePermissionSetMutationVariables
+  > = (props) => {
+    const { permissionSetId, data } = props ?? {};
+
+    return updatePermissionSet(permissionSetId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdatePermissionSetMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updatePermissionSet>>
+>;
+export type UpdatePermissionSetMutationBody = UpdatePermissionSetRequest;
+export type UpdatePermissionSetMutationError = unknown;
+export type UpdatePermissionSetMutationVariables = {
+  permissionSetId: string;
+  data: UpdatePermissionSetRequest;
+};
+
+export const useUpdatePermissionSet = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updatePermissionSet>>,
+      TError,
+      UpdatePermissionSetMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updatePermissionSet>>,
+  TError,
+  UpdatePermissionSetMutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getUpdatePermissionSetMutationOptions(options),
+    queryClient,
+  );
+};
 export type revokePermissionSetToUserResponse200 = {
   data: string;
   status: 200;
@@ -84,21 +197,8 @@ export const revokePermissionSetToUser = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<revokePermissionSetToUserResponse>(
     getRevokePermissionSetToUserUrl(permissionSetId),
@@ -113,9 +213,6 @@ export const revokePermissionSetToUser = async (
     },
   );
 };
-
-export const getRevokePermissionSetToUserMutationKey = () =>
-  ["revokePermissionSetToUser"] as const;
 
 export const getRevokePermissionSetToUserMutationOptions = <
   TError = unknown,
@@ -134,7 +231,7 @@ export const getRevokePermissionSetToUserMutationOptions = <
   RevokePermissionSetToUserMutationVariables,
   TContext
 > => {
-  const mutationKey = getRevokePermissionSetToUserMutationKey();
+  const mutationKey = ["revokePermissionSetToUser"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -216,21 +313,8 @@ export const grantPermissionSetToUser = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<grantPermissionSetToUserResponse>(
     getGrantPermissionSetToUserUrl(permissionSetId),
@@ -245,9 +329,6 @@ export const grantPermissionSetToUser = async (
     },
   );
 };
-
-export const getGrantPermissionSetToUserMutationKey = () =>
-  ["grantPermissionSetToUser"] as const;
 
 export const getGrantPermissionSetToUserMutationOptions = <
   TError = unknown,
@@ -266,7 +347,7 @@ export const getGrantPermissionSetToUserMutationOptions = <
   GrantPermissionSetToUserMutationVariables,
   TContext
 > => {
-  const mutationKey = getGrantPermissionSetToUserMutationKey();
+  const mutationKey = ["grantPermissionSetToUser"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -350,21 +431,8 @@ export const grantProjectionsToPermissionSet = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<grantProjectionsToPermissionSetResponse>(
     getGrantProjectionsToPermissionSetUrl(permissionSetId),
@@ -379,9 +447,6 @@ export const grantProjectionsToPermissionSet = async (
     },
   );
 };
-
-export const getGrantProjectionsToPermissionSetMutationKey = () =>
-  ["grantProjectionsToPermissionSet"] as const;
 
 export const getGrantProjectionsToPermissionSetMutationOptions = <
   TError = unknown,
@@ -400,7 +465,7 @@ export const getGrantProjectionsToPermissionSetMutationOptions = <
   GrantProjectionsToPermissionSetMutationVariables,
   TContext
 > => {
-  const mutationKey = getGrantProjectionsToPermissionSetMutationKey();
+  const mutationKey = ["grantProjectionsToPermissionSet"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -461,7 +526,7 @@ export const useGrantProjectionsToPermissionSet = <
   );
 };
 export type createPermissionSetResponse200 = {
-  data: PermissionSet;
+  data: PermissionSetDto;
   status: 200;
 };
 
@@ -476,7 +541,7 @@ export const getCreatePermissionSetUrl = () => {
 };
 
 export const createPermissionSet = async (
-  permissionSet: PermissionSet,
+  createPermissionSetRequest: CreatePermissionSetRequest,
   options?: Parameters<typeof customFetch>[1],
 ): Promise<createPermissionSetResponse> => {
   const getHeaders = (
@@ -484,21 +549,8 @@ export const createPermissionSet = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<createPermissionSetResponse>(getCreatePermissionSetUrl(), {
     ...options,
@@ -507,12 +559,9 @@ export const createPermissionSet = async (
       "Content-Type": "application/json",
       ...getHeaders(options?.headers),
     },
-    body: JSON.stringify(permissionSet),
+    body: JSON.stringify(createPermissionSetRequest),
   });
 };
-
-export const getCreatePermissionSetMutationKey = () =>
-  ["createPermissionSet"] as const;
 
 export const getCreatePermissionSetMutationOptions = <
   TError = unknown,
@@ -531,7 +580,7 @@ export const getCreatePermissionSetMutationOptions = <
   CreatePermissionSetMutationVariables,
   TContext
 > => {
-  const mutationKey = getCreatePermissionSetMutationKey();
+  const mutationKey = ["createPermissionSet"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -555,9 +604,11 @@ export const getCreatePermissionSetMutationOptions = <
 export type CreatePermissionSetMutationResult = NonNullable<
   Awaited<ReturnType<typeof createPermissionSet>>
 >;
-export type CreatePermissionSetMutationBody = PermissionSet;
+export type CreatePermissionSetMutationBody = CreatePermissionSetRequest;
 export type CreatePermissionSetMutationError = unknown;
-export type CreatePermissionSetMutationVariables = { data: PermissionSet };
+export type CreatePermissionSetMutationVariables = {
+  data: CreatePermissionSetRequest;
+};
 
 export const useCreatePermissionSet = <TError = unknown, TContext = unknown>(
   options?: {
@@ -1790,21 +1841,8 @@ export const revokeProjectionsFromPermissionSet = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<revokeProjectionsFromPermissionSetResponse>(
     getRevokeProjectionsFromPermissionSetUrl(permissionSetId),
@@ -1819,9 +1857,6 @@ export const revokeProjectionsFromPermissionSet = async (
     },
   );
 };
-
-export const getRevokeProjectionsFromPermissionSetMutationKey = () =>
-  ["revokeProjectionsFromPermissionSet"] as const;
 
 export const getRevokeProjectionsFromPermissionSetMutationOptions = <
   TError = unknown,
@@ -1840,7 +1875,7 @@ export const getRevokeProjectionsFromPermissionSetMutationOptions = <
   RevokeProjectionsFromPermissionSetMutationVariables,
   TContext
 > => {
-  const mutationKey = getRevokeProjectionsFromPermissionSetMutationKey();
+  const mutationKey = ["revokeProjectionsFromPermissionSet"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&

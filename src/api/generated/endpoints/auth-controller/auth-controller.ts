@@ -80,21 +80,8 @@ export const register = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<registerResponse>(getRegisterUrl(), {
     ...options,
@@ -106,8 +93,6 @@ export const register = async (
     body: JSON.stringify(registerRequest),
   });
 };
-
-export const getRegisterMutationKey = () => ["register"] as const;
 
 export const getRegisterMutationOptions = <
   TError = unknown,
@@ -126,7 +111,7 @@ export const getRegisterMutationOptions = <
   RegisterMutationVariables,
   TContext
 > => {
-  const mutationKey = getRegisterMutationKey();
+  const mutationKey = ["register"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -196,21 +181,8 @@ export const refreshWeb = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<refreshWebResponse>(getRefreshWebUrl(), {
     ...options,
@@ -222,8 +194,6 @@ export const refreshWeb = async (
     body: JSON.stringify(refreshRequest),
   });
 };
-
-export const getRefreshWebMutationKey = () => ["refreshWeb"] as const;
 
 export const getRefreshWebMutationOptions = <
   TError = unknown,
@@ -242,7 +212,7 @@ export const getRefreshWebMutationOptions = <
   RefreshWebMutationVariables,
   TContext
 > => {
-  const mutationKey = getRefreshWebMutationKey();
+  const mutationKey = ["refreshWeb"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -312,21 +282,8 @@ export const refreshMobile = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<refreshMobileResponse>(getRefreshMobileUrl(), {
     ...options,
@@ -338,8 +295,6 @@ export const refreshMobile = async (
     body: JSON.stringify(refreshRequest),
   });
 };
-
-export const getRefreshMobileMutationKey = () => ["refreshMobile"] as const;
 
 export const getRefreshMobileMutationOptions = <
   TError = unknown,
@@ -358,7 +313,7 @@ export const getRefreshMobileMutationOptions = <
   RefreshMobileMutationVariables,
   TContext
 > => {
-  const mutationKey = getRefreshMobileMutationKey();
+  const mutationKey = ["refreshMobile"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -428,21 +383,8 @@ export const logoutWeb = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<logoutWebResponse>(getLogoutWebUrl(), {
     ...options,
@@ -454,8 +396,6 @@ export const logoutWeb = async (
     body: JSON.stringify(logoutRequest),
   });
 };
-
-export const getLogoutWebMutationKey = () => ["logoutWeb"] as const;
 
 export const getLogoutWebMutationOptions = <
   TError = unknown,
@@ -474,7 +414,7 @@ export const getLogoutWebMutationOptions = <
   LogoutWebMutationVariables,
   TContext
 > => {
-  const mutationKey = getLogoutWebMutationKey();
+  const mutationKey = ["logoutWeb"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -544,21 +484,8 @@ export const logoutMobile = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<logoutMobileResponse>(getLogoutMobileUrl(), {
     ...options,
@@ -570,8 +497,6 @@ export const logoutMobile = async (
     body: JSON.stringify(logoutRequest),
   });
 };
-
-export const getLogoutMobileMutationKey = () => ["logoutMobile"] as const;
 
 export const getLogoutMobileMutationOptions = <
   TError = unknown,
@@ -590,7 +515,7 @@ export const getLogoutMobileMutationOptions = <
   LogoutMobileMutationVariables,
   TContext
 > => {
-  const mutationKey = getLogoutMobileMutationKey();
+  const mutationKey = ["logoutMobile"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -660,21 +585,8 @@ export const loginWeb = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<loginWebResponse>(getLoginWebUrl(), {
     ...options,
@@ -686,8 +598,6 @@ export const loginWeb = async (
     body: JSON.stringify(loginRequest),
   });
 };
-
-export const getLoginWebMutationKey = () => ["loginWeb"] as const;
 
 export const getLoginWebMutationOptions = <
   TError = unknown,
@@ -706,7 +616,7 @@ export const getLoginWebMutationOptions = <
   LoginWebMutationVariables,
   TContext
 > => {
-  const mutationKey = getLoginWebMutationKey();
+  const mutationKey = ["loginWeb"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -776,21 +686,8 @@ export const loginMobile = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<loginMobileResponse>(getLoginMobileUrl(), {
     ...options,
@@ -802,8 +699,6 @@ export const loginMobile = async (
     body: JSON.stringify(loginRequest),
   });
 };
-
-export const getLoginMobileMutationKey = () => ["loginMobile"] as const;
 
 export const getLoginMobileMutationOptions = <
   TError = unknown,
@@ -822,7 +717,7 @@ export const getLoginMobileMutationOptions = <
   LoginMobileMutationVariables,
   TContext
 > => {
-  const mutationKey = getLoginMobileMutationKey();
+  const mutationKey = ["loginMobile"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&

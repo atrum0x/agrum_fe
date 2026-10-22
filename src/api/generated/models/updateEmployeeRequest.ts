@@ -17,6 +17,7 @@ export interface UpdateEmployeeRequest {
   employeeCategory?: string;
   employmentStatus?: UpdateEmployeeRequestEmploymentStatus;
   startDate?: string;
+  endDate?: string;
   defaultEstateId?: string;
   homeEstateId?: string;
   division?: string;

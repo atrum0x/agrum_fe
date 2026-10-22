@@ -18,6 +18,7 @@ export interface EmployeeDto {
   employeeCategory?: string;
   employmentStatus?: EmployeeDtoEmploymentStatus;
   startDate?: string;
+  endDate?: string;
   defaultEstateId?: string;
   homeEstateId?: string;
   division?: string;

@@ -28,7 +28,10 @@ import type {
   GetAllEmployeesParams,
   GetGrantedEstatesParams,
   GetPermissionSetsParams,
+  GetUnassignedEstatesParams,
+  GetUnassignedPermissionSetsParams,
   PermissionSetDto,
+  SetPasswordRequest,
   UpdateEmployeeRequest,
 } from "../../models";
 
@@ -231,21 +234,8 @@ export const update = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<updateResponse>(getUpdateUrl(employeeCode), {
     ...options,
@@ -257,8 +247,6 @@ export const update = async (
     body: JSON.stringify(updateEmployeeRequest),
   });
 };
-
-export const getUpdateMutationKey = () => ["update"] as const;
 
 export const getUpdateMutationOptions = <
   TError = unknown,
@@ -277,7 +265,7 @@ export const getUpdateMutationOptions = <
   UpdateMutationVariables,
   TContext
 > => {
-  const mutationKey = getUpdateMutationKey();
+  const mutationKey = ["update"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -351,8 +339,6 @@ export const _delete = async (
   });
 };
 
-export const getDeleteMutationKey = () => ["_delete"] as const;
-
 export const getDeleteMutationOptions = <
   TError = unknown,
   TContext = unknown,
@@ -370,7 +356,7 @@ export const getDeleteMutationOptions = <
   _DeleteMutationVariables,
   TContext
 > => {
-  const mutationKey = getDeleteMutationKey();
+  const mutationKey = ["_delete"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -416,6 +402,111 @@ export const useDelete = <TError = unknown, TContext = unknown>(
   TContext
 > => {
   return useMutation(getDeleteMutationOptions(options), queryClient);
+};
+export type setPasswordResponse200 = {
+  data: string;
+  status: 200;
+};
+
+export type setPasswordResponseSuccess = setPasswordResponse200 & {
+  headers: Headers;
+};
+export type setPasswordResponse = setPasswordResponseSuccess;
+
+export const getSetPasswordUrl = (employeeCode: string) => {
+  return `/api/employees/${employeeCode}/password`;
+};
+
+export const setPassword = async (
+  employeeCode: string,
+  setPasswordRequest: SetPasswordRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<setPasswordResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<setPasswordResponse>(getSetPasswordUrl(employeeCode), {
+    ...options,
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(setPasswordRequest),
+  });
+};
+
+export const getSetPasswordMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof setPassword>>,
+    TError,
+    SetPasswordMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof setPassword>>,
+  TError,
+  SetPasswordMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["setPassword"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof setPassword>>,
+    SetPasswordMutationVariables
+  > = (props) => {
+    const { employeeCode, data } = props ?? {};
+
+    return setPassword(employeeCode, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SetPasswordMutationResult = NonNullable<
+  Awaited<ReturnType<typeof setPassword>>
+>;
+export type SetPasswordMutationBody = SetPasswordRequest;
+export type SetPasswordMutationError = unknown;
+export type SetPasswordMutationVariables = {
+  employeeCode: string;
+  data: SetPasswordRequest;
+};
+
+export const useSetPassword = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof setPassword>>,
+      TError,
+      SetPasswordMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof setPassword>>,
+  TError,
+  SetPasswordMutationVariables,
+  TContext
+> => {
+  return useMutation(getSetPasswordMutationOptions(options), queryClient);
 };
 export type getAllEmployeesResponse200 = {
   data: EmployeeDto[];
@@ -619,21 +710,8 @@ export const create1 = async (
   ): Record<string, string | readonly string[]> => {
     if (!h) return {};
     if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Symbol.iterator in h) {
-      return Object.fromEntries(
-        Array.from(
-          h as Iterable<Iterable<string>>,
-          (entry) => Array.from(entry) as [string, string],
-        ),
-      );
-    }
-    const headers: Record<string, string | readonly string[]> = {};
-    for (const [name, value] of Object.entries<
-      string | readonly string[] | undefined
-    >(h)) {
-      if (value !== undefined) headers[name] = value;
-    }
-    return headers;
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
   };
   return customFetch<create1Response>(getCreate1Url(), {
     ...options,
@@ -645,8 +723,6 @@ export const create1 = async (
     body: JSON.stringify(createEmployeeRequest),
   });
 };
-
-export const getCreate1MutationKey = () => ["create1"] as const;
 
 export const getCreate1MutationOptions = <
   TError = unknown,
@@ -665,7 +741,7 @@ export const getCreate1MutationOptions = <
   Create1MutationVariables,
   TContext
 > => {
-  const mutationKey = getCreate1MutationKey();
+  const mutationKey = ["create1"];
   const { mutation: mutationOptions, request: requestOptions } = options
     ? options.mutation &&
       "mutationKey" in options.mutation &&
@@ -712,6 +788,864 @@ export const useCreate1 = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(getCreate1MutationOptions(options), queryClient);
 };
+export type revokePermissionSetsResponse200 = {
+  data: string;
+  status: 200;
+};
+
+export type revokePermissionSetsResponseSuccess =
+  revokePermissionSetsResponse200 & {
+    headers: Headers;
+  };
+export type revokePermissionSetsResponse = revokePermissionSetsResponseSuccess;
+
+export const getRevokePermissionSetsUrl = (employeeCode: string) => {
+  return `/api/employees/revokePermissions/${employeeCode}`;
+};
+
+export const revokePermissionSets = async (
+  employeeCode: string,
+  revokePermissionSetsBody: string[],
+  options?: Parameters<typeof customFetch>[1],
+): Promise<revokePermissionSetsResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<revokePermissionSetsResponse>(
+    getRevokePermissionSetsUrl(employeeCode),
+    {
+      ...options,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(revokePermissionSetsBody),
+    },
+  );
+};
+
+export const getRevokePermissionSetsMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof revokePermissionSets>>,
+    TError,
+    RevokePermissionSetsMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof revokePermissionSets>>,
+  TError,
+  RevokePermissionSetsMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["revokePermissionSets"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof revokePermissionSets>>,
+    RevokePermissionSetsMutationVariables
+  > = (props) => {
+    const { employeeCode, data } = props ?? {};
+
+    return revokePermissionSets(employeeCode, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RevokePermissionSetsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof revokePermissionSets>>
+>;
+export type RevokePermissionSetsMutationBody = string[];
+export type RevokePermissionSetsMutationError = unknown;
+export type RevokePermissionSetsMutationVariables = {
+  employeeCode: string;
+  data: string[];
+};
+
+export const useRevokePermissionSets = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof revokePermissionSets>>,
+      TError,
+      RevokePermissionSetsMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof revokePermissionSets>>,
+  TError,
+  RevokePermissionSetsMutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getRevokePermissionSetsMutationOptions(options),
+    queryClient,
+  );
+};
+export type revokeEstatesResponse200 = {
+  data: string;
+  status: 200;
+};
+
+export type revokeEstatesResponseSuccess = revokeEstatesResponse200 & {
+  headers: Headers;
+};
+export type revokeEstatesResponse = revokeEstatesResponseSuccess;
+
+export const getRevokeEstatesUrl = (employeeCode: string) => {
+  return `/api/employees/revokeEstates/${employeeCode}`;
+};
+
+export const revokeEstates = async (
+  employeeCode: string,
+  revokeEstatesBody: string[],
+  options?: Parameters<typeof customFetch>[1],
+): Promise<revokeEstatesResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<revokeEstatesResponse>(getRevokeEstatesUrl(employeeCode), {
+    ...options,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(revokeEstatesBody),
+  });
+};
+
+export const getRevokeEstatesMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof revokeEstates>>,
+    TError,
+    RevokeEstatesMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof revokeEstates>>,
+  TError,
+  RevokeEstatesMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["revokeEstates"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof revokeEstates>>,
+    RevokeEstatesMutationVariables
+  > = (props) => {
+    const { employeeCode, data } = props ?? {};
+
+    return revokeEstates(employeeCode, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RevokeEstatesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof revokeEstates>>
+>;
+export type RevokeEstatesMutationBody = string[];
+export type RevokeEstatesMutationError = unknown;
+export type RevokeEstatesMutationVariables = {
+  employeeCode: string;
+  data: string[];
+};
+
+export const useRevokeEstates = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof revokeEstates>>,
+      TError,
+      RevokeEstatesMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof revokeEstates>>,
+  TError,
+  RevokeEstatesMutationVariables,
+  TContext
+> => {
+  return useMutation(getRevokeEstatesMutationOptions(options), queryClient);
+};
+export type grantPermissionSetsResponse200 = {
+  data: string;
+  status: 200;
+};
+
+export type grantPermissionSetsResponseSuccess =
+  grantPermissionSetsResponse200 & {
+    headers: Headers;
+  };
+export type grantPermissionSetsResponse = grantPermissionSetsResponseSuccess;
+
+export const getGrantPermissionSetsUrl = (employeeCode: string) => {
+  return `/api/employees/grantPermissions/${employeeCode}`;
+};
+
+export const grantPermissionSets = async (
+  employeeCode: string,
+  grantPermissionSetsBody: string[],
+  options?: Parameters<typeof customFetch>[1],
+): Promise<grantPermissionSetsResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<grantPermissionSetsResponse>(
+    getGrantPermissionSetsUrl(employeeCode),
+    {
+      ...options,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(grantPermissionSetsBody),
+    },
+  );
+};
+
+export const getGrantPermissionSetsMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof grantPermissionSets>>,
+    TError,
+    GrantPermissionSetsMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof grantPermissionSets>>,
+  TError,
+  GrantPermissionSetsMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["grantPermissionSets"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof grantPermissionSets>>,
+    GrantPermissionSetsMutationVariables
+  > = (props) => {
+    const { employeeCode, data } = props ?? {};
+
+    return grantPermissionSets(employeeCode, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GrantPermissionSetsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof grantPermissionSets>>
+>;
+export type GrantPermissionSetsMutationBody = string[];
+export type GrantPermissionSetsMutationError = unknown;
+export type GrantPermissionSetsMutationVariables = {
+  employeeCode: string;
+  data: string[];
+};
+
+export const useGrantPermissionSets = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof grantPermissionSets>>,
+      TError,
+      GrantPermissionSetsMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof grantPermissionSets>>,
+  TError,
+  GrantPermissionSetsMutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getGrantPermissionSetsMutationOptions(options),
+    queryClient,
+  );
+};
+export type grantEstatesResponse200 = {
+  data: string;
+  status: 200;
+};
+
+export type grantEstatesResponseSuccess = grantEstatesResponse200 & {
+  headers: Headers;
+};
+export type grantEstatesResponse = grantEstatesResponseSuccess;
+
+export const getGrantEstatesUrl = (employeeCode: string) => {
+  return `/api/employees/grantEstates/${employeeCode}`;
+};
+
+export const grantEstates = async (
+  employeeCode: string,
+  grantEstatesBody: string[],
+  options?: Parameters<typeof customFetch>[1],
+): Promise<grantEstatesResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<grantEstatesResponse>(getGrantEstatesUrl(employeeCode), {
+    ...options,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(grantEstatesBody),
+  });
+};
+
+export const getGrantEstatesMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof grantEstates>>,
+    TError,
+    GrantEstatesMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof grantEstates>>,
+  TError,
+  GrantEstatesMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["grantEstates"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof grantEstates>>,
+    GrantEstatesMutationVariables
+  > = (props) => {
+    const { employeeCode, data } = props ?? {};
+
+    return grantEstates(employeeCode, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GrantEstatesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof grantEstates>>
+>;
+export type GrantEstatesMutationBody = string[];
+export type GrantEstatesMutationError = unknown;
+export type GrantEstatesMutationVariables = {
+  employeeCode: string;
+  data: string[];
+};
+
+export const useGrantEstates = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof grantEstates>>,
+      TError,
+      GrantEstatesMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof grantEstates>>,
+  TError,
+  GrantEstatesMutationVariables,
+  TContext
+> => {
+  return useMutation(getGrantEstatesMutationOptions(options), queryClient);
+};
+export type getUnassignedPermissionSetsResponse200 = {
+  data: PermissionSetDto[];
+  status: 200;
+};
+
+export type getUnassignedPermissionSetsResponseSuccess =
+  getUnassignedPermissionSetsResponse200 & {
+    headers: Headers;
+  };
+export type getUnassignedPermissionSetsResponse =
+  getUnassignedPermissionSetsResponseSuccess;
+
+export const getGetUnassignedPermissionSetsUrl = (
+  employeeCode: string,
+  params?: GetUnassignedPermissionSetsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/employees/unassignedPermissions/${employeeCode}?${stringifiedParams}`
+    : `/api/employees/unassignedPermissions/${employeeCode}`;
+};
+
+export const getUnassignedPermissionSets = async (
+  employeeCode: string,
+  params?: GetUnassignedPermissionSetsParams,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getUnassignedPermissionSetsResponse> => {
+  return customFetch<getUnassignedPermissionSetsResponse>(
+    getGetUnassignedPermissionSetsUrl(employeeCode, params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetUnassignedPermissionSetsQueryKey = (
+  employeeCode: string,
+  params?: GetUnassignedPermissionSetsParams,
+) => {
+  return [
+    `/api/employees/unassignedPermissions/${employeeCode}`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetUnassignedPermissionSetsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  params?: GetUnassignedPermissionSetsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetUnassignedPermissionSetsQueryKey(employeeCode, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getUnassignedPermissionSets>>
+  > = ({ signal }) =>
+    getUnassignedPermissionSets(employeeCode, params, {
+      signal,
+      ...requestOptions,
+    });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: employeeCode !== null && employeeCode !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetUnassignedPermissionSetsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getUnassignedPermissionSets>>
+>;
+export type GetUnassignedPermissionSetsQueryError = unknown;
+
+export function useGetUnassignedPermissionSets<
+  TData = Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  params: undefined | GetUnassignedPermissionSetsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+          TError,
+          Awaited<ReturnType<typeof getUnassignedPermissionSets>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUnassignedPermissionSets<
+  TData = Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  params?: GetUnassignedPermissionSetsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+          TError,
+          Awaited<ReturnType<typeof getUnassignedPermissionSets>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUnassignedPermissionSets<
+  TData = Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  params?: GetUnassignedPermissionSetsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetUnassignedPermissionSets<
+  TData = Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  params?: GetUnassignedPermissionSetsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetUnassignedPermissionSetsQueryOptions(
+    employeeCode,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type getUnassignedEstatesResponse200 = {
+  data: EstateDto[];
+  status: 200;
+};
+
+export type getUnassignedEstatesResponseSuccess =
+  getUnassignedEstatesResponse200 & {
+    headers: Headers;
+  };
+export type getUnassignedEstatesResponse = getUnassignedEstatesResponseSuccess;
+
+export const getGetUnassignedEstatesUrl = (
+  employeeCode: string,
+  params?: GetUnassignedEstatesParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/employees/unassignedEstates/${employeeCode}?${stringifiedParams}`
+    : `/api/employees/unassignedEstates/${employeeCode}`;
+};
+
+export const getUnassignedEstates = async (
+  employeeCode: string,
+  params?: GetUnassignedEstatesParams,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getUnassignedEstatesResponse> => {
+  return customFetch<getUnassignedEstatesResponse>(
+    getGetUnassignedEstatesUrl(employeeCode, params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetUnassignedEstatesQueryKey = (
+  employeeCode: string,
+  params?: GetUnassignedEstatesParams,
+) => {
+  return [
+    `/api/employees/unassignedEstates/${employeeCode}`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetUnassignedEstatesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getUnassignedEstates>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  params?: GetUnassignedEstatesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedEstates>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetUnassignedEstatesQueryKey(employeeCode, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getUnassignedEstates>>
+  > = ({ signal }) =>
+    getUnassignedEstates(employeeCode, params, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: employeeCode !== null && employeeCode !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getUnassignedEstates>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetUnassignedEstatesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getUnassignedEstates>>
+>;
+export type GetUnassignedEstatesQueryError = unknown;
+
+export function useGetUnassignedEstates<
+  TData = Awaited<ReturnType<typeof getUnassignedEstates>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  params: undefined | GetUnassignedEstatesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedEstates>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUnassignedEstates>>,
+          TError,
+          Awaited<ReturnType<typeof getUnassignedEstates>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUnassignedEstates<
+  TData = Awaited<ReturnType<typeof getUnassignedEstates>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  params?: GetUnassignedEstatesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedEstates>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUnassignedEstates>>,
+          TError,
+          Awaited<ReturnType<typeof getUnassignedEstates>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUnassignedEstates<
+  TData = Awaited<ReturnType<typeof getUnassignedEstates>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  params?: GetUnassignedEstatesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedEstates>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetUnassignedEstates<
+  TData = Awaited<ReturnType<typeof getUnassignedEstates>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  params?: GetUnassignedEstatesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedEstates>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetUnassignedEstatesQueryOptions(
+    employeeCode,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 export type getPermissionSetsResponse200 = {
   data: PermissionSetDto[];
   status: 200;

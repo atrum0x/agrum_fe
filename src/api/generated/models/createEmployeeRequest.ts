@@ -18,6 +18,7 @@ export interface CreateEmployeeRequest {
   employeeCategory?: string;
   employmentStatus?: CreateEmployeeRequestEmploymentStatus;
   startDate?: string;
+  endDate?: string;
   defaultEstateId?: string;
   homeEstateId?: string;
   division?: string;

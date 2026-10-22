@@ -5,12 +5,10 @@
  * Powered By Atrum
  * OpenAPI spec version: 1.0.0
  */
-import type { Projection } from "./projection";
 
 export interface PermissionSet {
   id?: string;
   description?: string;
-  projections?: Projection[];
   modified?: string;
   modifiedBy?: string;
 }

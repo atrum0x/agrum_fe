@@ -40,6 +40,8 @@ import {
 } from "@/api/generated/endpoints/permission-controller/permission-controller"
 import type { AppUserDto, PermissionSetDto, ProjectionDto } from "@/api/generated/models"
 import { useQueryClient } from "@tanstack/react-query"
+import { ButtonGroup } from "@/components/ui/button-group"
+import { PermissionSetFormCard } from "@/components/permission-set-form-card"
 
 import {
     columnFilteringFeature,
@@ -177,6 +179,8 @@ export const PermissionSets = () => {
     const [selectedGrantedUsernames, setSelectedGrantedUsernames] = React.useState<string[]>([])
     const [selectedUnassignedUsernames, setSelectedUnassignedUsernames] = React.useState<string[]>([])
     const [view, setView] = React.useState("Granted")
+    const [permissionSetForm, setPermissionSetForm] = React.useState<"new" | "edit" | null>(null)
+    const closePermissionSetForm = React.useCallback(() => setPermissionSetForm(null), [])
     const { mutate: grantUsers, isPending: isGrantingUsers } = useGrantPermissionSetToUser()
     const { mutate: revokeUsers, isPending: isRevokingUsers } = useRevokePermissionSetToUser()
     const { mutate: grantProjections, isPending: isGranting } = useGrantProjectionsToPermissionSet()
@@ -424,6 +428,25 @@ export const PermissionSets = () => {
                     </Button>
                 </div>
 
+                <ButtonGroup className="px-4 lg:px-6 mb-2">
+                    <Button variant="outline" size="lg" disabled={!selectedPermissionSet} onClick={() => setPermissionSetForm("edit")}>
+                        Edit
+                    </Button>
+                    <Button variant="outline" size="lg" onClick={() => setPermissionSetForm("new")}>
+                        New Permission Set
+                    </Button>
+                </ButtonGroup>
+                {permissionSetForm && (
+                    <PermissionSetFormCard
+                        permissionSet={permissionSetForm === "edit" ? selectedPermissionSet : undefined}
+                        onClose={closePermissionSetForm}
+                        onSaved={(permissionSetId) => {
+                            setSelectedItemId(permissionSetId)
+                            setPagination((current) => ({ ...current, pageIndex: 0 }))
+                        }}
+                    />
+                )}
+
                 <div className="flex flex-col gap-6 pt-0 px-4 lg:px-6 shrink-0">
                     <div className="grid auto-rows-min gap-4 sm:grid-cols-2 md:grid-cols-6 rounded-xl bg-muted/50 p-4 ">
                         <div className="relative min-w-0 group">
@@ -522,7 +545,7 @@ export const PermissionSets = () => {
                             value="Users"
                             className="flex flex-col gap-4 px-4 lg:px-6 pb-8 outline-none"
                         >
-                            <div className="flex items-center justify-between gap-4">
+                            <div className="flex items-center gap-4">
                                 <Input
                                     type="search"
                                     placeholder="Search users"
@@ -535,7 +558,7 @@ export const PermissionSets = () => {
                                     <SheetTrigger
                                         render={<Button type="button" variant="outline" />}
                                     >
-                                        Unassigned users
+                                        Assign Users
                                     </SheetTrigger>
                                     <SheetContent side="right">
                                         <SheetHeader>

@@ -21,7 +21,14 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { Estate } from "../../models";
+import type {
+  CreateEstateRequest,
+  EmployeeDto,
+  Estate,
+  GetGrantedUsersParams,
+  GetUnassignedUsersParams,
+  UpdateEstateRequest,
+} from "../../models";
 
 import { customFetch } from "../../../custom-fetch";
 
@@ -45,6 +52,111 @@ const withQueryKey = <T extends object, K>(
   return result;
 };
 
+export type updateEstateResponse200 = {
+  data: Estate;
+  status: 200;
+};
+
+export type updateEstateResponseSuccess = updateEstateResponse200 & {
+  headers: Headers;
+};
+export type updateEstateResponse = updateEstateResponseSuccess;
+
+export const getUpdateEstateUrl = (estateId: string) => {
+  return `/api/estates/${estateId}`;
+};
+
+export const updateEstate = async (
+  estateId: string,
+  updateEstateRequest: UpdateEstateRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<updateEstateResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<updateEstateResponse>(getUpdateEstateUrl(estateId), {
+    ...options,
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(updateEstateRequest),
+  });
+};
+
+export const getUpdateEstateMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateEstate>>,
+    TError,
+    UpdateEstateMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateEstate>>,
+  TError,
+  UpdateEstateMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["updateEstate"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateEstate>>,
+    UpdateEstateMutationVariables
+  > = (props) => {
+    const { estateId, data } = props ?? {};
+
+    return updateEstate(estateId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateEstateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateEstate>>
+>;
+export type UpdateEstateMutationBody = UpdateEstateRequest;
+export type UpdateEstateMutationError = unknown;
+export type UpdateEstateMutationVariables = {
+  estateId: string;
+  data: UpdateEstateRequest;
+};
+
+export const useUpdateEstate = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateEstate>>,
+      TError,
+      UpdateEstateMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateEstate>>,
+  TError,
+  UpdateEstateMutationVariables,
+  TContext
+> => {
+  return useMutation(getUpdateEstateMutationOptions(options), queryClient);
+};
 export type assignEstatesToUserResponse200 = {
   data: string;
   status: 200;
@@ -311,7 +423,7 @@ export const getCreateEstateUrl = () => {
 };
 
 export const createEstate = async (
-  estate: Estate,
+  createEstateRequest: CreateEstateRequest,
   options?: Parameters<typeof customFetch>[1],
 ): Promise<createEstateResponse> => {
   const getHeaders = (
@@ -329,7 +441,7 @@ export const createEstate = async (
       "Content-Type": "application/json",
       ...getHeaders(options?.headers),
     },
-    body: JSON.stringify(estate),
+    body: JSON.stringify(createEstateRequest),
   });
 };
 
@@ -374,9 +486,9 @@ export const getCreateEstateMutationOptions = <
 export type CreateEstateMutationResult = NonNullable<
   Awaited<ReturnType<typeof createEstate>>
 >;
-export type CreateEstateMutationBody = Estate;
+export type CreateEstateMutationBody = CreateEstateRequest;
 export type CreateEstateMutationError = unknown;
-export type CreateEstateMutationVariables = { data: Estate };
+export type CreateEstateMutationVariables = { data: CreateEstateRequest };
 
 export const useCreateEstate = <TError = unknown, TContext = unknown>(
   options?: {
@@ -397,3 +509,622 @@ export const useCreateEstate = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(getCreateEstateMutationOptions(options), queryClient);
 };
+export type revokeUsersResponse200 = {
+  data: string;
+  status: 200;
+};
+
+export type revokeUsersResponseSuccess = revokeUsersResponse200 & {
+  headers: Headers;
+};
+export type revokeUsersResponse = revokeUsersResponseSuccess;
+
+export const getRevokeUsersUrl = (estateId: string) => {
+  return `/api/estates/${estateId}/granted-users/revoke`;
+};
+
+export const revokeUsers = async (
+  estateId: string,
+  revokeUsersBody: string[],
+  options?: Parameters<typeof customFetch>[1],
+): Promise<revokeUsersResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<revokeUsersResponse>(getRevokeUsersUrl(estateId), {
+    ...options,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(revokeUsersBody),
+  });
+};
+
+export const getRevokeUsersMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof revokeUsers>>,
+    TError,
+    RevokeUsersMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof revokeUsers>>,
+  TError,
+  RevokeUsersMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["revokeUsers"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof revokeUsers>>,
+    RevokeUsersMutationVariables
+  > = (props) => {
+    const { estateId, data } = props ?? {};
+
+    return revokeUsers(estateId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RevokeUsersMutationResult = NonNullable<
+  Awaited<ReturnType<typeof revokeUsers>>
+>;
+export type RevokeUsersMutationBody = string[];
+export type RevokeUsersMutationError = unknown;
+export type RevokeUsersMutationVariables = { estateId: string; data: string[] };
+
+export const useRevokeUsers = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof revokeUsers>>,
+      TError,
+      RevokeUsersMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof revokeUsers>>,
+  TError,
+  RevokeUsersMutationVariables,
+  TContext
+> => {
+  return useMutation(getRevokeUsersMutationOptions(options), queryClient);
+};
+export type grantUsersResponse200 = {
+  data: string;
+  status: 200;
+};
+
+export type grantUsersResponseSuccess = grantUsersResponse200 & {
+  headers: Headers;
+};
+export type grantUsersResponse = grantUsersResponseSuccess;
+
+export const getGrantUsersUrl = (estateId: string) => {
+  return `/api/estates/${estateId}/granted-users/grant`;
+};
+
+export const grantUsers = async (
+  estateId: string,
+  grantUsersBody: string[],
+  options?: Parameters<typeof customFetch>[1],
+): Promise<grantUsersResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<grantUsersResponse>(getGrantUsersUrl(estateId), {
+    ...options,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(grantUsersBody),
+  });
+};
+
+export const getGrantUsersMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof grantUsers>>,
+    TError,
+    GrantUsersMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof grantUsers>>,
+  TError,
+  GrantUsersMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["grantUsers"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof grantUsers>>,
+    GrantUsersMutationVariables
+  > = (props) => {
+    const { estateId, data } = props ?? {};
+
+    return grantUsers(estateId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GrantUsersMutationResult = NonNullable<
+  Awaited<ReturnType<typeof grantUsers>>
+>;
+export type GrantUsersMutationBody = string[];
+export type GrantUsersMutationError = unknown;
+export type GrantUsersMutationVariables = { estateId: string; data: string[] };
+
+export const useGrantUsers = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof grantUsers>>,
+      TError,
+      GrantUsersMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof grantUsers>>,
+  TError,
+  GrantUsersMutationVariables,
+  TContext
+> => {
+  return useMutation(getGrantUsersMutationOptions(options), queryClient);
+};
+export type getUnassignedUsersResponse200 = {
+  data: EmployeeDto[];
+  status: 200;
+};
+
+export type getUnassignedUsersResponseSuccess =
+  getUnassignedUsersResponse200 & {
+    headers: Headers;
+  };
+export type getUnassignedUsersResponse = getUnassignedUsersResponseSuccess;
+
+export const getGetUnassignedUsersUrl = (
+  estateId: string,
+  params?: GetUnassignedUsersParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/estates/${estateId}/unassigned-users?${stringifiedParams}`
+    : `/api/estates/${estateId}/unassigned-users`;
+};
+
+export const getUnassignedUsers = async (
+  estateId: string,
+  params?: GetUnassignedUsersParams,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getUnassignedUsersResponse> => {
+  return customFetch<getUnassignedUsersResponse>(
+    getGetUnassignedUsersUrl(estateId, params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetUnassignedUsersQueryKey = (
+  estateId: string,
+  params?: GetUnassignedUsersParams,
+) => {
+  return [
+    `/api/estates/${estateId}/unassigned-users`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetUnassignedUsersQueryOptions = <
+  TData = Awaited<ReturnType<typeof getUnassignedUsers>>,
+  TError = unknown,
+>(
+  estateId: string,
+  params?: GetUnassignedUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedUsers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetUnassignedUsersQueryKey(estateId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getUnassignedUsers>>
+  > = ({ signal }) =>
+    getUnassignedUsers(estateId, params, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: estateId !== null && estateId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getUnassignedUsers>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetUnassignedUsersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getUnassignedUsers>>
+>;
+export type GetUnassignedUsersQueryError = unknown;
+
+export function useGetUnassignedUsers<
+  TData = Awaited<ReturnType<typeof getUnassignedUsers>>,
+  TError = unknown,
+>(
+  estateId: string,
+  params: undefined | GetUnassignedUsersParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedUsers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUnassignedUsers>>,
+          TError,
+          Awaited<ReturnType<typeof getUnassignedUsers>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUnassignedUsers<
+  TData = Awaited<ReturnType<typeof getUnassignedUsers>>,
+  TError = unknown,
+>(
+  estateId: string,
+  params?: GetUnassignedUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedUsers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getUnassignedUsers>>,
+          TError,
+          Awaited<ReturnType<typeof getUnassignedUsers>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetUnassignedUsers<
+  TData = Awaited<ReturnType<typeof getUnassignedUsers>>,
+  TError = unknown,
+>(
+  estateId: string,
+  params?: GetUnassignedUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedUsers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetUnassignedUsers<
+  TData = Awaited<ReturnType<typeof getUnassignedUsers>>,
+  TError = unknown,
+>(
+  estateId: string,
+  params?: GetUnassignedUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getUnassignedUsers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetUnassignedUsersQueryOptions(
+    estateId,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type getGrantedUsersResponse200 = {
+  data: EmployeeDto[];
+  status: 200;
+};
+
+export type getGrantedUsersResponseSuccess = getGrantedUsersResponse200 & {
+  headers: Headers;
+};
+export type getGrantedUsersResponse = getGrantedUsersResponseSuccess;
+
+export const getGetGrantedUsersUrl = (
+  estateId: string,
+  params?: GetGrantedUsersParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/estates/${estateId}/granted-users?${stringifiedParams}`
+    : `/api/estates/${estateId}/granted-users`;
+};
+
+export const getGrantedUsers = async (
+  estateId: string,
+  params?: GetGrantedUsersParams,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getGrantedUsersResponse> => {
+  return customFetch<getGrantedUsersResponse>(
+    getGetGrantedUsersUrl(estateId, params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetGrantedUsersQueryKey = (
+  estateId: string,
+  params?: GetGrantedUsersParams,
+) => {
+  return [
+    `/api/estates/${estateId}/granted-users`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetGrantedUsersQueryOptions = <
+  TData = Awaited<ReturnType<typeof getGrantedUsers>>,
+  TError = unknown,
+>(
+  estateId: string,
+  params?: GetGrantedUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getGrantedUsers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetGrantedUsersQueryKey(estateId, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getGrantedUsers>>> = ({
+    signal,
+  }) => getGrantedUsers(estateId, params, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: estateId !== null && estateId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getGrantedUsers>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetGrantedUsersQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getGrantedUsers>>
+>;
+export type GetGrantedUsersQueryError = unknown;
+
+export function useGetGrantedUsers<
+  TData = Awaited<ReturnType<typeof getGrantedUsers>>,
+  TError = unknown,
+>(
+  estateId: string,
+  params: undefined | GetGrantedUsersParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getGrantedUsers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getGrantedUsers>>,
+          TError,
+          Awaited<ReturnType<typeof getGrantedUsers>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetGrantedUsers<
+  TData = Awaited<ReturnType<typeof getGrantedUsers>>,
+  TError = unknown,
+>(
+  estateId: string,
+  params?: GetGrantedUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getGrantedUsers>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getGrantedUsers>>,
+          TError,
+          Awaited<ReturnType<typeof getGrantedUsers>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetGrantedUsers<
+  TData = Awaited<ReturnType<typeof getGrantedUsers>>,
+  TError = unknown,
+>(
+  estateId: string,
+  params?: GetGrantedUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getGrantedUsers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetGrantedUsers<
+  TData = Awaited<ReturnType<typeof getGrantedUsers>>,
+  TError = unknown,
+>(
+  estateId: string,
+  params?: GetGrantedUsersParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getGrantedUsers>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetGrantedUsersQueryOptions(
+    estateId,
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}

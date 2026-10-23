@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext";
 import { PermissionSets } from "./pages/PermissionSets";
+import { Estates } from "./pages/Estates";
 
 
 const queryClient = new QueryClient({
@@ -43,6 +44,7 @@ const router = createBrowserRouter([
               { path: "landing", element: <Landing /> },
               { path: "users", element: <Users /> },
               { path: "permission-sets", element: <PermissionSets /> },
+              { path: "sites", element: <Estates /> },
             ],
           },
         ],

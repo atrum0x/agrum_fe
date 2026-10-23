@@ -9,5 +9,10 @@
 export interface Estate {
   id?: string;
   name?: string;
+  address?: string;
   active?: boolean;
+  fullDayQtyKg?: number;
+  halfDayQtyKg?: number;
+  maxDailyTransactions?: number;
+  variancePercent?: number;
 }

@@ -12,8 +12,9 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getGetAllEmployeesQueryKey, useCreate1, useUpdate } from "@/api/generated/endpoints/employee-controller/employee-controller"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
+import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
 import { CreateEmployeeRequestEmploymentStatus } from "@/api/generated/models"
-import type { CreateEmployeeRequest, EmployeeDto, Estate, UpdateEmployeeRequest } from "@/api/generated/models"
+import type { CollectionPointDto, CreateEmployeeRequest, EmployeeDto, Estate, UpdateEmployeeRequest } from "@/api/generated/models"
 
 const emptyForm: CreateEmployeeRequest = {
     employeeCode: "",
@@ -28,6 +29,7 @@ const emptyForm: CreateEmployeeRequest = {
     endDate: "",
     homeEstateId: "",
     defaultEstateId: "",
+    defaultCollectionPointCode: "",
     isUserAccount: false,
     password: "",
 }
@@ -49,6 +51,7 @@ const toForm = (employee: EmployeeDto): CreateEmployeeRequest => ({
     endDate: employee.endDate ?? "",
     homeEstateId: employee.homeEstateId ?? "",
     defaultEstateId: employee.defaultEstateId ?? "",
+    defaultCollectionPointCode: employee.defaultCollectionPointCode ?? "",
     division: employee.division,
     field: employee.field,
 })
@@ -95,6 +98,21 @@ export const EmployeeFormCard = ({
         }
         return []
     }, [estatesResponse])
+    // The default collection point must belong to the default site
+    const defaultEstateId = form.defaultEstateId ?? ""
+    const { data: collectionPointsResponse } = useGetCollectionPoints(
+        defaultEstateId,
+        { search: "" },
+        { query: { enabled: Boolean(defaultEstateId) } },
+    )
+    const collectionPoints = React.useMemo<CollectionPointDto[]>(() => {
+        const response = collectionPointsResponse as unknown
+        if (Array.isArray(response)) return response as CollectionPointDto[]
+        if (response && typeof response === "object" && "data" in response) {
+            return Array.isArray(response.data) ? response.data as CollectionPointDto[] : []
+        }
+        return []
+    }, [collectionPointsResponse])
 
     React.useEffect(() => {
         // Let Escape close the date picker first instead of the whole card
@@ -135,6 +153,7 @@ export const EmployeeFormCard = ({
                 startDate: data.startDate,
                 endDate: data.endDate,
                 defaultEstateId: data.defaultEstateId,
+                defaultCollectionPointCode: data.defaultCollectionPointCode,
                 homeEstateId: data.homeEstateId,
                 division: data.division,
                 field: data.field,
@@ -257,7 +276,17 @@ export const EmployeeFormCard = ({
                             ] as const).map(([key, label]) => (
                                 <Field key={key}>
                                     <FieldLabel htmlFor={`employee-form-${key}`} className="text-muted-foreground">{label}</FieldLabel>
-                                    <Select value={form[key] || null} onValueChange={(value) => setField(key, value ?? "")}>
+                                    <Select
+                                        value={form[key] || null}
+                                        onValueChange={(value) => setForm((current) => ({
+                                            ...current,
+                                            [key]: value ?? "",
+                                            // A collection point from the previous default site no longer applies
+                                            ...(key === "defaultEstateId" && value !== current.defaultEstateId
+                                                ? { defaultCollectionPointCode: "" }
+                                                : {}),
+                                        }))}
+                                    >
                                         <SelectTrigger id={`employee-form-${key}`} className="w-full bg-background">
                                             <SelectValue placeholder="Select a site">
                                                 {(value: string | null) => value ? estateLabel(value) : "Select a site"}
@@ -273,6 +302,31 @@ export const EmployeeFormCard = ({
                                     </Select>
                                 </Field>
                             ))}
+                            <Field>
+                                <FieldLabel htmlFor="employee-form-defaultCollectionPointCode" className="text-muted-foreground">
+                                    Default Collection Point
+                                </FieldLabel>
+                                <Select
+                                    value={form.defaultCollectionPointCode || null}
+                                    onValueChange={(value) => setField("defaultCollectionPointCode", value ?? "")}
+                                    disabled={!defaultEstateId}
+                                >
+                                    <SelectTrigger id="employee-form-defaultCollectionPointCode" className="w-full bg-background">
+                                        <SelectValue>
+                                            {(value: string | null) => value
+                                                ? collectionPoints.find((point) => point.cpCode === value)?.name ?? value
+                                                : defaultEstateId ? "Select a collection point" : "Select a default site first"}
+                                        </SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {collectionPoints.map((point) => (
+                                            <SelectItem key={point.cpCode} value={point.cpCode ?? ""}>
+                                                {point.name ?? point.cpCode}{point.isDefault && " (site default)"}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </Field>
                         </div>
 
                         {!isEdit && (

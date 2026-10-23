@@ -33,18 +33,19 @@ const navData: NavItem[] = [
     title: "Users and Permissions",
     items: [
       { title: "Users", url: "/users" },
-      {title: "Permissions",
-       items: [
-        { title: "Permission Sets", url: "/permission-sets" },
-       ]
-      }
+      {title: "Permission Sets", url: "/permission-sets" },
     ],
   },
   {
     title: "Sites",
     items: [
       { title: "Sites", url: "/sites" },
-      { title: "Sites Per User", url: "/sites-per-user" },
+    ],
+  },
+  {
+    title: "Attendance Management",
+    items: [
+      { title: "Attendance", url: "/attendance" },
     ],
   },
 ];

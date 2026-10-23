@@ -325,6 +325,10 @@ export const Users = () => {
                             <TruncatedCell value={selectedEmployee?.defaultEstateId ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
+                            <p className="text-sm text-muted-foreground">Default Collection Point</p>
+                            <TruncatedCell value={selectedEmployee?.defaultCollectionPointCode ?? "-"} />
+                        </div>
+                        <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Has User Account</p>
                             <Badge className={selectedEmployee?.hasUserAccount
                                 ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"

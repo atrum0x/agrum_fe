@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { LovSelect } from "@/components/lov-select"
 import { getGetAllEstatesQueryKey, useCreateEstate, useUpdateEstate } from "@/api/generated/endpoints/estate-controller/estate-controller"
 import type { Estate } from "@/api/generated/models"
 
@@ -153,18 +153,15 @@ export const EstateFormCard = ({
                             </Field>
                             <Field>
                                 <FieldLabel htmlFor="estate-form-status" className="text-muted-foreground">Status *</FieldLabel>
-                                <Select
+                                <LovSelect
+                                    id="estate-form-status"
                                     value={form.active ? "ACTIVE" : "INACTIVE"}
                                     onValueChange={(value) => value && setField("active", value === "ACTIVE")}
-                                >
-                                    <SelectTrigger id="estate-form-status" className="w-full bg-background">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="ACTIVE">ACTIVE</SelectItem>
-                                        <SelectItem value="INACTIVE">INACTIVE</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                    options={[
+                                        { value: "ACTIVE", label: "ACTIVE" },
+                                        { value: "INACTIVE", label: "INACTIVE" },
+                                    ]}
+                                />
                             </Field>
                             {numberFields.map(({ key, label, step }) => (
                                 <Field key={key}>

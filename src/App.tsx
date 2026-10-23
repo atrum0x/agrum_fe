@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext";
 import { PermissionSets } from "./pages/PermissionSets";
 import { Estates } from "./pages/Estates";
+import { Attendance } from "./pages/Attendance";
 
 
 const queryClient = new QueryClient({
@@ -45,6 +46,7 @@ const router = createBrowserRouter([
               { path: "users", element: <Users /> },
               { path: "permission-sets", element: <PermissionSets /> },
               { path: "sites", element: <Estates /> },
+              { path: "attendance", element: <Attendance /> },
             ],
           },
         ],

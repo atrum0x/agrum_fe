@@ -1,6 +1,7 @@
 import { LoginForm } from "../components/login-form";
 import { GalleryVerticalEnd } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle";
+import loginImage from "@/assets/login.webp";
 
 export default function Login() {
   return (
@@ -26,9 +27,9 @@ export default function Login() {
       </div>
       <div className="relative hidden bg-muted lg:block">
         <img
-          src="/placeholder.svg"
+          src={loginImage}
           alt="Image"
-          className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
+          className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
     </div>

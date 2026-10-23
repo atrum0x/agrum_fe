@@ -9,7 +9,8 @@ import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader,
 import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { LovSelect, type LovOption } from "@/components/lov-select"
+import { estateOptions } from "@/lib/lov-options"
 import { getGetAllEmployeesQueryKey, useCreate1, useUpdate } from "@/api/generated/endpoints/employee-controller/employee-controller"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
 import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
@@ -55,6 +56,9 @@ const toForm = (employee: EmployeeDto): CreateEmployeeRequest => ({
     division: employee.division,
     field: employee.field,
 })
+
+const statusOptions: LovOption<CreateEmployeeRequestEmploymentStatus>[] =
+    Object.values(CreateEmployeeRequestEmploymentStatus).map((status) => ({ value: status, label: status }))
 
 type DateField = "startDate" | "endDate"
 
@@ -165,8 +169,6 @@ export const EmployeeFormCard = ({
         createEmployee({ data }, { onSuccess })
     }
 
-    const estateLabel = (id?: string) => estates.find((estate) => estate.id === id)?.name ?? id
-
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
@@ -211,19 +213,12 @@ export const EmployeeFormCard = ({
                             ))}
                             <Field>
                                 <FieldLabel htmlFor="employee-form-status" className="text-muted-foreground">Status</FieldLabel>
-                                <Select
-                                    value={form.employmentStatus}
-                                    onValueChange={(value) => value && setField("employmentStatus", value as CreateEmployeeRequest["employmentStatus"])}
-                                >
-                                    <SelectTrigger id="employee-form-status" className="w-full bg-background">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {Object.values(CreateEmployeeRequestEmploymentStatus).map((status) => (
-                                            <SelectItem key={status} value={status}>{status}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                <LovSelect
+                                    id="employee-form-status"
+                                    value={form.employmentStatus ?? ""}
+                                    onValueChange={(value) => value && setField("employmentStatus", value)}
+                                    options={statusOptions}
+                                />
                             </Field>
                             {([
                                 ["startDate", "Start Date"],
@@ -276,56 +271,40 @@ export const EmployeeFormCard = ({
                             ] as const).map(([key, label]) => (
                                 <Field key={key}>
                                     <FieldLabel htmlFor={`employee-form-${key}`} className="text-muted-foreground">{label}</FieldLabel>
-                                    <Select
-                                        value={form[key] || null}
+                                    <LovSelect
+                                        id={`employee-form-${key}`}
+                                        value={form[key] ?? ""}
                                         onValueChange={(value) => setForm((current) => ({
                                             ...current,
-                                            [key]: value ?? "",
+                                            [key]: value,
                                             // A collection point from the previous default site no longer applies
                                             ...(key === "defaultEstateId" && value !== current.defaultEstateId
                                                 ? { defaultCollectionPointCode: "" }
                                                 : {}),
                                         }))}
-                                    >
-                                        <SelectTrigger id={`employee-form-${key}`} className="w-full bg-background">
-                                            <SelectValue placeholder="Select a site">
-                                                {(value: string | null) => value ? estateLabel(value) : "Select a site"}
-                                            </SelectValue>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {estates.map((estate) => (
-                                                <SelectItem key={estate.id} value={estate.id ?? ""}>
-                                                    {estate.name ?? estate.id}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                        options={estateOptions(estates)}
+                                        placeholder="Select a site"
+                                    />
                                 </Field>
                             ))}
                             <Field>
                                 <FieldLabel htmlFor="employee-form-defaultCollectionPointCode" className="text-muted-foreground">
                                     Default Collection Point
                                 </FieldLabel>
-                                <Select
-                                    value={form.defaultCollectionPointCode || null}
-                                    onValueChange={(value) => setField("defaultCollectionPointCode", value ?? "")}
+                                <LovSelect
+                                    id="employee-form-defaultCollectionPointCode"
+                                    value={form.defaultCollectionPointCode ?? ""}
+                                    onValueChange={(value) => setField("defaultCollectionPointCode", value)}
+                                    options={collectionPoints
+                                        .filter((point) => point.cpCode)
+                                        .map((point) => ({
+                                            value: point.cpCode!,
+                                            label: point.name ?? point.cpCode!,
+                                            hint: point.isDefault ? " (site default)" : undefined,
+                                        }))}
+                                    placeholder={defaultEstateId ? "Select a collection point" : "Select a default site first"}
                                     disabled={!defaultEstateId}
-                                >
-                                    <SelectTrigger id="employee-form-defaultCollectionPointCode" className="w-full bg-background">
-                                        <SelectValue>
-                                            {(value: string | null) => value
-                                                ? collectionPoints.find((point) => point.cpCode === value)?.name ?? value
-                                                : defaultEstateId ? "Select a collection point" : "Select a default site first"}
-                                        </SelectValue>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {collectionPoints.map((point) => (
-                                            <SelectItem key={point.cpCode} value={point.cpCode ?? ""}>
-                                                {point.name ?? point.cpCode}{point.isDefault && " (site default)"}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
+                                />
                             </Field>
                         </div>
 

@@ -30,10 +30,9 @@ export type NavItem = {
 
 const navData: NavItem[] = [
   {
-    title: "Users and Permissions",
+    title: "Attendance Management",
     items: [
-      { title: "Users", url: "/users" },
-      {title: "Permission Sets", url: "/permission-sets" },
+      { title: "Attendance", url: "/attendance" },
     ],
   },
   {
@@ -43,9 +42,10 @@ const navData: NavItem[] = [
     ],
   },
   {
-    title: "Attendance Management",
+    title: "Users and Permissions",
     items: [
-      { title: "Attendance", url: "/attendance" },
+      { title: "Users", url: "/users" },
+      {title: "Permission Sets", url: "/permission-sets" },
     ],
   },
 ];

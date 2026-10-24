@@ -69,6 +69,9 @@ export const getUpdateCollectionPointUrl = (
   return `/api/estates/${estateId}/collection-points/${cpCode}`;
 };
 
+/**
+ * @summary Change a collection point
+ */
 export const updateCollectionPoint = async (
   estateId: string,
   cpCode: string,
@@ -146,6 +149,9 @@ export type UpdateCollectionPointMutationVariables = {
   data: UpdateCollectionPointRequest;
 };
 
+/**
+ * @summary Change a collection point
+ */
 export const useUpdateCollectionPoint = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -187,6 +193,9 @@ export const getSetDefaultCollectionPointUrl = (
   return `/api/estates/${estateId}/collection-points/${cpCode}/default`;
 };
 
+/**
+ * @summary Set a site's default collection point
+ */
 export const setDefaultCollectionPoint = async (
   estateId: string,
   cpCode: string,
@@ -249,6 +258,9 @@ export type SetDefaultCollectionPointMutationVariables = {
   cpCode: string;
 };
 
+/**
+ * @summary Set a site's default collection point
+ */
 export const useSetDefaultCollectionPoint = <
   TError = unknown,
   TContext = unknown,
@@ -304,6 +316,9 @@ export const getGetCollectionPointsUrl = (
     : `/api/estates/${estateId}/collection-points`;
 };
 
+/**
+ * @summary List a site's collection points. Needed by anyone who records attendance or edits sites
+ */
 export const getCollectionPoints = async (
   estateId: string,
   params?: GetCollectionPointsParams,
@@ -448,6 +463,9 @@ export function useGetCollectionPoints<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List a site's collection points. Needed by anyone who records attendance or edits sites
+ */
 
 export function useGetCollectionPoints<
   TData = Awaited<ReturnType<typeof getCollectionPoints>>,
@@ -499,6 +517,9 @@ export const getCreateCollectionPointUrl = (estateId: string) => {
   return `/api/estates/${estateId}/collection-points`;
 };
 
+/**
+ * @summary Add a collection point to a site
+ */
 export const createCollectionPoint = async (
   estateId: string,
   createCollectionPointRequest: CreateCollectionPointRequest,
@@ -574,6 +595,9 @@ export type CreateCollectionPointMutationVariables = {
   data: CreateCollectionPointRequest;
 };
 
+/**
+ * @summary Add a collection point to a site
+ */
 export const useCreateCollectionPoint = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -612,6 +636,9 @@ export const getDeleteCollectionPointsUrl = (estateId: string) => {
   return `/api/estates/${estateId}/collection-points/delete`;
 };
 
+/**
+ * @summary Remove collection points from a site
+ */
 export const deleteCollectionPoints = async (
   estateId: string,
   deleteCollectionPointsBody: string[],
@@ -687,6 +714,9 @@ export type DeleteCollectionPointsMutationVariables = {
   data: string[];
 };
 
+/**
+ * @summary Remove collection points from a site
+ */
 export const useDeleteCollectionPoints = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<

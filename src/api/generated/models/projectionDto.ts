@@ -11,4 +11,5 @@ export interface ProjectionDto {
   httpMethod?: string;
   urlPath?: string;
   description?: string;
+  groupName?: string;
 }

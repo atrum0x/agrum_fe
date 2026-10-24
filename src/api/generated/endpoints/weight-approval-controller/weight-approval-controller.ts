@@ -61,6 +61,9 @@ export const getDisapproveWeightChangeUrl = (changeId: number) => {
   return `/api/weight-changes/${changeId}/disapprove`;
 };
 
+/**
+ * @summary Reject a weight correction or cancellation (approvers)
+ */
 export const disapproveWeightChange = async (
   changeId: number,
   decideWeightChangeRequest: DecideWeightChangeRequest,
@@ -136,6 +139,9 @@ export type DisapproveWeightChangeMutationVariables = {
   data: DecideWeightChangeRequest;
 };
 
+/**
+ * @summary Reject a weight correction or cancellation (approvers)
+ */
 export const useDisapproveWeightChange = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -173,6 +179,9 @@ export const getApproveWeightChangeUrl = (changeId: number) => {
   return `/api/weight-changes/${changeId}/approve`;
 };
 
+/**
+ * @summary Approve a weight correction or cancellation (approvers)
+ */
 export const approveWeightChange = async (
   changeId: number,
   decideWeightChangeRequest: DecideWeightChangeRequest,
@@ -248,6 +257,9 @@ export type ApproveWeightChangeMutationVariables = {
   data: DecideWeightChangeRequest;
 };
 
+/**
+ * @summary Approve a weight correction or cancellation (approvers)
+ */
 export const useApproveWeightChange = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -286,6 +298,9 @@ export const getGetPendingWeightChangesUrl = () => {
   return `/api/weight-changes/pending`;
 };
 
+/**
+ * @summary List weight changes waiting for approval. Needed to open Pending Approvals
+ */
 export const getPendingWeightChanges = async (
   options?: Parameters<typeof customFetch>[1],
 ): Promise<getPendingWeightChangesResponse> => {
@@ -406,6 +421,9 @@ export function useGetPendingWeightChanges<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List weight changes waiting for approval. Needed to open Pending Approvals
+ */
 
 export function useGetPendingWeightChanges<
   TData = Awaited<ReturnType<typeof getPendingWeightChanges>>,
@@ -451,6 +469,9 @@ export const getCountPendingWeightChangesUrl = () => {
   return `/api/weight-changes/pending/count`;
 };
 
+/**
+ * @summary Show the Pending Authorizations count on the dashboard (approvers)
+ */
 export const countPendingWeightChanges = async (
   options?: Parameters<typeof customFetch>[1],
 ): Promise<countPendingWeightChangesResponse> => {
@@ -571,6 +592,9 @@ export function useCountPendingWeightChanges<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Show the Pending Authorizations count on the dashboard (approvers)
+ */
 
 export function useCountPendingWeightChanges<
   TData = Awaited<ReturnType<typeof countPendingWeightChanges>>,

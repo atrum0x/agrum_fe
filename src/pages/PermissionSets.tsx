@@ -80,7 +80,7 @@ const columnHelper = createColumnHelper<
 
 type PermissionSetTableRow = {
     id: string
-    header: string
+    groupName: string
     httpMethod: string
     urlPath: string
     description: string
@@ -123,14 +123,15 @@ const createColumns = (
         enableSorting: false,
         enableHiding: false,
     }),
-    columnHelper.accessor("id", {
-        header: "ID",
-        cell: ({ row }) => <TruncatedCell value={row.original.id} className="max-w-40" />,
+    // Window and plain-language description first, so admins can pick what a role needs
+    columnHelper.accessor("groupName", {
+        header: "Window",
+        cell: ({ row }) => <TruncatedCell value={row.original.groupName} className="max-w-48" />,
         enableHiding: false,
     }),
-    columnHelper.accessor("header", {
-        header: "Projection",
-        cell: ({ row }) => <TruncatedCell value={row.original.header} className="max-w-48" />,
+    columnHelper.accessor("description", {
+        header: "What it allows",
+        cell: ({ row }) => <TruncatedCell value={row.original.description} className="max-w-md" />,
         enableHiding: false,
     }),
     columnHelper.accessor("httpMethod", {
@@ -141,9 +142,9 @@ const createColumns = (
             </Badge>
         ),
     }),
-    columnHelper.accessor("description", {
-        header: "Description",
-        cell: ({ row }) => <TruncatedCell value={row.original.description} className="max-w-64" />,
+    columnHelper.accessor("urlPath", {
+        header: "Endpoint",
+        cell: ({ row }) => <TruncatedCell value={row.original.urlPath} className="max-w-56 font-mono text-xs" />,
     }),
 ])
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -280,7 +281,7 @@ export const PermissionSets = () => {
         const projections = projectionPage.content ?? []
         return projections.map((projection) => ({
             id: String(projection.id ?? ""),
-            header: projection.urlPath ?? "",
+            groupName: projection.groupName ?? "",
             httpMethod: projection.httpMethod ?? "",
             urlPath: projection.urlPath ?? "",
             description: projection.description ?? "",
@@ -541,7 +542,7 @@ export const PermissionSets = () => {
                                                         column.toggleVisibility(!!value)
                                                     }
                                                 >
-                                                    {column.id}
+                                                    {typeof column.columnDef.header === "string" ? column.columnDef.header : column.id}
                                                 </DropdownMenuCheckboxItem>
                                             )
                                         })}
@@ -730,7 +731,7 @@ export const PermissionSets = () => {
                     >
                         <Input
                             type="search"
-                            placeholder="Search projections"
+                            placeholder="Search by window, description or endpoint"
                             value={projectionSearch}
                             onChange={(event) => {
                                 setProjectionSearch(event.target.value)

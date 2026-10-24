@@ -66,6 +66,9 @@ export const getUpdateEstateUrl = (estateId: string) => {
   return `/api/estates/${estateId}`;
 };
 
+/**
+ * @summary Change a site's settings: standards, variance, daily limit, status
+ */
 export const updateEstate = async (
   estateId: string,
   updateEstateRequest: UpdateEstateRequest,
@@ -138,6 +141,9 @@ export type UpdateEstateMutationVariables = {
   data: UpdateEstateRequest;
 };
 
+/**
+ * @summary Change a site's settings: standards, variance, daily limit, status
+ */
 export const useUpdateEstate = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -172,6 +178,9 @@ export const getAssignEstatesToUserUrl = (username: string) => {
   return `/api/estates/user/${username}`;
 };
 
+/**
+ * @summary Replace the list of sites a user can see
+ */
 export const assignEstatesToUser = async (
   username: string,
   assignEstatesToUserBody: string[],
@@ -247,6 +256,9 @@ export type AssignEstatesToUserMutationVariables = {
   data: string[];
 };
 
+/**
+ * @summary Replace the list of sites a user can see
+ */
 export const useAssignEstatesToUser = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -283,6 +295,9 @@ export const getGetAllEstatesUrl = () => {
   return `/api/estates`;
 };
 
+/**
+ * @summary List sites. Needed to open Site Basic Data and by most screens that pick a site
+ */
 export const getAllEstates = async (
   options?: Parameters<typeof customFetch>[1],
 ): Promise<getAllEstatesResponse> => {
@@ -383,6 +398,9 @@ export function useGetAllEstates<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List sites. Needed to open Site Basic Data and by most screens that pick a site
+ */
 
 export function useGetAllEstates<
   TData = Awaited<ReturnType<typeof getAllEstates>>,
@@ -422,6 +440,9 @@ export const getCreateEstateUrl = () => {
   return `/api/estates`;
 };
 
+/**
+ * @summary Create a site
+ */
 export const createEstate = async (
   createEstateRequest: CreateEstateRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -490,6 +511,9 @@ export type CreateEstateMutationBody = CreateEstateRequest;
 export type CreateEstateMutationError = unknown;
 export type CreateEstateMutationVariables = { data: CreateEstateRequest };
 
+/**
+ * @summary Create a site
+ */
 export const useCreateEstate = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -523,6 +547,9 @@ export const getRevokeUsersUrl = (estateId: string) => {
   return `/api/estates/${estateId}/granted-users/revoke`;
 };
 
+/**
+ * @summary Stop users seeing a site's data
+ */
 export const revokeUsers = async (
   estateId: string,
   revokeUsersBody: string[],
@@ -592,6 +619,9 @@ export type RevokeUsersMutationBody = string[];
 export type RevokeUsersMutationError = unknown;
 export type RevokeUsersMutationVariables = { estateId: string; data: string[] };
 
+/**
+ * @summary Stop users seeing a site's data
+ */
 export const useRevokeUsers = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -625,6 +655,9 @@ export const getGrantUsersUrl = (estateId: string) => {
   return `/api/estates/${estateId}/granted-users/grant`;
 };
 
+/**
+ * @summary Let users see a site's data
+ */
 export const grantUsers = async (
   estateId: string,
   grantUsersBody: string[],
@@ -694,6 +727,9 @@ export type GrantUsersMutationBody = string[];
 export type GrantUsersMutationError = unknown;
 export type GrantUsersMutationVariables = { estateId: string; data: string[] };
 
+/**
+ * @summary Let users see a site's data
+ */
 export const useGrantUsers = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -743,6 +779,9 @@ export const getGetUnassignedUsersUrl = (
     : `/api/estates/${estateId}/unassigned-users`;
 };
 
+/**
+ * @summary List the users who cannot see a site yet
+ */
 export const getUnassignedUsers = async (
   estateId: string,
   params?: GetUnassignedUsersParams,
@@ -887,6 +926,9 @@ export function useGetUnassignedUsers<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List the users who cannot see a site yet
+ */
 
 export function useGetUnassignedUsers<
   TData = Awaited<ReturnType<typeof getUnassignedUsers>>,
@@ -951,6 +993,9 @@ export const getGetGrantedUsersUrl = (
     : `/api/estates/${estateId}/granted-users`;
 };
 
+/**
+ * @summary List the users who can see a site
+ */
 export const getGrantedUsers = async (
   estateId: string,
   params?: GetGrantedUsersParams,
@@ -1094,6 +1139,9 @@ export function useGetGrantedUsers<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List the users who can see a site
+ */
 
 export function useGetGrantedUsers<
   TData = Awaited<ReturnType<typeof getGrantedUsers>>,

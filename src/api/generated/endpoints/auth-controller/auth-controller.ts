@@ -30,8 +30,6 @@ import type {
   LogoutWeb200,
   RefreshRequest,
   RefreshWeb200,
-  Register200,
-  RegisterRequest,
   TokenResponse,
 } from "../../models";
 
@@ -57,107 +55,6 @@ const withQueryKey = <T extends object, K>(
   return result;
 };
 
-export type registerResponse200 = {
-  data: Register200;
-  status: 200;
-};
-
-export type registerResponseSuccess = registerResponse200 & {
-  headers: Headers;
-};
-export type registerResponse = registerResponseSuccess;
-
-export const getRegisterUrl = () => {
-  return `/api/auth/register`;
-};
-
-export const register = async (
-  registerRequest: RegisterRequest,
-  options?: Parameters<typeof customFetch>[1],
-): Promise<registerResponse> => {
-  const getHeaders = (
-    h?: NonNullable<RequestInit["headers"]>,
-  ): Record<string, string | readonly string[]> => {
-    if (!h) return {};
-    if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Array.isArray(h)) return Object.fromEntries(h);
-    return h;
-  };
-  return customFetch<registerResponse>(getRegisterUrl(), {
-    ...options,
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getHeaders(options?.headers),
-    },
-    body: JSON.stringify(registerRequest),
-  });
-};
-
-export const getRegisterMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof register>>,
-    TError,
-    RegisterMutationVariables,
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof register>>,
-  TError,
-  RegisterMutationVariables,
-  TContext
-> => {
-  const mutationKey = ["register"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof register>>,
-    RegisterMutationVariables
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return register(data, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
-};
-
-export type RegisterMutationResult = NonNullable<
-  Awaited<ReturnType<typeof register>>
->;
-export type RegisterMutationBody = RegisterRequest;
-export type RegisterMutationError = unknown;
-export type RegisterMutationVariables = { data: RegisterRequest };
-
-export const useRegister = <TError = unknown, TContext = unknown>(
-  options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof register>>,
-      TError,
-      RegisterMutationVariables,
-      TContext
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof register>>,
-  TError,
-  RegisterMutationVariables,
-  TContext
-> => {
-  return useMutation(getRegisterMutationOptions(options), queryClient);
-};
 export type refreshWebResponse200 = {
   data: RefreshWeb200;
   status: 200;
@@ -172,6 +69,9 @@ export const getRefreshWebUrl = () => {
   return `/api/auth/refresh/web`;
 };
 
+/**
+ * @summary Keep a web session alive
+ */
 export const refreshWeb = async (
   refreshRequest: RefreshRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -240,6 +140,9 @@ export type RefreshWebMutationBody = RefreshRequest;
 export type RefreshWebMutationError = unknown;
 export type RefreshWebMutationVariables = { data: RefreshRequest };
 
+/**
+ * @summary Keep a web session alive
+ */
 export const useRefreshWeb = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -273,6 +176,9 @@ export const getRefreshMobileUrl = () => {
   return `/api/auth/refresh/mobile`;
 };
 
+/**
+ * @summary Keep a mobile session alive
+ */
 export const refreshMobile = async (
   refreshRequest: RefreshRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -341,6 +247,9 @@ export type RefreshMobileMutationBody = RefreshRequest;
 export type RefreshMobileMutationError = unknown;
 export type RefreshMobileMutationVariables = { data: RefreshRequest };
 
+/**
+ * @summary Keep a mobile session alive
+ */
 export const useRefreshMobile = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -374,6 +283,9 @@ export const getLogoutWebUrl = () => {
   return `/api/auth/logout/web`;
 };
 
+/**
+ * @summary Log out of the web app
+ */
 export const logoutWeb = async (
   logoutRequest: LogoutRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -442,6 +354,9 @@ export type LogoutWebMutationBody = LogoutRequest;
 export type LogoutWebMutationError = unknown;
 export type LogoutWebMutationVariables = { data: LogoutRequest };
 
+/**
+ * @summary Log out of the web app
+ */
 export const useLogoutWeb = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -475,6 +390,9 @@ export const getLogoutMobileUrl = () => {
   return `/api/auth/logout/mobile`;
 };
 
+/**
+ * @summary Log out of the mobile app
+ */
 export const logoutMobile = async (
   logoutRequest: LogoutRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -543,6 +461,9 @@ export type LogoutMobileMutationBody = LogoutRequest;
 export type LogoutMobileMutationError = unknown;
 export type LogoutMobileMutationVariables = { data: LogoutRequest };
 
+/**
+ * @summary Log out of the mobile app
+ */
 export const useLogoutMobile = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -576,6 +497,9 @@ export const getLoginWebUrl = () => {
   return `/api/auth/login/web`;
 };
 
+/**
+ * @summary Log in to the web app
+ */
 export const loginWeb = async (
   loginRequest: LoginRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -644,6 +568,9 @@ export type LoginWebMutationBody = LoginRequest;
 export type LoginWebMutationError = unknown;
 export type LoginWebMutationVariables = { data: LoginRequest };
 
+/**
+ * @summary Log in to the web app
+ */
 export const useLoginWeb = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -677,6 +604,9 @@ export const getLoginMobileUrl = () => {
   return `/api/auth/login/mobile`;
 };
 
+/**
+ * @summary Log in to the mobile app
+ */
 export const loginMobile = async (
   loginRequest: LoginRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -745,6 +675,9 @@ export type LoginMobileMutationBody = LoginRequest;
 export type LoginMobileMutationError = unknown;
 export type LoginMobileMutationVariables = { data: LoginRequest };
 
+/**
+ * @summary Log in to the mobile app
+ */
 export const useLoginMobile = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -778,6 +711,9 @@ export const getGetCurrentUserUrl = () => {
   return `/api/auth/me/web`;
 };
 
+/**
+ * @summary Current web user and what they are granted
+ */
 export const getCurrentUser = async (
   options?: Parameters<typeof customFetch>[1],
 ): Promise<getCurrentUserResponse> => {
@@ -878,6 +814,9 @@ export function useGetCurrentUser<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Current web user and what they are granted
+ */
 
 export function useGetCurrentUser<
   TData = Awaited<ReturnType<typeof getCurrentUser>>,
@@ -918,6 +857,9 @@ export const getGetCurrentUserMobileUrl = () => {
   return `/api/auth/me/mobile`;
 };
 
+/**
+ * @summary Current mobile user and what they are granted
+ */
 export const getCurrentUserMobile = async (
   options?: Parameters<typeof customFetch>[1],
 ): Promise<getCurrentUserMobileResponse> => {
@@ -1037,6 +979,9 @@ export function useGetCurrentUserMobile<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Current mobile user and what they are granted
+ */
 
 export function useGetCurrentUserMobile<
   TData = Awaited<ReturnType<typeof getCurrentUserMobile>>,

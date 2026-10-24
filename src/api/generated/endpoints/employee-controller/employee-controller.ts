@@ -71,6 +71,9 @@ export const getFindByCodeUrl = (employeeCode: string) => {
   return `/api/employees/${employeeCode}`;
 };
 
+/**
+ * @summary View one employee
+ */
 export const findByCode = async (
   employeeCode: string,
   options?: Parameters<typeof customFetch>[1],
@@ -184,6 +187,9 @@ export function useFindByCode<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary View one employee
+ */
 
 export function useFindByCode<
   TData = Awaited<ReturnType<typeof findByCode>>,
@@ -224,6 +230,9 @@ export const getUpdateUrl = (employeeCode: string) => {
   return `/api/employees/${employeeCode}`;
 };
 
+/**
+ * @summary Change an employee's details or status
+ */
 export const update = async (
   employeeCode: string,
   updateEmployeeRequest: UpdateEmployeeRequest,
@@ -296,6 +305,9 @@ export type UpdateMutationVariables = {
   data: UpdateEmployeeRequest;
 };
 
+/**
+ * @summary Change an employee's details or status
+ */
 export const useUpdate = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -329,6 +341,9 @@ export const getDeleteUrl = (employeeCode: string) => {
   return `/api/employees/${employeeCode}`;
 };
 
+/**
+ * @summary Delete an employee entered by mistake (only without attendance or login)
+ */
 export const _delete = async (
   employeeCode: string,
   options?: Parameters<typeof customFetch>[1],
@@ -384,6 +399,9 @@ export type _DeleteMutationResult = NonNullable<
 export type _DeleteMutationError = unknown;
 export type _DeleteMutationVariables = { employeeCode: string };
 
+/**
+ * @summary Delete an employee entered by mistake (only without attendance or login)
+ */
 export const useDelete = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -417,6 +435,9 @@ export const getSetPasswordUrl = (employeeCode: string) => {
   return `/api/employees/${employeeCode}/password`;
 };
 
+/**
+ * @summary Set a new password for an employee's login (administrators)
+ */
 export const setPassword = async (
   employeeCode: string,
   setPasswordRequest: SetPasswordRequest,
@@ -489,6 +510,9 @@ export type SetPasswordMutationVariables = {
   data: SetPasswordRequest;
 };
 
+/**
+ * @summary Set a new password for an employee's login (administrators)
+ */
 export const useSetPassword = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -534,6 +558,9 @@ export const getGetAllEmployeesUrl = (params?: GetAllEmployeesParams) => {
     : `/api/employees`;
 };
 
+/**
+ * @summary Search employees. Needed to open Users (Person Basic Data)
+ */
 export const getAllEmployees = async (
   params?: GetAllEmployeesParams,
   options?: Parameters<typeof customFetch>[1],
@@ -657,6 +684,9 @@ export function useGetAllEmployees<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Search employees. Needed to open Users (Person Basic Data)
+ */
 
 export function useGetAllEmployees<
   TData = Awaited<ReturnType<typeof getAllEmployees>>,
@@ -701,6 +731,9 @@ export const getCreate1Url = () => {
   return `/api/employees`;
 };
 
+/**
+ * @summary Create an employee (and optionally their login)
+ */
 export const create1 = async (
   createEmployeeRequest: CreateEmployeeRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -769,6 +802,9 @@ export type Create1MutationBody = CreateEmployeeRequest;
 export type Create1MutationError = unknown;
 export type Create1MutationVariables = { data: CreateEmployeeRequest };
 
+/**
+ * @summary Create an employee (and optionally their login)
+ */
 export const useCreate1 = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -803,6 +839,9 @@ export const getRevokePermissionSetsUrl = (employeeCode: string) => {
   return `/api/employees/revokePermissions/${employeeCode}`;
 };
 
+/**
+ * @summary Take permission sets away from an employee's login
+ */
 export const revokePermissionSets = async (
   employeeCode: string,
   revokePermissionSetsBody: string[],
@@ -878,6 +917,9 @@ export type RevokePermissionSetsMutationVariables = {
   data: string[];
 };
 
+/**
+ * @summary Take permission sets away from an employee's login
+ */
 export const useRevokePermissionSets = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -914,6 +956,9 @@ export const getRevokeEstatesUrl = (employeeCode: string) => {
   return `/api/employees/revokeEstates/${employeeCode}`;
 };
 
+/**
+ * @summary Stop an employee's login seeing sites
+ */
 export const revokeEstates = async (
   employeeCode: string,
   revokeEstatesBody: string[],
@@ -986,6 +1031,9 @@ export type RevokeEstatesMutationVariables = {
   data: string[];
 };
 
+/**
+ * @summary Stop an employee's login seeing sites
+ */
 export const useRevokeEstates = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -1020,6 +1068,9 @@ export const getGrantPermissionSetsUrl = (employeeCode: string) => {
   return `/api/employees/grantPermissions/${employeeCode}`;
 };
 
+/**
+ * @summary Give permission sets to an employee's login
+ */
 export const grantPermissionSets = async (
   employeeCode: string,
   grantPermissionSetsBody: string[],
@@ -1095,6 +1146,9 @@ export type GrantPermissionSetsMutationVariables = {
   data: string[];
 };
 
+/**
+ * @summary Give permission sets to an employee's login
+ */
 export const useGrantPermissionSets = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -1131,6 +1185,9 @@ export const getGrantEstatesUrl = (employeeCode: string) => {
   return `/api/employees/grantEstates/${employeeCode}`;
 };
 
+/**
+ * @summary Let an employee's login see sites
+ */
 export const grantEstates = async (
   employeeCode: string,
   grantEstatesBody: string[],
@@ -1203,6 +1260,9 @@ export type GrantEstatesMutationVariables = {
   data: string[];
 };
 
+/**
+ * @summary Let an employee's login see sites
+ */
 export const useGrantEstates = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -1253,6 +1313,9 @@ export const getGetUnassignedPermissionSetsUrl = (
     : `/api/employees/unassignedPermissions/${employeeCode}`;
 };
 
+/**
+ * @summary List permission sets an employee's login does not have yet
+ */
 export const getUnassignedPermissionSets = async (
   employeeCode: string,
   params?: GetUnassignedPermissionSetsParams,
@@ -1401,6 +1464,9 @@ export function useGetUnassignedPermissionSets<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List permission sets an employee's login does not have yet
+ */
 
 export function useGetUnassignedPermissionSets<
   TData = Awaited<ReturnType<typeof getUnassignedPermissionSets>>,
@@ -1466,6 +1532,9 @@ export const getGetUnassignedEstatesUrl = (
     : `/api/employees/unassignedEstates/${employeeCode}`;
 };
 
+/**
+ * @summary List sites an employee's login cannot see yet
+ */
 export const getUnassignedEstates = async (
   employeeCode: string,
   params?: GetUnassignedEstatesParams,
@@ -1611,6 +1680,9 @@ export function useGetUnassignedEstates<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List sites an employee's login cannot see yet
+ */
 
 export function useGetUnassignedEstates<
   TData = Awaited<ReturnType<typeof getUnassignedEstates>>,
@@ -1675,6 +1747,9 @@ export const getGetPermissionSetsUrl = (
     : `/api/employees/grantedPermissions/${employeeCode}`;
 };
 
+/**
+ * @summary View the permission sets an employee's login has
+ */
 export const getPermissionSets = async (
   employeeCode: string,
   params?: GetPermissionSetsParams,
@@ -1820,6 +1895,9 @@ export function useGetPermissionSets<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary View the permission sets an employee's login has
+ */
 
 export function useGetPermissionSets<
   TData = Awaited<ReturnType<typeof getPermissionSets>>,
@@ -1884,6 +1962,9 @@ export const getGetGrantedEstatesUrl = (
     : `/api/employees/grantedEstates/${employeeCode}`;
 };
 
+/**
+ * @summary View the sites an employee's login can see
+ */
 export const getGrantedEstates = async (
   employeeCode: string,
   params?: GetGrantedEstatesParams,
@@ -2029,6 +2110,9 @@ export function useGetGrantedEstates<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary View the sites an employee's login can see
+ */
 
 export function useGetGrantedEstates<
   TData = Awaited<ReturnType<typeof getGrantedEstates>>,

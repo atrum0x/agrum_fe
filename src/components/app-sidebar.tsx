@@ -20,35 +20,7 @@ import {
 } from "@/components/ui/sidebar"
 import { TerminalIcon } from "lucide-react"
 import { useAuth } from "@/context/AuthContext";
-
-
-export type NavItem = {
-  title: string;
-  url?: string; // The route path
-  items?: NavItem[]; // Nested sub-items
-};
-
-const navData: NavItem[] = [
-  {
-    title: "Attendance Management",
-    items: [
-      { title: "Attendance", url: "/attendance" },
-    ],
-  },
-  {
-    title: "Sites",
-    items: [
-      { title: "Sites", url: "/sites" },
-    ],
-  },
-  {
-    title: "Users and Permissions",
-    items: [
-      { title: "Users", url: "/users" },
-      {title: "Permission Sets", url: "/permission-sets" },
-    ],
-  },
-];
+import { navData, type NavItem } from "@/components/nav-data";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();

@@ -10,9 +10,18 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useSidebar } from "@/components/ui/sidebar"
 import { PanelLeftIcon } from "lucide-react"
+import { Fragment } from "react"
+import { Link, useLocation } from "react-router-dom"
+import { findNavTrail } from "@/components/nav-data"
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar()
+  const { pathname } = useLocation()
+
+  // Drop a group crumb that just repeats the page name (e.g. "Sites > Sites")
+  const crumbs = findNavTrail(pathname).filter(
+    (crumb, index, trail) => index === trail.length - 1 || crumb.title !== trail[index + 1].title
+  )
 
   return (
     <header className="sticky top-0 z-50 flex w-full items-center border-b bg-background">
@@ -33,12 +42,26 @@ export function SiteHeader() {
         <Breadcrumb className="hidden sm:block">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="#">Build Your Application</BreadcrumbLink>
+              {crumbs.length ? (
+                <BreadcrumbLink render={<Link to="/landing" />}>Home</BreadcrumbLink>
+              ) : (
+                <BreadcrumbPage>Home</BreadcrumbPage>
+              )}
             </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-            </BreadcrumbItem>
+            {crumbs.map((crumb, index) => (
+              <Fragment key={crumb.title}>
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  {index === crumbs.length - 1 ? (
+                    <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
+                  ) : crumb.url ? (
+                    <BreadcrumbLink render={<Link to={crumb.url} />}>{crumb.title}</BreadcrumbLink>
+                  ) : (
+                    <span>{crumb.title}</span>
+                  )}
+                </BreadcrumbItem>
+              </Fragment>
+            ))}
           </BreadcrumbList>
         </Breadcrumb>
         {/* <SearchForm className="w-full sm:ml-auto sm:w-auto" /> */}

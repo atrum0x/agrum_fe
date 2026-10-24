@@ -28,6 +28,18 @@ export default defineConfig({
               name: 'serializeQueryParams',
             },
           },
+          searchWeights: {
+            paramsSerializer: {
+              path: './src/api/params-serializer.ts',
+              name: 'serializeQueryParams',
+            },
+          },
+          searchMyWeights: {
+            paramsSerializer: {
+              path: './src/api/params-serializer.ts',
+              name: 'serializeQueryParams',
+            },
+          },
         },
       },
     },

@@ -1,4 +1,5 @@
 import React from "react"
+import { PageTitle } from "@/components/page-title"
 import { format, isSameDay, parseISO, startOfToday } from "date-fns"
 import type { DateRange } from "react-day-picker"
 import { IconCalendar, IconEdit, IconPlus, IconX } from "@tabler/icons-react"
@@ -282,6 +283,7 @@ export const Attendance = () => {
             </aside>
 
             <main className="flex-1 overflow-y-auto bg-background p-4 lg:p-6">
+                <PageTitle />
                 {/* MOBILE TOGGLE BUTTON (Hidden on Desktop) */}
                 <div className="mb-6 flex lg:hidden">
                     <Button

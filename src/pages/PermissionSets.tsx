@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { PageTitle } from "@/components/page-title"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
@@ -416,6 +417,7 @@ export const PermissionSets = () => {
             </aside>
 
             <main className="flex-1 overflow-y-auto bg-background p-4 lg:p-6">
+                <PageTitle />
                 {/* MOBILE TOGGLE BUTTON (Hidden on Desktop) */}
                 <div className="mb-6 flex lg:hidden">
                     <Button

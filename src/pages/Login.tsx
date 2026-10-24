@@ -1,5 +1,5 @@
 import { LoginForm } from "../components/login-form";
-import { GalleryVerticalEnd } from "lucide-react"
+import logo from "@/assets/logo.png";
 import { ThemeToggle } from "@/components/theme-toggle";
 import loginImage from "@/assets/login.webp";
 
@@ -11,8 +11,8 @@ export default function Login() {
         
         <div className="flex items-center justify-between">
           <a href="#" className="flex items-center gap-2 font-medium">
-            <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <GalleryVerticalEnd className="size-4" />
+            <div className="flex size-8 items-center justify-center overflow-hidden rounded-lg">
+              <img src={logo} alt="" className="size-full object-contain" />
             </div>
             Agrum
           </a>

@@ -12,6 +12,17 @@ export const navData: NavItem[] = [
     ],
   },
   {
+    title: "Weight Management",
+    items: [
+      { title: "Weight History", url: "/weight-history" },
+      { title: "Pending Approvals", url: "/weight-approvals" },
+      { title: "Daily Summary", url: "/daily-weight-summary" },
+      // Pickers: granted the /mine endpoints instead of the full ones
+      { title: "My Weighings", url: "/my-weighings" },
+      { title: "My Daily Summary", url: "/my-daily-summary" },
+    ],
+  },
+  {
     title: "Sites",
     items: [
       { title: "Sites", url: "/sites" },

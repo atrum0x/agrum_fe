@@ -10,6 +10,9 @@ import { AuthProvider } from "./context/AuthContext";
 import { PermissionSets } from "./pages/PermissionSets";
 import { Estates } from "./pages/Estates";
 import { Attendance } from "./pages/Attendance";
+import { WeightHistory } from "./pages/WeightHistory";
+import { WeightApprovals } from "./pages/WeightApprovals";
+import { DailyWeightSummary } from "./pages/DailyWeightSummary";
 
 
 const queryClient = new QueryClient({
@@ -47,6 +50,11 @@ const router = createBrowserRouter([
               { path: "permission-sets", element: <PermissionSets /> },
               { path: "sites", element: <Estates /> },
               { path: "attendance", element: <Attendance /> },
+              { path: "weight-history", element: <WeightHistory /> },
+              { path: "weight-approvals", element: <WeightApprovals /> },
+              { path: "daily-weight-summary", element: <DailyWeightSummary /> },
+              { path: "my-weighings", element: <WeightHistory key="mine" mine /> },
+              { path: "my-daily-summary", element: <DailyWeightSummary key="mine" mine /> },
             ],
           },
         ],

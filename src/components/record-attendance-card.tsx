@@ -339,7 +339,7 @@ export const RecordAttendanceCard = ({
                             {/* Ticked workers, with a category each */}
                             <div className="flex min-h-0 flex-col gap-2">
                                 <p className="text-sm font-medium">Selected ({tickedWorkers.length})</p>
-                                <div className="h-[19.5rem] overflow-y-auto rounded-lg border bg-background">
+                                <div className="h-78 overflow-y-auto rounded-lg border bg-background">
                                     <Table>
                                         <TableHeader className="sticky top-0 z-10 bg-muted">
                                             <TableRow>

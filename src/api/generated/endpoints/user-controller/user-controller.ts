@@ -59,6 +59,9 @@ export const getFindAllUrl = () => {
   return `/api/users`;
 };
 
+/**
+ * @summary List login accounts
+ */
 export const findAll = async (
   options?: Parameters<typeof customFetch>[1],
 ): Promise<findAllResponse> => {
@@ -159,6 +162,9 @@ export function useFindAll<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List login accounts
+ */
 
 export function useFindAll<
   TData = Awaited<ReturnType<typeof findAll>>,
@@ -198,6 +204,9 @@ export const getCreateUrl = () => {
   return `/api/users`;
 };
 
+/**
+ * @summary Create a login account directly (administrators)
+ */
 export const create = async (
   createUserRequest: CreateUserRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -266,6 +275,9 @@ export type CreateMutationBody = CreateUserRequest;
 export type CreateMutationError = unknown;
 export type CreateMutationVariables = { data: CreateUserRequest };
 
+/**
+ * @summary Create a login account directly (administrators)
+ */
 export const useCreate = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -299,6 +311,9 @@ export const getFindByUsernameUrl = (username: string) => {
   return `/api/users/${username}`;
 };
 
+/**
+ * @summary View one login account
+ */
 export const findByUsername = async (
   username: string,
   options?: Parameters<typeof customFetch>[1],
@@ -412,6 +427,9 @@ export function useFindByUsername<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary View one login account
+ */
 
 export function useFindByUsername<
   TData = Awaited<ReturnType<typeof findByUsername>>,
@@ -452,6 +470,9 @@ export const getDelete1Url = (username: string) => {
   return `/api/users/${username}`;
 };
 
+/**
+ * @summary Delete a login account (administrators)
+ */
 export const delete1 = async (
   username: string,
   options?: Parameters<typeof customFetch>[1],
@@ -507,6 +528,9 @@ export type Delete1MutationResult = NonNullable<
 export type Delete1MutationError = unknown;
 export type Delete1MutationVariables = { username: string };
 
+/**
+ * @summary Delete a login account (administrators)
+ */
 export const useDelete1 = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<

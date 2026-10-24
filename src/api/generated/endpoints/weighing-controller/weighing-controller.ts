@@ -67,6 +67,9 @@ export const getRecordWeightUrl = () => {
   return `/api/weights`;
 };
 
+/**
+ * @summary Record a weight read from the scale (phone, online)
+ */
 export const recordWeight = async (
   recordWeightRequest: RecordWeightRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -135,6 +138,9 @@ export type RecordWeightMutationBody = RecordWeightRequest;
 export type RecordWeightMutationError = unknown;
 export type RecordWeightMutationVariables = { data: RecordWeightRequest };
 
+/**
+ * @summary Record a weight read from the scale (phone, online)
+ */
 export const useRecordWeight = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -168,6 +174,9 @@ export const getSyncWeightsUrl = () => {
   return `/api/weights/sync`;
 };
 
+/**
+ * @summary Send weighings saved offline on the phone. Give to field supervisors
+ */
 export const syncWeights = async (
   syncWeightRequest: SyncWeightRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -236,6 +245,9 @@ export type SyncWeightsMutationBody = SyncWeightRequest;
 export type SyncWeightsMutationError = unknown;
 export type SyncWeightsMutationVariables = { data: SyncWeightRequest };
 
+/**
+ * @summary Send weighings saved offline on the phone. Give to field supervisors
+ */
 export const useSyncWeights = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -270,6 +282,9 @@ export const getRecordManualWeightUrl = () => {
   return `/api/weights/manual`;
 };
 
+/**
+ * @summary Type in a weight by hand when there is no scale reading (WE-08). Also lets the phone send manual weighings
+ */
 export const recordManualWeight = async (
   recordWeightRequest: RecordWeightRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -338,6 +353,9 @@ export type RecordManualWeightMutationBody = RecordWeightRequest;
 export type RecordManualWeightMutationError = unknown;
 export type RecordManualWeightMutationVariables = { data: RecordWeightRequest };
 
+/**
+ * @summary Type in a weight by hand when there is no scale reading (WE-08). Also lets the phone send manual weighings
+ */
 export const useRecordManualWeight = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -389,6 +407,9 @@ export const getGetWeighableWorkersUrl = (
     : `/api/weights/workers`;
 };
 
+/**
+ * @summary List workers who can be weighed today. Needed to record weights
+ */
 export const getWeighableWorkers = async (
   params?: GetWeighableWorkersParams,
   options?: Parameters<typeof customFetch>[1],
@@ -519,6 +540,9 @@ export function useGetWeighableWorkers<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List workers who can be weighed today. Needed to record weights
+ */
 
 export function useGetWeighableWorkers<
   TData = Awaited<ReturnType<typeof getWeighableWorkers>>,
@@ -564,6 +588,9 @@ export const getGetWeighingDefaultsUrl = () => {
   return `/api/weights/defaults`;
 };
 
+/**
+ * @summary Weighing screen setup: today's date and server time. Needed to record weights
+ */
 export const getWeighingDefaults = async (
   options?: Parameters<typeof customFetch>[1],
 ): Promise<getWeighingDefaultsResponse> => {
@@ -680,6 +707,9 @@ export function useGetWeighingDefaults<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Weighing screen setup: today's date and server time. Needed to record weights
+ */
 
 export function useGetWeighingDefaults<
   TData = Awaited<ReturnType<typeof getWeighingDefaults>>,

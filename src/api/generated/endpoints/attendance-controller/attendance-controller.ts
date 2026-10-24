@@ -80,6 +80,9 @@ export const getSearchAttendanceUrl = (params?: SearchAttendanceParams) => {
     : `/api/attendance`;
 };
 
+/**
+ * @summary Search attendance records (web list). Needed to open Attendance Management
+ */
 export const searchAttendance = async (
   params?: SearchAttendanceParams,
   options?: Parameters<typeof customFetch>[1],
@@ -206,6 +209,9 @@ export function useSearchAttendance<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Search attendance records (web list). Needed to open Attendance Management
+ */
 
 export function useSearchAttendance<
   TData = Awaited<ReturnType<typeof searchAttendance>>,
@@ -250,6 +256,9 @@ export const getRecordAttendanceUrl = () => {
   return `/api/attendance`;
 };
 
+/**
+ * @summary Record attendance on the web for workers at their default site
+ */
 export const recordAttendance = async (
   recordAttendanceRequest: RecordAttendanceRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -320,6 +329,9 @@ export type RecordAttendanceMutationVariables = {
   data: RecordAttendanceRequest;
 };
 
+/**
+ * @summary Record attendance on the web for workers at their default site
+ */
 export const useRecordAttendance = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -353,6 +365,9 @@ export const getSyncAttendanceUrl = () => {
   return `/api/attendance/sync`;
 };
 
+/**
+ * @summary Send attendance saved offline on the phone. Give to field supervisors
+ */
 export const syncAttendance = async (
   syncAttendanceRequest: SyncAttendanceRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -421,6 +436,9 @@ export type SyncAttendanceMutationBody = SyncAttendanceRequest;
 export type SyncAttendanceMutationError = unknown;
 export type SyncAttendanceMutationVariables = { data: SyncAttendanceRequest };
 
+/**
+ * @summary Send attendance saved offline on the phone. Give to field supervisors
+ */
 export const useSyncAttendance = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -456,6 +474,9 @@ export const getRecordOtherSiteAttendanceUrl = () => {
   return `/api/attendance/other-site`;
 };
 
+/**
+ * @summary Record attendance for workers at a site other than their default site (lent / borrowed workers, AT-06). Also lets the phone send such records
+ */
 export const recordOtherSiteAttendance = async (
   recordAttendanceRequest: RecordAttendanceRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -529,6 +550,9 @@ export type RecordOtherSiteAttendanceMutationVariables = {
   data: RecordAttendanceRequest;
 };
 
+/**
+ * @summary Record attendance for workers at a site other than their default site (lent / borrowed workers, AT-06). Also lets the phone send such records
+ */
 export const useRecordOtherSiteAttendance = <
   TError = unknown,
   TContext = unknown,
@@ -583,6 +607,9 @@ export const getGetAvailableWorkersUrl = (
     : `/api/attendance/workers`;
 };
 
+/**
+ * @summary List workers who can be marked present today. Needed to record attendance
+ */
 export const getAvailableWorkers = async (
   params?: GetAvailableWorkersParams,
   options?: Parameters<typeof customFetch>[1],
@@ -713,6 +740,9 @@ export function useGetAvailableWorkers<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List workers who can be marked present today. Needed to record attendance
+ */
 
 export function useGetAvailableWorkers<
   TData = Awaited<ReturnType<typeof getAvailableWorkers>>,
@@ -759,6 +789,9 @@ export const getGetAttendanceDefaultsUrl = () => {
   return `/api/attendance/defaults`;
 };
 
+/**
+ * @summary Attendance screen setup: today's date and the user's default site. Needed to record attendance
+ */
 export const getAttendanceDefaults = async (
   options?: Parameters<typeof customFetch>[1],
 ): Promise<getAttendanceDefaultsResponse> => {
@@ -878,6 +911,9 @@ export function useGetAttendanceDefaults<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Attendance screen setup: today's date and the user's default site. Needed to record attendance
+ */
 
 export function useGetAttendanceDefaults<
   TData = Awaited<ReturnType<typeof getAttendanceDefaults>>,

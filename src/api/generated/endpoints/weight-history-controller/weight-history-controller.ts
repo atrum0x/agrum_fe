@@ -68,6 +68,9 @@ export const getSearchWeightsUrl = (params: SearchWeightsParams) => {
     : `/api/weights`;
 };
 
+/**
+ * @summary Search all weighings at the user's sites. Needed to open Weight History
+ */
 export const searchWeights = async (
   params: SearchWeightsParams,
   options?: Parameters<typeof customFetch>[1],
@@ -175,6 +178,9 @@ export function useSearchWeights<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Search all weighings at the user's sites. Needed to open Weight History
+ */
 
 export function useSearchWeights<
   TData = Awaited<ReturnType<typeof searchWeights>>,
@@ -215,6 +221,9 @@ export const getGetWeightHistoryUrl = (weightId: string) => {
   return `/api/weights/${weightId}/history`;
 };
 
+/**
+ * @summary View the change history of a weighing
+ */
 export const getWeightHistory = async (
   weightId: string,
   options?: Parameters<typeof customFetch>[1],
@@ -347,6 +356,9 @@ export function useGetWeightHistory<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary View the change history of a weighing
+ */
 
 export function useGetWeightHistory<
   TData = Awaited<ReturnType<typeof getWeightHistory>>,
@@ -395,6 +407,9 @@ export const getSearchMyWeightsUrl = (params: SearchMyWeightsParams) => {
     : `/api/weights/mine`;
 };
 
+/**
+ * @summary Weight history for pickers: only their own weighings
+ */
 export const searchMyWeights = async (
   params: SearchMyWeightsParams,
   options?: Parameters<typeof customFetch>[1],
@@ -518,6 +533,9 @@ export function useSearchMyWeights<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Weight history for pickers: only their own weighings
+ */
 
 export function useSearchMyWeights<
   TData = Awaited<ReturnType<typeof searchMyWeights>>,
@@ -574,6 +592,9 @@ export const getExportMyWeightsUrl = (params?: ExportMyWeightsParams) => {
     : `/api/weights/mine/export`;
 };
 
+/**
+ * @summary Export a picker's own weighings to Excel
+ */
 export const exportMyWeights = async (
   params?: ExportMyWeightsParams,
   options?: Parameters<typeof customFetch>[1],
@@ -697,6 +718,9 @@ export function useExportMyWeights<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Export a picker's own weighings to Excel
+ */
 
 export function useExportMyWeights<
   TData = Awaited<ReturnType<typeof exportMyWeights>>,
@@ -753,6 +777,9 @@ export const getExportWeightsUrl = (params?: ExportWeightsParams) => {
     : `/api/weights/export`;
 };
 
+/**
+ * @summary Export weight history to Excel
+ */
 export const exportWeights = async (
   params?: ExportWeightsParams,
   options?: Parameters<typeof customFetch>[1],
@@ -860,6 +887,9 @@ export function useExportWeights<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Export weight history to Excel
+ */
 
 export function useExportWeights<
   TData = Awaited<ReturnType<typeof exportWeights>>,

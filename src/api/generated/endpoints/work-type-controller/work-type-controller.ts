@@ -63,6 +63,9 @@ export const getUpdateWorkTypeUrl = (estateId: string, workType: string) => {
   return `/api/estates/${estateId}/work-types/${workType}`;
 };
 
+/**
+ * @summary Change a work type (e.g. Weighing Required)
+ */
 export const updateWorkType = async (
   estateId: string,
   workType: string,
@@ -140,6 +143,9 @@ export type UpdateWorkTypeMutationVariables = {
   data: UpdateWorkTypeRequest;
 };
 
+/**
+ * @summary Change a work type (e.g. Weighing Required)
+ */
 export const useUpdateWorkType = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -173,6 +179,9 @@ export const getGetWorkTypesUrl = (estateId: string) => {
   return `/api/estates/${estateId}/work-types`;
 };
 
+/**
+ * @summary List a site's work types. Needed by anyone who records attendance or edits sites
+ */
 export const getWorkTypes = async (
   estateId: string,
   options?: Parameters<typeof customFetch>[1],
@@ -285,6 +294,9 @@ export function useGetWorkTypes<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List a site's work types. Needed by anyone who records attendance or edits sites
+ */
 
 export function useGetWorkTypes<
   TData = Awaited<ReturnType<typeof getWorkTypes>>,
@@ -325,6 +337,9 @@ export const getCreateWorkTypeUrl = (estateId: string) => {
   return `/api/estates/${estateId}/work-types`;
 };
 
+/**
+ * @summary Add a work type to a site
+ */
 export const createWorkType = async (
   estateId: string,
   createWorkTypeRequest: CreateWorkTypeRequest,
@@ -397,6 +412,9 @@ export type CreateWorkTypeMutationVariables = {
   data: CreateWorkTypeRequest;
 };
 
+/**
+ * @summary Add a work type to a site
+ */
 export const useCreateWorkType = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -430,6 +448,9 @@ export const getDeleteWorkTypesUrl = (estateId: string) => {
   return `/api/estates/${estateId}/work-types/delete`;
 };
 
+/**
+ * @summary Remove work types from a site
+ */
 export const deleteWorkTypes = async (
   estateId: string,
   deleteWorkTypesBody: string[],
@@ -502,6 +523,9 @@ export type DeleteWorkTypesMutationVariables = {
   data: string[];
 };
 
+/**
+ * @summary Remove work types from a site
+ */
 export const useDeleteWorkTypes = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<

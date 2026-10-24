@@ -12,5 +12,6 @@ export interface Projection {
   httpMethod?: string;
   urlPath?: string;
   description?: string;
+  groupName?: string;
   permissionSets?: PermissionSet[];
 }

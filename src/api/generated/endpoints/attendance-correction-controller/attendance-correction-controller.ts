@@ -64,6 +64,9 @@ export const getCorrectAttendanceUrl = (attendanceId: string) => {
   return `/api/attendance/${attendanceId}/correction`;
 };
 
+/**
+ * @summary Correct an attendance record: site, work type, collection point or category (administrators)
+ */
 export const correctAttendance = async (
   attendanceId: string,
   correctAttendanceRequest: CorrectAttendanceRequest,
@@ -139,6 +142,9 @@ export type CorrectAttendanceMutationVariables = {
   data: CorrectAttendanceRequest;
 };
 
+/**
+ * @summary Correct an attendance record: site, work type, collection point or category (administrators)
+ */
 export const useCorrectAttendance = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -172,6 +178,9 @@ export const getDeleteAttendanceUrl = (attendanceId: string) => {
   return `/api/attendance/${attendanceId}/delete`;
 };
 
+/**
+ * @summary Delete an attendance record that has no weighings (administrators)
+ */
 export const deleteAttendance = async (
   attendanceId: string,
   deleteAttendanceRequest: DeleteAttendanceRequest,
@@ -247,6 +256,9 @@ export type DeleteAttendanceMutationVariables = {
   data: DeleteAttendanceRequest;
 };
 
+/**
+ * @summary Delete an attendance record that has no weighings (administrators)
+ */
 export const useDeleteAttendance = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -281,6 +293,9 @@ export const getGetAttendanceHistoryUrl = (attendanceId: string) => {
   return `/api/attendance/${attendanceId}/corrections`;
 };
 
+/**
+ * @summary View the correction history of an attendance record
+ */
 export const getAttendanceHistory = async (
   attendanceId: string,
   options?: Parameters<typeof customFetch>[1],
@@ -414,6 +429,9 @@ export function useGetAttendanceHistory<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary View the correction history of an attendance record
+ */
 
 export function useGetAttendanceHistory<
   TData = Awaited<ReturnType<typeof getAttendanceHistory>>,

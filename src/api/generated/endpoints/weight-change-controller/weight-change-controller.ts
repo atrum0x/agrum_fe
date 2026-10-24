@@ -39,6 +39,9 @@ export const getRequestWeightCorrectionUrl = (weightId: string) => {
   return `/api/weights/${weightId}/correction`;
 };
 
+/**
+ * @summary Request a correction of a weighing; it applies only after approval
+ */
 export const requestWeightCorrection = async (
   weightId: string,
   requestCorrectionRequest: RequestCorrectionRequest,
@@ -114,6 +117,9 @@ export type RequestWeightCorrectionMutationVariables = {
   data: RequestCorrectionRequest;
 };
 
+/**
+ * @summary Request a correction of a weighing; it applies only after approval
+ */
 export const useRequestWeightCorrection = <
   TError = unknown,
   TContext = unknown,
@@ -155,6 +161,9 @@ export const getRequestWeightCancellationUrl = (weightId: string) => {
   return `/api/weights/${weightId}/cancellation`;
 };
 
+/**
+ * @summary Request a cancellation of a weighing; it applies only after approval
+ */
 export const requestWeightCancellation = async (
   weightId: string,
   requestCancellationRequest: RequestCancellationRequest,
@@ -230,6 +239,9 @@ export type RequestWeightCancellationMutationVariables = {
   data: RequestCancellationRequest;
 };
 
+/**
+ * @summary Request a cancellation of a weighing; it applies only after approval
+ */
 export const useRequestWeightCancellation = <
   TError = unknown,
   TContext = unknown,

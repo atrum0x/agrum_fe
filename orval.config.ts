@@ -10,6 +10,8 @@ export default defineConfig({
       target: './src/api/generated/endpoints',
       schemas: './src/api/generated/models',
       client: 'react-query',
+      // Remove files of endpoints and models that no longer exist before generating
+      clean: true,
       override: {
         mutator: {
           path: './src/api/custom-fetch.ts',

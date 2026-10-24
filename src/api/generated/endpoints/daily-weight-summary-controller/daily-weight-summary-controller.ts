@@ -67,6 +67,9 @@ export const getRecalculateDailyWeightSummaryUrl = () => {
   return `/api/daily-weight-summary/recalculate`;
 };
 
+/**
+ * @summary Recalculate the daily summary now instead of waiting for 10 pm (administrators)
+ */
 export const recalculateDailyWeightSummary = async (
   options?: Parameters<typeof customFetch>[1],
 ): Promise<recalculateDailyWeightSummaryResponse> => {
@@ -121,6 +124,9 @@ export type RecalculateDailyWeightSummaryMutationResult = NonNullable<
 
 export type RecalculateDailyWeightSummaryMutationError = unknown;
 
+/**
+ * @summary Recalculate the daily summary now instead of waiting for 10 pm (administrators)
+ */
 export const useRecalculateDailyWeightSummary = <
   TError = unknown,
   TContext = unknown,
@@ -176,6 +182,9 @@ export const getSearchDailyWeightSummaryUrl = (
     : `/api/daily-weight-summary`;
 };
 
+/**
+ * @summary Search the daily weight summary for all workers at the user's sites
+ */
 export const searchDailyWeightSummary = async (
   params?: SearchDailyWeightSummaryParams,
   options?: Parameters<typeof customFetch>[1],
@@ -306,6 +315,9 @@ export function useSearchDailyWeightSummary<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Search the daily weight summary for all workers at the user's sites
+ */
 
 export function useSearchDailyWeightSummary<
   TData = Awaited<ReturnType<typeof searchDailyWeightSummary>>,
@@ -366,6 +378,9 @@ export const getSearchMyDailyWeightSummaryUrl = (
     : `/api/daily-weight-summary/mine`;
 };
 
+/**
+ * @summary Daily weight summary for pickers: only their own rows
+ */
 export const searchMyDailyWeightSummary = async (
   params?: SearchMyDailyWeightSummaryParams,
   options?: Parameters<typeof customFetch>[1],
@@ -499,6 +514,9 @@ export function useSearchMyDailyWeightSummary<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Daily weight summary for pickers: only their own rows
+ */
 
 export function useSearchMyDailyWeightSummary<
   TData = Awaited<ReturnType<typeof searchMyDailyWeightSummary>>,
@@ -562,6 +580,9 @@ export const getExportMyDailyWeightSummaryUrl = (
     : `/api/daily-weight-summary/mine/export`;
 };
 
+/**
+ * @summary Export a picker's own daily summary to Excel
+ */
 export const exportMyDailyWeightSummary = async (
   params?: ExportMyDailyWeightSummaryParams,
   options?: Parameters<typeof customFetch>[1],
@@ -695,6 +716,9 @@ export function useExportMyDailyWeightSummary<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Export a picker's own daily summary to Excel
+ */
 
 export function useExportMyDailyWeightSummary<
   TData = Awaited<ReturnType<typeof exportMyDailyWeightSummary>>,
@@ -758,6 +782,9 @@ export const getExportDailyWeightSummaryUrl = (
     : `/api/daily-weight-summary/export`;
 };
 
+/**
+ * @summary Export the daily weight summary to Excel
+ */
 export const exportDailyWeightSummary = async (
   params?: ExportDailyWeightSummaryParams,
   options?: Parameters<typeof customFetch>[1],
@@ -891,6 +918,9 @@ export function useExportDailyWeightSummary<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Export the daily weight summary to Excel
+ */
 
 export function useExportDailyWeightSummary<
   TData = Awaited<ReturnType<typeof exportDailyWeightSummary>>,

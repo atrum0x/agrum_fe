@@ -74,6 +74,9 @@ export const getUpdatePermissionSetUrl = (permissionSetId: string) => {
   return `/api/permissionSet/${permissionSetId}`;
 };
 
+/**
+ * @summary Change a permission set's description
+ */
 export const updatePermissionSet = async (
   permissionSetId: string,
   updatePermissionSetRequest: UpdatePermissionSetRequest,
@@ -149,6 +152,9 @@ export type UpdatePermissionSetMutationVariables = {
   data: UpdatePermissionSetRequest;
 };
 
+/**
+ * @summary Change a permission set's description
+ */
 export const useUpdatePermissionSet = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -187,6 +193,9 @@ export const getRevokePermissionSetToUserUrl = (permissionSetId: string) => {
   return `/api/permissionSet/${permissionSetId}/revokeUsers`;
 };
 
+/**
+ * @summary Take a permission set away from users
+ */
 export const revokePermissionSetToUser = async (
   permissionSetId: string,
   revokePermissionSetToUserBody: string[],
@@ -262,6 +271,9 @@ export type RevokePermissionSetToUserMutationVariables = {
   data: string[];
 };
 
+/**
+ * @summary Take a permission set away from users
+ */
 export const useRevokePermissionSetToUser = <
   TError = unknown,
   TContext = unknown,
@@ -303,6 +315,9 @@ export const getGrantPermissionSetToUserUrl = (permissionSetId: string) => {
   return `/api/permissionSet/${permissionSetId}/grantUsers`;
 };
 
+/**
+ * @summary Give a permission set to users
+ */
 export const grantPermissionSetToUser = async (
   permissionSetId: string,
   grantPermissionSetToUserBody: string[],
@@ -378,6 +393,9 @@ export type GrantPermissionSetToUserMutationVariables = {
   data: string[];
 };
 
+/**
+ * @summary Give a permission set to users
+ */
 export const useGrantPermissionSetToUser = <
   TError = unknown,
   TContext = unknown,
@@ -421,6 +439,9 @@ export const getGrantProjectionsToPermissionSetUrl = (
   return `/api/permissionSet/${permissionSetId}/grantProjections`;
 };
 
+/**
+ * @summary Add endpoints to a permission set
+ */
 export const grantProjectionsToPermissionSet = async (
   permissionSetId: string,
   projectionsRequest: ProjectionsRequest,
@@ -500,6 +521,9 @@ export type GrantProjectionsToPermissionSetMutationVariables = {
   data: ProjectionsRequest;
 };
 
+/**
+ * @summary Add endpoints to a permission set
+ */
 export const useGrantProjectionsToPermissionSet = <
   TError = unknown,
   TContext = unknown,
@@ -540,6 +564,9 @@ export const getCreatePermissionSetUrl = () => {
   return `/api/permissionSet/permission-sets`;
 };
 
+/**
+ * @summary Create a permission set
+ */
 export const createPermissionSet = async (
   createPermissionSetRequest: CreatePermissionSetRequest,
   options?: Parameters<typeof customFetch>[1],
@@ -610,6 +637,9 @@ export type CreatePermissionSetMutationVariables = {
   data: CreatePermissionSetRequest;
 };
 
+/**
+ * @summary Create a permission set
+ */
 export const useCreatePermissionSet = <TError = unknown, TContext = unknown>(
   options?: {
     mutation?: UseMutationOptions<
@@ -661,6 +691,9 @@ export const getGetAllPermissionSetsUrl = (
     : `/api/permissionSet`;
 };
 
+/**
+ * @summary List permission sets. Needed to open Permission Sets
+ */
 export const getAllPermissionSets = async (
   params?: GetAllPermissionSetsParams,
   options?: Parameters<typeof customFetch>[1],
@@ -791,6 +824,9 @@ export function useGetAllPermissionSets<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List permission sets. Needed to open Permission Sets
+ */
 
 export function useGetAllPermissionSets<
   TData = Awaited<ReturnType<typeof getAllPermissionSets>>,
@@ -852,6 +888,9 @@ export const getGetUnassignedAppUsersUrl = (
     : `/api/permissionSet/unassignedUsers/${permissionID}`;
 };
 
+/**
+ * @summary List users who do not have a permission set yet
+ */
 export const getUnassignedAppUsers = async (
   permissionID: string,
   params?: GetUnassignedAppUsersParams,
@@ -997,6 +1036,9 @@ export function useGetUnassignedAppUsers<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List users who do not have a permission set yet
+ */
 
 export function useGetUnassignedAppUsers<
   TData = Awaited<ReturnType<typeof getUnassignedAppUsers>>,
@@ -1055,6 +1097,9 @@ export const getGetUnassignedProjectionsUrl = (
     : `/api/permissionSet/revokedProjections/${permissionSetId}`;
 };
 
+/**
+ * @summary List endpoints not in a permission set yet
+ */
 export const getUnassignedProjections = async (
   permissionSetId: string,
   params: GetUnassignedProjectionsParams,
@@ -1203,6 +1248,9 @@ export function useGetUnassignedProjections<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List endpoints not in a permission set yet
+ */
 
 export function useGetUnassignedProjections<
   TData = Awaited<ReturnType<typeof getUnassignedProjections>>,
@@ -1252,6 +1300,9 @@ export const getGetAllProjectionsUrl = () => {
   return `/api/permissionSet/projections`;
 };
 
+/**
+ * @summary List every endpoint that can be granted
+ */
 export const getAllProjections = async (
   options?: Parameters<typeof customFetch>[1],
 ): Promise<getAllProjectionsResponse> => {
@@ -1368,6 +1419,9 @@ export function useGetAllProjections<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List every endpoint that can be granted
+ */
 
 export function useGetAllProjections<
   TData = Awaited<ReturnType<typeof getAllProjections>>,
@@ -1427,6 +1481,9 @@ export const getGetGrantedAppUsersUrl = (
     : `/api/permissionSet/grantedUsers/${permissionID}`;
 };
 
+/**
+ * @summary View the users who have a permission set
+ */
 export const getGrantedAppUsers = async (
   permissionID: string,
   params?: GetGrantedAppUsersParams,
@@ -1572,6 +1629,9 @@ export function useGetGrantedAppUsers<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary View the users who have a permission set
+ */
 
 export function useGetGrantedAppUsers<
   TData = Awaited<ReturnType<typeof getGrantedAppUsers>>,
@@ -1630,6 +1690,9 @@ export const getGetGrantedProjectionsUrl = (
     : `/api/permissionSet/grantedProjections/${permissionSetId}`;
 };
 
+/**
+ * @summary View the endpoints in a permission set
+ */
 export const getGrantedProjections = async (
   permissionSetId: string,
   params: GetGrantedProjectionsParams,
@@ -1778,6 +1841,9 @@ export function useGetGrantedProjections<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary View the endpoints in a permission set
+ */
 
 export function useGetGrantedProjections<
   TData = Awaited<ReturnType<typeof getGrantedProjections>>,
@@ -1831,6 +1897,9 @@ export const getRevokeProjectionsFromPermissionSetUrl = (
   return `/api/permissionSet/${permissionSetId}/revokeProjections`;
 };
 
+/**
+ * @summary Remove endpoints from a permission set
+ */
 export const revokeProjectionsFromPermissionSet = async (
   permissionSetId: string,
   projectionsRequest: ProjectionsRequest,
@@ -1910,6 +1979,9 @@ export type RevokeProjectionsFromPermissionSetMutationVariables = {
   data: ProjectionsRequest;
 };
 
+/**
+ * @summary Remove endpoints from a permission set
+ */
 export const useRevokeProjectionsFromPermissionSet = <
   TError = unknown,
   TContext = unknown,

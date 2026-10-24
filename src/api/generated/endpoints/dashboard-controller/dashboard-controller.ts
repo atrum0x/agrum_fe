@@ -56,6 +56,9 @@ export const getGetDashboardUrl = () => {
   return `/api/dashboard`;
 };
 
+/**
+ * @summary Dashboard: today's attendance, weighings and total weight for the user's sites
+ */
 export const getDashboard = async (
   options?: Parameters<typeof customFetch>[1],
 ): Promise<getDashboardResponse> => {
@@ -156,6 +159,9 @@ export function useGetDashboard<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Dashboard: today's attendance, weighings and total weight for the user's sites
+ */
 
 export function useGetDashboard<
   TData = Awaited<ReturnType<typeof getDashboard>>,
@@ -195,6 +201,9 @@ export const getGetMyDashboardUrl = () => {
   return `/api/dashboard/mine`;
 };
 
+/**
+ * @summary Dashboard for pickers: only their own weighings and total today
+ */
 export const getMyDashboard = async (
   options?: Parameters<typeof customFetch>[1],
 ): Promise<getMyDashboardResponse> => {
@@ -295,6 +304,9 @@ export function useGetMyDashboard<
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Dashboard for pickers: only their own weighings and total today
+ */
 
 export function useGetMyDashboard<
   TData = Awaited<ReturnType<typeof getMyDashboard>>,

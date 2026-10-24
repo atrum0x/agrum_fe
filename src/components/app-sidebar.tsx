@@ -18,7 +18,7 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
 } from "@/components/ui/sidebar"
-import { TerminalIcon } from "lucide-react"
+import logo from "@/assets/logo.png"
 import { useAuth } from "@/context/AuthContext";
 
 
@@ -72,8 +72,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" render={<a href="#" />}>
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <TerminalIcon className="size-4" />
+              <div className="flex aspect-square size-8 items-center justify-center overflow-hidden rounded-lg">
+                <img src={logo} alt="Agrum" className="size-full object-contain" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">Agrum</span>

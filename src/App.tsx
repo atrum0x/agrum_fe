@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate, Outlet, RouterProvider } from "react-rou
 import Login from "./pages/Login";
 import { Users } from "./pages/Users"; // Your new users page
 import ProtectedRoute from "./components/ProtectedRoute";
+import RequirePermission from "./components/RequirePermission";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import MainLayout from "./layout/MainLayout";
 import Landing from "./pages/Landing";
@@ -46,15 +47,21 @@ const router = createBrowserRouter([
             children: [
               { index: true, element: <Navigate to="/landing" replace /> },
               { path: "landing", element: <Landing /> },
-              { path: "users", element: <Users /> },
-              { path: "permission-sets", element: <PermissionSets /> },
-              { path: "sites", element: <Estates /> },
-              { path: "attendance", element: <Attendance /> },
-              { path: "weight-history", element: <WeightHistory /> },
-              { path: "weight-approvals", element: <WeightApprovals /> },
-              { path: "daily-weight-summary", element: <DailyWeightSummary /> },
-              { path: "my-weighings", element: <WeightHistory key="mine" mine /> },
-              { path: "my-daily-summary", element: <DailyWeightSummary key="mine" mine /> },
+              {
+                // Menu pages need their permission (nav-data)
+                element: <RequirePermission />,
+                children: [
+                  { path: "users", element: <Users /> },
+                  { path: "permission-sets", element: <PermissionSets /> },
+                  { path: "sites", element: <Estates /> },
+                  { path: "attendance", element: <Attendance /> },
+                  { path: "weight-history", element: <WeightHistory /> },
+                  { path: "weight-approvals", element: <WeightApprovals /> },
+                  { path: "daily-weight-summary", element: <DailyWeightSummary /> },
+                  { path: "my-weighings", element: <WeightHistory key="mine" mine /> },
+                  { path: "my-daily-summary", element: <DailyWeightSummary key="mine" mine /> },
+                ],
+              },
             ],
           },
         ],

@@ -35,8 +35,8 @@ const toForm = (estate?: Estate): EstateForm => ({
 })
 
 const numberFields: { key: NumberKey; label: string; step: string }[] = [
-    { key: "fullDayQtyKg", label: "Full Day Qty (kg)", step: "1" },
-    { key: "halfDayQtyKg", label: "Half Day Qty (kg)", step: "1" },
+    { key: "fullDayQtyKg", label: "Full Day Qty (kg)", step: "0.01" },
+    { key: "halfDayQtyKg", label: "Half Day Qty (kg)", step: "0.01" },
     { key: "maxDailyTransactions", label: "Max Daily Transactions", step: "1" },
     { key: "variancePercent", label: "Variance %", step: "0.01" },
 ]

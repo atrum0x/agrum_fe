@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { Estate } from "@/api/generated/models"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/context/AuthContext"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -29,6 +30,8 @@ const TruncatedCell = ({ value, className = "max-w-xs" }: { value: string; class
 
 export const Estates = () => {
 
+    // Buttons are shown only for granted endpoints; the backend still checks
+    const { can } = useAuth()
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
     const [selectedItemId, setSelectedItemId] = React.useState<string | null>(null)
     const [searchTerm, setSearchTerm] = React.useState("")
@@ -136,12 +139,16 @@ export const Estates = () => {
                 </div>
 
                 <ButtonGroup className="px-4 lg:px-6 mb-2">
-                    <Button variant="outline" size="lg" disabled={!selectedEstate} onClick={() => setEstateForm("edit")}>
-                        Edit
-                    </Button>
-                    <Button variant="outline" size="lg" onClick={() => setEstateForm("new")}>
-                        New Site
-                    </Button>
+                    {can("PUT:/api/estates/{estateId}") && (
+                        <Button variant="outline" size="lg" disabled={!selectedEstate} onClick={() => setEstateForm("edit")}>
+                            Edit
+                        </Button>
+                    )}
+                    {can("POST:/api/estates") && (
+                        <Button variant="outline" size="lg" onClick={() => setEstateForm("new")}>
+                            New Site
+                        </Button>
+                    )}
                 </ButtonGroup>
                 {estateForm && (
                     <EstateFormCard

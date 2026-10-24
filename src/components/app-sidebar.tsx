@@ -20,13 +20,13 @@ import {
 } from "@/components/ui/sidebar"
 import logo from "@/assets/logo.png"
 import { useAuth } from "@/context/AuthContext";
-import { navData, type NavItem } from "@/components/nav-data";
+import { filterNav, navData, type NavItem } from "@/components/nav-data";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navigate = useNavigate();
 
   // 👇 1. Call useAuth INSIDE the component body (fixes the hook error)
-  const { user } = useAuth();
+  const { user, can } = useAuth();
 
   // 👇 2. Map user data inside with fallbacks to satisfy NavUser's required strings
   const sidebarUserData = {
@@ -57,7 +57,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
-          {navData.map((item, index) => (
+          {filterNav(navData, can).map((item, index) => (
             <Tree key={index} item={item} />
           ))}
         </SidebarMenu>

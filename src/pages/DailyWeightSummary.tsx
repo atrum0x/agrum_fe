@@ -6,6 +6,7 @@ import { IconCalendar, IconDownload, IconRefresh, IconX } from "@tabler/icons-re
 import { useQueryClient } from "@tanstack/react-query"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/context/AuthContext"
 import { Calendar } from "@/components/ui/calendar"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -67,6 +68,8 @@ const formatRange = (range: DateRange) => {
  */
 export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
     const queryClient = useQueryClient()
+    // Buttons are shown only for granted endpoints; the backend still checks
+    const { can } = useAuth()
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
     const today = React.useMemo(() => startOfToday(), [])
     // DS-01: Date From / To are mandatory; yesterday by default, since today is only final after 10 pm
@@ -293,16 +296,18 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        {!mine && (
+                        {!mine && can("POST:/api/daily-weight-summary/recalculate") && (
                             <Button variant="outline" size="lg" disabled={recalculate.isPending} onClick={recalculateNow}>
                                 <IconRefresh />
                                 {recalculate.isPending ? "Recalculating..." : "Recalculate Now"}
                             </Button>
                         )}
-                        <Button variant="outline" size="lg" disabled={isExporting || rows.length === 0} onClick={exportRows}>
-                            <IconDownload />
-                            {isExporting ? "Exporting..." : "Export"}
-                        </Button>
+                        {can(mine ? "GET:/api/daily-weight-summary/mine/export" : "GET:/api/daily-weight-summary/export") && (
+                            <Button variant="outline" size="lg" disabled={isExporting || rows.length === 0} onClick={exportRows}>
+                                <IconDownload />
+                                {isExporting ? "Exporting..." : "Export"}
+                            </Button>
+                        )}
                     </div>
                 </div>
 

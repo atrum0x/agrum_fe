@@ -2,16 +2,23 @@ import React, { createContext, useContext } from "react";
 import { useGetCurrentUser, useLogoutWeb } from "@/api/generated/endpoints/auth-controller/auth-controller";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
+import { hasPermission, type Permission } from "@/lib/permissions";
 
 export type UserProfile = {
     username: string;
     email: string;
+    employeeName?: string;
+    superuser?: boolean;
+    // Granted projection ids, e.g. "GET:/api/weights/mine"
+    permissions?: string[];
 };
 
 interface AuthContextType {
     user: UserProfile | undefined;
     isLoading: boolean;
     isAuthenticated: boolean;
+    // Hides what the user may not use; the backend still checks every call
+    can: (permission: Permission) => boolean;
     logout: () => void;
 }
 
@@ -47,9 +54,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const isAuthenticated = !isError && !!user;
+    const can = (permission: Permission) => hasPermission(user, permission);
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, isAuthenticated, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, isAuthenticated, can, logout }}>
             {children}
         </AuthContext.Provider>
     );

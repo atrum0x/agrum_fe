@@ -28,6 +28,7 @@ import {
     useRevokePermissionSets,
 } from "@/api/generated/endpoints/employee-controller/employee-controller"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/context/AuthContext"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Badge } from "@/components/ui/badge"
 import { ButtonGroup } from "@/components/ui/button-group"
@@ -55,6 +56,8 @@ const TruncatedCell = ({ value, className = "max-w-xs" }: { value: string; class
 export const Users = () => {
 
     const queryClient = useQueryClient()
+    // Buttons are shown only for granted endpoints; the backend still checks
+    const { can } = useAuth()
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
     const [selectedItemId, setSelectedItemId] = React.useState<string | null>(null)
     const [searchTerm, setSearchTerm] = React.useState("")
@@ -255,15 +258,21 @@ export const Users = () => {
                 </div>
 
                 <ButtonGroup className="px-4 lg:px-6 mb-2">
-                    <Button variant="outline" size="lg" disabled={!selectedEmployee} onClick={() => setEmployeeForm("edit")}>
-                        Edit
-                    </Button>
-                    <Button variant="outline" size="lg" disabled={!hasUserAccount} onClick={() => setEmployeeForm("password")}>
-                        Set New Password
-                    </Button>
-                    <Button variant="outline" size="lg" onClick={() => setEmployeeForm("new")}>
-                        New Employee
-                    </Button>
+                    {can("PUT:/api/employees/{employeeCode}") && (
+                        <Button variant="outline" size="lg" disabled={!selectedEmployee} onClick={() => setEmployeeForm("edit")}>
+                            Edit
+                        </Button>
+                    )}
+                    {can("PUT:/api/employees/{employeeCode}/password") && (
+                        <Button variant="outline" size="lg" disabled={!hasUserAccount} onClick={() => setEmployeeForm("password")}>
+                            Set New Password
+                        </Button>
+                    )}
+                    {can("POST:/api/employees") && (
+                        <Button variant="outline" size="lg" onClick={() => setEmployeeForm("new")}>
+                            New Employee
+                        </Button>
+                    )}
                 </ButtonGroup>
                 {employeeForm === "password" && activeSelectedItemId && (
                     <SetPasswordCard employeeCode={activeSelectedItemId} onClose={closeEmployeeForm} />

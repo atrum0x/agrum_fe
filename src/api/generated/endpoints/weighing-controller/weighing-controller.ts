@@ -255,6 +255,111 @@ export const useSyncWeights = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(getSyncWeightsMutationOptions(options), queryClient);
 };
+export type recordManualWeightResponse200 = {
+  data: WeightRecordDto;
+  status: 200;
+};
+
+export type recordManualWeightResponseSuccess =
+  recordManualWeightResponse200 & {
+    headers: Headers;
+  };
+export type recordManualWeightResponse = recordManualWeightResponseSuccess;
+
+export const getRecordManualWeightUrl = () => {
+  return `/api/weights/manual`;
+};
+
+export const recordManualWeight = async (
+  recordWeightRequest: RecordWeightRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<recordManualWeightResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<recordManualWeightResponse>(getRecordManualWeightUrl(), {
+    ...options,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(recordWeightRequest),
+  });
+};
+
+export const getRecordManualWeightMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof recordManualWeight>>,
+    TError,
+    RecordManualWeightMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof recordManualWeight>>,
+  TError,
+  RecordManualWeightMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["recordManualWeight"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof recordManualWeight>>,
+    RecordManualWeightMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return recordManualWeight(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RecordManualWeightMutationResult = NonNullable<
+  Awaited<ReturnType<typeof recordManualWeight>>
+>;
+export type RecordManualWeightMutationBody = RecordWeightRequest;
+export type RecordManualWeightMutationError = unknown;
+export type RecordManualWeightMutationVariables = { data: RecordWeightRequest };
+
+export const useRecordManualWeight = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof recordManualWeight>>,
+      TError,
+      RecordManualWeightMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof recordManualWeight>>,
+  TError,
+  RecordManualWeightMutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getRecordManualWeightMutationOptions(options),
+    queryClient,
+  );
+};
 export type getWeighableWorkersResponse200 = {
   data: WeighableWorkerDto[];
   status: 200;

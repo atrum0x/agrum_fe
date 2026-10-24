@@ -5,6 +5,7 @@
  * Powered By Atrum
  * OpenAPI spec version: 1.0.0
  */
+import type { CreateEmployeeRequestEmployeeCategory } from "./createEmployeeRequestEmployeeCategory";
 import type { CreateEmployeeRequestEmploymentStatus } from "./createEmployeeRequestEmploymentStatus";
 
 export interface CreateEmployeeRequest {
@@ -15,15 +16,13 @@ export interface CreateEmployeeRequest {
   phoneNumber?: string;
   bankAccountNumber?: string;
   designation?: string;
-  employeeCategory?: string;
+  employeeCategory?: CreateEmployeeRequestEmployeeCategory;
   employmentStatus?: CreateEmployeeRequestEmploymentStatus;
   startDate?: string;
   endDate?: string;
   defaultEstateId?: string;
   defaultCollectionPointCode?: string;
   homeEstateId?: string;
-  division?: string;
-  field?: string;
   isUserAccount?: boolean;
   password?: string;
 }

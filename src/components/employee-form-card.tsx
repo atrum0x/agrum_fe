@@ -14,7 +14,7 @@ import { estateOptions } from "@/lib/lov-options"
 import { getGetAllEmployeesQueryKey, useCreate1, useUpdate } from "@/api/generated/endpoints/employee-controller/employee-controller"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
 import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
-import { CreateEmployeeRequestEmploymentStatus } from "@/api/generated/models"
+import { CreateEmployeeRequestEmployeeCategory, CreateEmployeeRequestEmploymentStatus } from "@/api/generated/models"
 import type { CollectionPointDto, CreateEmployeeRequest, EmployeeDto, Estate, UpdateEmployeeRequest } from "@/api/generated/models"
 
 const emptyForm: CreateEmployeeRequest = {
@@ -24,7 +24,7 @@ const emptyForm: CreateEmployeeRequest = {
     nic: "",
     phoneNumber: "",
     designation: "",
-    employeeCategory: "",
+    employeeCategory: undefined,
     employmentStatus: CreateEmployeeRequestEmploymentStatus.ACTIVE,
     startDate: "",
     endDate: "",
@@ -36,7 +36,7 @@ const emptyForm: CreateEmployeeRequest = {
 }
 
 // The update endpoint replaces every field, so fields the form does not show
-// (bank account, division, field) are carried over to avoid clearing them.
+// (bank account) are carried over to avoid clearing them.
 const toForm = (employee: EmployeeDto): CreateEmployeeRequest => ({
     ...emptyForm,
     employeeCode: employee.employeeCode ?? "",
@@ -46,23 +46,28 @@ const toForm = (employee: EmployeeDto): CreateEmployeeRequest => ({
     phoneNumber: employee.phoneNumber ?? "",
     bankAccountNumber: employee.bankAccountNumber,
     designation: employee.designation ?? "",
-    employeeCategory: employee.employeeCategory ?? "",
+    employeeCategory: employee.employeeCategory,
     employmentStatus: employee.employmentStatus ?? CreateEmployeeRequestEmploymentStatus.ACTIVE,
     startDate: employee.startDate ?? "",
     endDate: employee.endDate ?? "",
     homeEstateId: employee.homeEstateId ?? "",
     defaultEstateId: employee.defaultEstateId ?? "",
     defaultCollectionPointCode: employee.defaultCollectionPointCode ?? "",
-    division: employee.division,
-    field: employee.field,
 })
 
 const statusOptions: LovOption<CreateEmployeeRequestEmploymentStatus>[] =
     Object.values(CreateEmployeeRequestEmploymentStatus).map((status) => ({ value: status, label: status }))
 
+// Employment Category, the default Attendance Category (FSD 2.4)
+const categoryOptions: LovOption<CreateEmployeeRequestEmployeeCategory>[] =
+    Object.values(CreateEmployeeRequestEmployeeCategory).map((category) => ({
+        value: category,
+        label: category.charAt(0) + category.slice(1).toLowerCase(),
+    }))
+
 type DateField = "startDate" | "endDate"
 
-type TextField = "employeeCode" | "firstName" | "lastName" | "nic" | "phoneNumber" | "designation" | "employeeCategory"
+type TextField = "employeeCode" | "firstName" | "lastName" | "nic" | "phoneNumber" | "designation"
 
 const textFields: { key: TextField; label: string; required?: boolean }[] = [
     { key: "employeeCode", label: "Employee Code", required: true },
@@ -71,7 +76,6 @@ const textFields: { key: TextField; label: string; required?: boolean }[] = [
     { key: "nic", label: "NIC" },
     { key: "phoneNumber", label: "Phone" },
     { key: "designation", label: "Designation" },
-    { key: "employeeCategory", label: "Category", required: true },
 ]
 
 /** Create an employee, or edit `employee` when one is given. Mount it only while it should be shown. */
@@ -88,6 +92,7 @@ export const EmployeeFormCard = ({
     const queryClient = useQueryClient()
     const [form, setForm] = React.useState<CreateEmployeeRequest>(() => employee ? toForm(employee) : emptyForm)
     const [openDatePicker, setOpenDatePicker] = React.useState<DateField | null>(null)
+    const [categoryMissing, setCategoryMissing] = React.useState(false)
     const toDate = (value?: string) => value ? parse(value, "yyyy-MM-dd", new Date()) : undefined
     const { mutate: createEmployee, isPending: isCreating, error: createError } = useCreate1()
     const { mutate: updateEmployee, isPending: isUpdating, error: updateError } = useUpdate()
@@ -133,6 +138,11 @@ export const EmployeeFormCard = ({
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault()
+        // A dropdown is not covered by the browser's required check
+        if (!form.employeeCategory) {
+            setCategoryMissing(true)
+            return
+        }
         // Send blanks as null so optional fields are not stored as empty strings
         const data = Object.fromEntries(
             Object.entries(form).map(([key, value]) => [key, value === "" ? undefined : value]),
@@ -159,8 +169,6 @@ export const EmployeeFormCard = ({
                 defaultEstateId: data.defaultEstateId,
                 defaultCollectionPointCode: data.defaultCollectionPointCode,
                 homeEstateId: data.homeEstateId,
-                division: data.division,
-                field: data.field,
             }
             updateEmployee({ employeeCode, data: updateData }, { onSuccess })
             return
@@ -189,6 +197,11 @@ export const EmployeeFormCard = ({
                     </CardHeader>
 
                     <CardContent className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+                        {categoryMissing && !form.employeeCategory && (
+                            <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
+                                Please select the Employment Category.
+                            </div>
+                        )}
                         {error instanceof Error && (
                             <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
                                 {error.message}
@@ -211,6 +224,17 @@ export const EmployeeFormCard = ({
                                     />
                                 </Field>
                             ))}
+                            <Field>
+                                <FieldLabel htmlFor="employee-form-category" className="text-muted-foreground">Employment Category *</FieldLabel>
+                                <LovSelect
+                                    id="employee-form-category"
+                                    value={form.employeeCategory ?? ""}
+                                    onValueChange={(value) => value && setField("employeeCategory", value)}
+                                    options={categoryOptions}
+                                    placeholder="Select a category"
+                                    invalid={categoryMissing && !form.employeeCategory}
+                                />
+                            </Field>
                             <Field>
                                 <FieldLabel htmlFor="employee-form-status" className="text-muted-foreground">Status</FieldLabel>
                                 <LovSelect

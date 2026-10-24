@@ -902,3 +902,166 @@ export function useGetCurrentUser<
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+export type getCurrentUserMobileResponse200 = {
+  data: CurrentUserProfileResponse;
+  status: 200;
+};
+
+export type getCurrentUserMobileResponseSuccess =
+  getCurrentUserMobileResponse200 & {
+    headers: Headers;
+  };
+export type getCurrentUserMobileResponse = getCurrentUserMobileResponseSuccess;
+
+export const getGetCurrentUserMobileUrl = () => {
+  return `/api/auth/me/mobile`;
+};
+
+export const getCurrentUserMobile = async (
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getCurrentUserMobileResponse> => {
+  return customFetch<getCurrentUserMobileResponse>(
+    getGetCurrentUserMobileUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetCurrentUserMobileQueryKey = () => {
+  return [`/api/auth/me/mobile`] as const;
+};
+
+export const getGetCurrentUserMobileQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCurrentUserMobile>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getCurrentUserMobile>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCurrentUserMobileQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getCurrentUserMobile>>
+  > = ({ signal }) => getCurrentUserMobile({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCurrentUserMobile>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetCurrentUserMobileQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getCurrentUserMobile>>
+>;
+export type GetCurrentUserMobileQueryError = unknown;
+
+export function useGetCurrentUserMobile<
+  TData = Awaited<ReturnType<typeof getCurrentUserMobile>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCurrentUserMobile>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCurrentUserMobile>>,
+          TError,
+          Awaited<ReturnType<typeof getCurrentUserMobile>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCurrentUserMobile<
+  TData = Awaited<ReturnType<typeof getCurrentUserMobile>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCurrentUserMobile>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCurrentUserMobile>>,
+          TError,
+          Awaited<ReturnType<typeof getCurrentUserMobile>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetCurrentUserMobile<
+  TData = Awaited<ReturnType<typeof getCurrentUserMobile>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCurrentUserMobile>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+
+export function useGetCurrentUserMobile<
+  TData = Awaited<ReturnType<typeof getCurrentUserMobile>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getCurrentUserMobile>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetCurrentUserMobileQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}

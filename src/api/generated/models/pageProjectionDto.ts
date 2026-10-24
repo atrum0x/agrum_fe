@@ -14,11 +14,11 @@ export interface PageProjectionDto {
   totalPages?: number;
   first?: boolean;
   last?: boolean;
-  numberOfElements?: number;
   size?: number;
   content?: ProjectionDto[];
   number?: number;
   sort?: SortObject;
+  numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 }

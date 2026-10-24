@@ -440,6 +440,120 @@ export const useSyncAttendance = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(getSyncAttendanceMutationOptions(options), queryClient);
 };
+export type recordOtherSiteAttendanceResponse200 = {
+  data: AttendanceDto[];
+  status: 200;
+};
+
+export type recordOtherSiteAttendanceResponseSuccess =
+  recordOtherSiteAttendanceResponse200 & {
+    headers: Headers;
+  };
+export type recordOtherSiteAttendanceResponse =
+  recordOtherSiteAttendanceResponseSuccess;
+
+export const getRecordOtherSiteAttendanceUrl = () => {
+  return `/api/attendance/other-site`;
+};
+
+export const recordOtherSiteAttendance = async (
+  recordAttendanceRequest: RecordAttendanceRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<recordOtherSiteAttendanceResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<recordOtherSiteAttendanceResponse>(
+    getRecordOtherSiteAttendanceUrl(),
+    {
+      ...options,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...getHeaders(options?.headers),
+      },
+      body: JSON.stringify(recordAttendanceRequest),
+    },
+  );
+};
+
+export const getRecordOtherSiteAttendanceMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof recordOtherSiteAttendance>>,
+    TError,
+    RecordOtherSiteAttendanceMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof recordOtherSiteAttendance>>,
+  TError,
+  RecordOtherSiteAttendanceMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["recordOtherSiteAttendance"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof recordOtherSiteAttendance>>,
+    RecordOtherSiteAttendanceMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return recordOtherSiteAttendance(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RecordOtherSiteAttendanceMutationResult = NonNullable<
+  Awaited<ReturnType<typeof recordOtherSiteAttendance>>
+>;
+export type RecordOtherSiteAttendanceMutationBody = RecordAttendanceRequest;
+export type RecordOtherSiteAttendanceMutationError = unknown;
+export type RecordOtherSiteAttendanceMutationVariables = {
+  data: RecordAttendanceRequest;
+};
+
+export const useRecordOtherSiteAttendance = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof recordOtherSiteAttendance>>,
+      TError,
+      RecordOtherSiteAttendanceMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof recordOtherSiteAttendance>>,
+  TError,
+  RecordOtherSiteAttendanceMutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getRecordOtherSiteAttendanceMutationOptions(options),
+    queryClient,
+  );
+};
 export type getAvailableWorkersResponse200 = {
   data: AttendanceWorkerDto[];
   status: 200;

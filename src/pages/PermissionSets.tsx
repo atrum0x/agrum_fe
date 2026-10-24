@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/context/AuthContext"
 import { PageTitle } from "@/components/page-title"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -159,6 +160,8 @@ import {
 
 export const PermissionSets = () => {
     const queryClient = useQueryClient()
+    // Buttons are shown only for granted endpoints; the backend still checks
+    const { can } = useAuth()
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
     const [rowSelection, setRowSelection] = React.useState({})
     const [columnVisibility, setColumnVisibility] =
@@ -431,12 +434,16 @@ export const PermissionSets = () => {
                 </div>
 
                 <ButtonGroup className="px-4 lg:px-6 mb-2">
-                    <Button variant="outline" size="lg" disabled={!selectedPermissionSet} onClick={() => setPermissionSetForm("edit")}>
-                        Edit
-                    </Button>
-                    <Button variant="outline" size="lg" onClick={() => setPermissionSetForm("new")}>
-                        New Permission Set
-                    </Button>
+                    {can("PUT:/api/permissionSet/{permissionSetId}") && (
+                        <Button variant="outline" size="lg" disabled={!selectedPermissionSet} onClick={() => setPermissionSetForm("edit")}>
+                            Edit
+                        </Button>
+                    )}
+                    {can("POST:/api/permissionSet/permission-sets") && (
+                        <Button variant="outline" size="lg" onClick={() => setPermissionSetForm("new")}>
+                            New Permission Set
+                        </Button>
+                    )}
                 </ButtonGroup>
                 {permissionSetForm && (
                     <PermissionSetFormCard

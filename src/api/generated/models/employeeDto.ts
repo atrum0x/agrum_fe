@@ -5,6 +5,7 @@
  * Powered By Atrum
  * OpenAPI spec version: 1.0.0
  */
+import type { EmployeeDtoEmployeeCategory } from "./employeeDtoEmployeeCategory";
 import type { EmployeeDtoEmploymentStatus } from "./employeeDtoEmploymentStatus";
 
 export interface EmployeeDto {
@@ -15,14 +16,12 @@ export interface EmployeeDto {
   phoneNumber?: string;
   bankAccountNumber?: string;
   designation?: string;
-  employeeCategory?: string;
+  employeeCategory?: EmployeeDtoEmployeeCategory;
   employmentStatus?: EmployeeDtoEmploymentStatus;
   startDate?: string;
   endDate?: string;
   defaultEstateId?: string;
   defaultCollectionPointCode?: string;
   homeEstateId?: string;
-  division?: string;
-  field?: string;
   hasUserAccount?: boolean;
 }

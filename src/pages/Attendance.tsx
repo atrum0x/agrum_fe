@@ -7,6 +7,7 @@ import { RecordAttendanceCard } from "@/components/record-attendance-card"
 import { CorrectAttendanceCard } from "@/components/correct-attendance-card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/context/AuthContext"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -77,6 +78,8 @@ const formatRange = (range: DateRange) => {
 
 export const Attendance = () => {
 
+    // Buttons are shown only for granted endpoints; the backend still checks
+    const { can } = useAuth()
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
     const today = React.useMemo(() => startOfToday(), [])
     // Date From / To are mandatory and default to today
@@ -298,29 +301,35 @@ export const Attendance = () => {
 
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2 px-4 lg:px-6">
                     <ButtonGroup>
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            onClick={() => {
-                                setSuccessMessage(null)
-                                setAttendanceForm("record")
-                            }}
-                        >
-                            <IconPlus />
-                            Record Attendance
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="lg"
-                            disabled={!canCorrect}
-                            onClick={() => {
-                                setSuccessMessage(null)
-                                setAttendanceForm("correct")
-                            }}
-                        >
-                            <IconEdit />
-                            Correct Attendance
-                        </Button>
+                        {(can("POST:/api/attendance") || can("POST:/api/attendance/other-site")) && (
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                onClick={() => {
+                                    setSuccessMessage(null)
+                                    setAttendanceForm("record")
+                                }}
+                            >
+                                <IconPlus />
+                                Record Attendance
+                            </Button>
+                        )}
+                        {/* AT-14: administrators only */}
+                        {(can("PUT:/api/attendance/{attendanceId}/correction")
+                            || can("POST:/api/attendance/{attendanceId}/delete")) && (
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                disabled={!canCorrect}
+                                onClick={() => {
+                                    setSuccessMessage(null)
+                                    setAttendanceForm("correct")
+                                }}
+                            >
+                                <IconEdit />
+                                Correct Attendance
+                            </Button>
+                        )}
                     </ButtonGroup>
                     <p className="text-sm text-muted-foreground">
                         {rows.length} {rows.length === 1 ? "record" : "records"} · {formatRange(range)}

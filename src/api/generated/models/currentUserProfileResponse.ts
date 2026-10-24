@@ -8,4 +8,7 @@
 
 export interface CurrentUserProfileResponse {
   username?: string;
+  employeeName?: string;
+  superuser?: boolean;
+  permissions?: string[];
 }

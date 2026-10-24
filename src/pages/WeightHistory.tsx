@@ -16,6 +16,7 @@ import {
 } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/context/AuthContext"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { Calendar } from "@/components/ui/calendar"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -196,6 +197,8 @@ const saveHiddenColumns = (storageKey: string, hidden: string[]) => {
  * no worker filter and no change buttons. The server enforces both through separate endpoints.
  */
 export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
+    // Buttons are shown only for granted endpoints; the backend still checks
+    const { can } = useAuth()
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
     const today = React.useMemo(() => startOfToday(), [])
     // WH-01: Date From / To are mandatory and default to today
@@ -502,22 +505,25 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
 
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2 px-4 lg:px-6">
                     <ButtonGroup>
-                        {!mine && (
-                            <>
-                                <Button variant="outline" size="lg" disabled={!canChange} onClick={() => openDialog("CORRECTION")}>
-                                    <IconEdit />
-                                    Correct Weight
-                                </Button>
-                                <Button variant="outline" size="lg" disabled={!canChange} onClick={() => openDialog("CANCELLATION")}>
-                                    <IconTrash />
-                                    Request Cancellation
-                                </Button>
-                            </>
+                        {/* WH-03 */}
+                        {!mine && can("POST:/api/weights/{weightId}/correction") && (
+                            <Button variant="outline" size="lg" disabled={!canChange} onClick={() => openDialog("CORRECTION")}>
+                                <IconEdit />
+                                Correct Weight
+                            </Button>
                         )}
-                        <Button variant="outline" size="lg" disabled={!selected} onClick={() => openDialog("history")}>
-                            <IconHistory />
-                            View History
-                        </Button>
+                        {!mine && can("POST:/api/weights/{weightId}/cancellation") && (
+                            <Button variant="outline" size="lg" disabled={!canChange} onClick={() => openDialog("CANCELLATION")}>
+                                <IconTrash />
+                                Request Cancellation
+                            </Button>
+                        )}
+                        {can("GET:/api/weights/{weightId}/history") && (
+                            <Button variant="outline" size="lg" disabled={!selected} onClick={() => openDialog("history")}>
+                                <IconHistory />
+                                View History
+                            </Button>
+                        )}
                     </ButtonGroup>
                     <div className="flex items-center gap-3">
                         <p className="text-sm text-muted-foreground">
@@ -543,10 +549,12 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                                 ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        <Button variant="outline" size="lg" disabled={isExporting || totalRows === 0} onClick={exportRows}>
-                            <IconDownload />
-                            {isExporting ? "Exporting..." : "Export"}
-                        </Button>
+                        {can(mine ? "GET:/api/weights/mine/export" : "GET:/api/weights/export") && (
+                            <Button variant="outline" size="lg" disabled={isExporting || totalRows === 0} onClick={exportRows}>
+                                <IconDownload />
+                                {isExporting ? "Exporting..." : "Export"}
+                            </Button>
+                        )}
                     </div>
                 </div>
 

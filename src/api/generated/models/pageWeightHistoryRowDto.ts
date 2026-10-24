@@ -14,11 +14,11 @@ export interface PageWeightHistoryRowDto {
   totalPages?: number;
   first?: boolean;
   last?: boolean;
-  numberOfElements?: number;
   size?: number;
   content?: WeightHistoryRowDto[];
   number?: number;
   sort?: SortObject;
+  numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 }

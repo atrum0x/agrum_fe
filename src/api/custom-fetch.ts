@@ -25,6 +25,9 @@ export const customFetch = async <T>(
     }
   }
 
+  // A trailing slash on the base URL would produce "//api/..." which Spring Security rejects
+  baseUrl = baseUrl.replace(/\/+$/, '');
+
   const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
 
   const response = await fetch(fullUrl, {

@@ -73,25 +73,11 @@ export const getRefreshWebUrl = () => {
  * @summary Keep a web session alive
  */
 export const refreshWeb = async (
-  refreshRequest: RefreshRequest,
   options?: Parameters<typeof customFetch>[1],
 ): Promise<refreshWebResponse> => {
-  const getHeaders = (
-    h?: NonNullable<RequestInit["headers"]>,
-  ): Record<string, string | readonly string[]> => {
-    if (!h) return {};
-    if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Array.isArray(h)) return Object.fromEntries(h);
-    return h;
-  };
   return customFetch<refreshWebResponse>(getRefreshWebUrl(), {
     ...options,
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getHeaders(options?.headers),
-    },
-    body: JSON.stringify(refreshRequest),
   });
 };
 
@@ -102,14 +88,14 @@ export const getRefreshWebMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof refreshWeb>>,
     TError,
-    RefreshWebMutationVariables,
+    void,
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof refreshWeb>>,
   TError,
-  RefreshWebMutationVariables,
+  void,
   TContext
 > => {
   const mutationKey = ["refreshWeb"];
@@ -123,11 +109,9 @@ export const getRefreshWebMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof refreshWeb>>,
-    RefreshWebMutationVariables
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return refreshWeb(data, requestOptions);
+    void
+  > = () => {
+    return refreshWeb(requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -136,9 +120,8 @@ export const getRefreshWebMutationOptions = <
 export type RefreshWebMutationResult = NonNullable<
   Awaited<ReturnType<typeof refreshWeb>>
 >;
-export type RefreshWebMutationBody = RefreshRequest;
+
 export type RefreshWebMutationError = unknown;
-export type RefreshWebMutationVariables = { data: RefreshRequest };
 
 /**
  * @summary Keep a web session alive
@@ -148,7 +131,7 @@ export const useRefreshWeb = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof refreshWeb>>,
       TError,
-      RefreshWebMutationVariables,
+      void,
       TContext
     >;
     request?: SecondParameter<typeof customFetch>;
@@ -157,7 +140,7 @@ export const useRefreshWeb = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof refreshWeb>>,
   TError,
-  RefreshWebMutationVariables,
+  void,
   TContext
 > => {
   return useMutation(getRefreshWebMutationOptions(options), queryClient);

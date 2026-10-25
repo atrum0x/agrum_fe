@@ -12,12 +12,12 @@ import type { WeightHistoryRowDto } from "./weightHistoryRowDto";
 export interface PageWeightHistoryRowDto {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: WeightHistoryRowDto[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;

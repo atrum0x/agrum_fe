@@ -68,7 +68,7 @@ export const Users = () => {
     const [unassignedEstateSearch, setUnassignedEstateSearch] = React.useState("")
     const [isPermissionAssignmentOpen, setIsPermissionAssignmentOpen] = React.useState(false)
     const [isEstateAssignmentOpen, setIsEstateAssignmentOpen] = React.useState(false)
-    const [employeeForm, setEmployeeForm] = React.useState<"new" | "edit" | "password" | null>(null)
+    const [employeeForm, setEmployeeForm] = React.useState<"new" | "edit" | "password" | "account" | null>(null)
     const closeEmployeeForm = React.useCallback(() => setEmployeeForm(null), [])
     const [selectedPermissionSetIds, setSelectedPermissionSetIds] = React.useState<string[]>([])
     const [selectedEstateIds, setSelectedEstateIds] = React.useState<string[]>([])
@@ -263,8 +263,19 @@ export const Users = () => {
                             Edit
                         </Button>
                     )}
-                    {can("PUT:/api/employees/{employeeCode}/password") && (
-                        <Button variant="outline" size="lg" disabled={!hasUserAccount} onClick={() => setEmployeeForm("password")}>
+                    {/* Create User Account or Set New Password, whichever fits the selected employee */}
+                    {can("POST:/api/users") && !hasUserAccount && (
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            disabled={!selectedEmployee}
+                            onClick={() => setEmployeeForm("account")}
+                        >
+                            Create User Account
+                        </Button>
+                    )}
+                    {can("PUT:/api/employees/{employeeCode}/password") && hasUserAccount && (
+                        <Button variant="outline" size="lg" onClick={() => setEmployeeForm("password")}>
                             Set New Password
                         </Button>
                     )}
@@ -274,8 +285,12 @@ export const Users = () => {
                         </Button>
                     )}
                 </ButtonGroup>
-                {employeeForm === "password" && activeSelectedItemId && (
-                    <SetPasswordCard employeeCode={activeSelectedItemId} onClose={closeEmployeeForm} />
+                {(employeeForm === "password" || employeeForm === "account") && activeSelectedItemId && (
+                    <SetPasswordCard
+                        employeeCode={activeSelectedItemId}
+                        createAccount={employeeForm === "account"}
+                        onClose={closeEmployeeForm}
+                    />
                 )}
                 {(employeeForm === "new" || employeeForm === "edit") && (
                     <EmployeeFormCard

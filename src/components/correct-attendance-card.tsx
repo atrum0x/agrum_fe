@@ -120,10 +120,9 @@ export const CorrectAttendanceCard = ({
     const [showInvalid, setShowInvalid] = React.useState(false)
     const [isConfirmingDelete, setIsConfirmingDelete] = React.useState(false)
     const [showHistory, setShowHistory] = React.useState(false)
-    const { mutate: correctAttendance, isPending: isSaving, error: saveError, reset: resetSave } = useCorrectAttendance()
-    const { mutate: deleteAttendance, isPending: isDeleting, error: deleteError, reset: resetDelete } = useDeleteAttendance()
+    const { mutate: correctAttendance, isPending: isSaving } = useCorrectAttendance()
+    const { mutate: deleteAttendance, isPending: isDeleting } = useDeleteAttendance()
     const isPending = isSaving || isDeleting
-    const error = saveError ?? deleteError
 
     const { data: estatesResponse } = useGetAllEstates()
     // AT-05: only Active sites, but keep the current one so its name still shows
@@ -190,8 +189,6 @@ export const CorrectAttendanceCard = ({
 
     const handleSave = (event: React.FormEvent) => {
         event.preventDefault()
-        resetSave()
-        resetDelete()
         setIsConfirmingDelete(false)
         setShowInvalid(true)
         setValidationError(saveValidationError)
@@ -211,8 +208,6 @@ export const CorrectAttendanceCard = ({
     }
 
     const handleDelete = () => {
-        resetSave()
-        resetDelete()
         setShowInvalid(true)
         setValidationError(reasonError)
         if (reasonError) return
@@ -247,11 +242,6 @@ export const CorrectAttendanceCard = ({
                     </CardHeader>
 
                     <CardContent className="flex min-h-0 flex-col gap-4 overflow-y-auto">
-                        {error instanceof Error && (
-                            <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                                {error.message}
-                            </div>
-                        )}
                         {validationError && (
                             <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
                                 {validationError}

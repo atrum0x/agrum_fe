@@ -2,7 +2,7 @@ import React from "react"
 import { PageTitle } from "@/components/page-title"
 import { format, isSameDay, parseISO, startOfToday } from "date-fns"
 import type { DateRange } from "react-day-picker"
-import { IconCalendar, IconEdit, IconPlus, IconX } from "@tabler/icons-react"
+import { IconCalendar, IconEdit, IconPlus } from "@tabler/icons-react"
 import { RecordAttendanceCard } from "@/components/record-attendance-card"
 import { CorrectAttendanceCard } from "@/components/correct-attendance-card"
 import { Badge } from "@/components/ui/badge"
@@ -33,6 +33,7 @@ import type {
     WorkTypeDto,
 } from "@/api/generated/models"
 import { SearchAutocomplete, type AutocompleteOption } from "@/components/search-autocomplete"
+import { notifySuccess } from "@/lib/notify"
 
 type Filters = {
     employee: string
@@ -91,7 +92,6 @@ export const Attendance = () => {
     const [selectedIds, setSelectedIds] = React.useState<string[]>([])
     const [attendanceForm, setAttendanceForm] = React.useState<"record" | "correct" | null>(null)
     const closeAttendanceForm = React.useCallback(() => setAttendanceForm(null), [])
-    const [successMessage, setSuccessMessage] = React.useState<string | null>(null)
 
     const { data: estatesResponse } = useGetAllEstates()
     const estates = React.useMemo(() => toList<Estate>(estatesResponse), [estatesResponse])
@@ -129,7 +129,7 @@ export const Attendance = () => {
         [usersResponse])
 
     // The server limits the list to the user's granted sites and sorts it by date, site and EMP No
-    const { data: attendanceResponse, isLoading, error: listError } = useSearchAttendance({
+    const { data: attendanceResponse, isLoading } = useSearchAttendance({
         dateFrom: format(range.from ?? today, "yyyy-MM-dd"),
         // While a range is half picked, show just the first day
         dateTo: format(range.to ?? range.from ?? today, "yyyy-MM-dd"),
@@ -305,10 +305,7 @@ export const Attendance = () => {
                             <Button
                                 variant="outline"
                                 size="lg"
-                                onClick={() => {
-                                    setSuccessMessage(null)
-                                    setAttendanceForm("record")
-                                }}
+                                onClick={() => setAttendanceForm("record")}
                             >
                                 <IconPlus />
                                 Record Attendance
@@ -321,10 +318,7 @@ export const Attendance = () => {
                                 variant="outline"
                                 size="lg"
                                 disabled={!canCorrect}
-                                onClick={() => {
-                                    setSuccessMessage(null)
-                                    setAttendanceForm("correct")
-                                }}
+                                onClick={() => setAttendanceForm("correct")}
                             >
                                 <IconEdit />
                                 Correct Attendance
@@ -341,7 +335,7 @@ export const Attendance = () => {
                     <RecordAttendanceCard
                         onClose={closeAttendanceForm}
                         onSaved={(count) => {
-                            setSuccessMessage(`Attendance recorded for ${count} workers.`)
+                            notifySuccess(`Attendance recorded for ${count} workers.`)
                             // Show today's list, where the new records are
                             selectRange({ from: today, to: today })
                         }}
@@ -355,25 +349,10 @@ export const Attendance = () => {
                         attendance={selectedAttendance}
                         onClose={closeAttendanceForm}
                         onSaved={(message) => {
-                            setSuccessMessage(message)
+                            notifySuccess(message)
                             setSelectedIds([])
                         }}
                     />
-                )}
-
-                {successMessage && (
-                    <div className="mx-4 mb-2 flex items-center justify-between gap-2 rounded-md bg-green-50 p-3 text-sm font-medium text-green-700 lg:mx-6 dark:bg-green-950 dark:text-green-300">
-                        <span>{successMessage}</span>
-                        <Button variant="ghost" size="icon-sm" aria-label="Dismiss" onClick={() => setSuccessMessage(null)}>
-                            <IconX />
-                        </Button>
-                    </div>
-                )}
-
-                {listError instanceof Error && (
-                    <div className="mx-4 mb-2 rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive lg:mx-6">
-                        {listError.message}
-                    </div>
                 )}
 
                 <div className="px-4 pt-2 lg:px-6">

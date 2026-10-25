@@ -20,7 +20,7 @@ export function LoginForm({
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { mutate: doLogin, isPending, error } = useLoginWeb();
+  const { mutate: doLogin, isPending } = useLoginWeb();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,11 +45,6 @@ export function LoginForm({
             Enter your credentials below to access the admin dashboard
           </p>
         </div>
-        {error instanceof Error && (
-          <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive text-center">
-            {error && <p className="text-red-500">{error.message}</p>}
-          </div>
-        )}
         <Field>
           <FieldLabel htmlFor="username">Username</FieldLabel>
           <Input 

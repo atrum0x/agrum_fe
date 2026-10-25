@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
+import { errorMessage, notifyError } from "@/lib/notify"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover"
@@ -48,15 +49,14 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
     const [selectedCodes, setSelectedCodes] = React.useState<string[]>([])
     const [drafts, setDrafts] = React.useState<Draft[]>([])
     const [showInvalid, setShowInvalid] = React.useState(false)
-    const [saveErrors, setSaveErrors] = React.useState<string[]>([])
     const [isSaving, setIsSaving] = React.useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = React.useState(false)
     const nextNewKey = React.useRef(0)
 
-    const { data: response, isLoading, error: listError } = useGetWorkTypes(estateId)
-    const { mutateAsync: createWorkType } = useCreateWorkType()
-    const { mutateAsync: updateWorkType } = useUpdateWorkType()
-    const { mutate: deleteWorkTypes, isPending: isDeleting, error: deleteError } = useDeleteWorkTypes()
+    const { data: response, isLoading } = useGetWorkTypes(estateId)
+    const { mutateAsync: createWorkType } = useCreateWorkType({ mutation: { meta: { errorToast: false } } })
+    const { mutateAsync: updateWorkType } = useUpdateWorkType({ mutation: { meta: { errorToast: false } } })
+    const { mutate: deleteWorkTypes, isPending: isDeleting } = useDeleteWorkTypes()
     const workTypes = React.useMemo<WorkTypeDto[]>(() => {
         const value = response as unknown
         if (Array.isArray(value)) return value as WorkTypeDto[]
@@ -90,7 +90,6 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
     const cancel = () => {
         setDrafts([])
         setShowInvalid(false)
-        setSaveErrors([])
     }
 
     const save = async () => {
@@ -99,9 +98,7 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
             return
         }
         setIsSaving(true)
-        setSaveErrors([])
         const failed: Draft[] = []
-        const errors: string[] = []
         for (const draft of drafts) {
             const workType = draft.workType.trim()
             try {
@@ -112,13 +109,12 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
                 }
             } catch (error) {
                 failed.push(draft)
-                errors.push(`${workType}: ${error instanceof Error ? error.message : "Save failed"}`)
+                notifyError(`${workType}: ${errorMessage(error, "Save failed")}`)
             }
         }
         await refresh()
         // Keep only the rows that failed open
         setDrafts(failed)
-        setSaveErrors(errors)
         setShowInvalid(false)
         setIsSaving(false)
     }
@@ -175,7 +171,6 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
         </>
     )
 
-    const error = listError ?? deleteError
     const allSelected = visibleCodes.length > 0 && visibleCodes.every((code) => activeSelection.includes(code))
 
     return (
@@ -240,17 +235,6 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
                     </div>
                 )}
             </div>
-
-            {error instanceof Error && (
-                <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                    {error.message}
-                </div>
-            )}
-            {saveErrors.length > 0 && (
-                <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                    {saveErrors.map((message) => <p key={message}>{message}</p>)}
-                </div>
-            )}
 
             <div className="relative rounded-lg border bg-background">
                 <Table>

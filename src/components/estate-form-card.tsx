@@ -54,10 +54,9 @@ export const EstateFormCard = ({
     const isEdit = Boolean(estate)
     const queryClient = useQueryClient()
     const [form, setForm] = React.useState(() => toForm(estate))
-    const { mutate: createEstate, isPending: isCreating, error: createError } = useCreateEstate()
-    const { mutate: updateEstate, isPending: isUpdating, error: updateError } = useUpdateEstate()
+    const { mutate: createEstate, isPending: isCreating } = useCreateEstate()
+    const { mutate: updateEstate, isPending: isUpdating } = useUpdateEstate()
     const isPending = isCreating || isUpdating
-    const error = isEdit ? updateError : createError
 
     const setField = <K extends keyof EstateForm>(key: K, value: EstateForm[K]) =>
         setForm((current) => ({ ...current, [key]: value }))
@@ -114,11 +113,6 @@ export const EstateFormCard = ({
                     </CardHeader>
 
                     <CardContent className="flex flex-col gap-4">
-                        {error instanceof Error && (
-                            <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                                {error.message}
-                            </div>
-                        )}
                         <div className="grid gap-4 rounded-xl bg-muted/50 p-4 md:grid-cols-2">
                             <Field>
                                 <FieldLabel htmlFor="estate-form-id" className="text-muted-foreground">Site ID *</FieldLabel>

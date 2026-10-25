@@ -37,7 +37,6 @@ export const WeightDecisionCard = ({
     const approve = useApproveWeightChange()
     const disapprove = useDisapproveWeightChange()
     const isPending = approve.isPending || disapprove.isPending
-    const error = approve.error ?? disapprove.error
     const isCorrection = change.changeType === "CORRECTION"
 
     React.useEffect(() => {
@@ -84,11 +83,6 @@ export const WeightDecisionCard = ({
                 </CardHeader>
 
                 <CardContent className="flex min-h-0 flex-col gap-4 overflow-y-auto">
-                    {error instanceof Error && (
-                        <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                            {error.message}
-                        </div>
-                    )}
                     <div className="grid gap-4 rounded-xl bg-muted/50 p-4 sm:grid-cols-2">
                         <Detail label="Worker">{change.employeeCode} · {change.employeeName}</Detail>
                         <Detail label="Weighing">#{change.entrySequence} · {formatDate(change.weighDate)} · {change.estateId}</Detail>

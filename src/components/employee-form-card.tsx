@@ -94,10 +94,9 @@ export const EmployeeFormCard = ({
     const [openDatePicker, setOpenDatePicker] = React.useState<DateField | null>(null)
     const [categoryMissing, setCategoryMissing] = React.useState(false)
     const toDate = (value?: string) => value ? parse(value, "yyyy-MM-dd", new Date()) : undefined
-    const { mutate: createEmployee, isPending: isCreating, error: createError } = useCreate1()
-    const { mutate: updateEmployee, isPending: isUpdating, error: updateError } = useUpdate()
+    const { mutate: createEmployee, isPending: isCreating } = useCreate1()
+    const { mutate: updateEmployee, isPending: isUpdating } = useUpdate()
     const isPending = isCreating || isUpdating
-    const error = isEdit ? updateError : createError
     const { data: estatesResponse } = useGetAllEstates()
     const estates = React.useMemo<Estate[]>(() => {
         const response = estatesResponse as unknown
@@ -200,11 +199,6 @@ export const EmployeeFormCard = ({
                         {categoryMissing && !form.employeeCategory && (
                             <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
                                 Please select the Employment Category.
-                            </div>
-                        )}
-                        {error instanceof Error && (
-                            <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                                {error.message}
                             </div>
                         )}
                         <div className="grid auto-rows-min gap-4 rounded-xl bg-muted/50 p-4 sm:grid-cols-2 md:grid-cols-3">

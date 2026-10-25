@@ -26,10 +26,9 @@ export const PermissionSetFormCard = ({
     const queryClient = useQueryClient()
     const [permissionSetId, setPermissionSetId] = React.useState(permissionSet?.permissionSetId ?? "")
     const [description, setDescription] = React.useState(permissionSet?.description ?? "")
-    const { mutate: createPermissionSet, isPending: isCreating, error: createError } = useCreatePermissionSet()
-    const { mutate: updatePermissionSet, isPending: isUpdating, error: updateError } = useUpdatePermissionSet()
+    const { mutate: createPermissionSet, isPending: isCreating } = useCreatePermissionSet()
+    const { mutate: updatePermissionSet, isPending: isUpdating } = useUpdatePermissionSet()
     const isPending = isCreating || isUpdating
-    const error = isEdit ? updateError : createError
 
     React.useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
@@ -75,11 +74,6 @@ export const PermissionSetFormCard = ({
                     </CardHeader>
 
                     <CardContent className="flex flex-col gap-4">
-                        {error instanceof Error && (
-                            <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                                {error.message}
-                            </div>
-                        )}
                         <div className="flex flex-col gap-4 rounded-xl bg-muted/50 p-4">
                             <Field>
                                 <FieldLabel htmlFor="permission-set-form-id" className="text-muted-foreground">

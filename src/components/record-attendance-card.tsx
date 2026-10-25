@@ -81,7 +81,7 @@ export const RecordAttendanceCard = ({
     const [ticked, setTicked] = React.useState<Map<string, TickedWorker>>(new Map())
     const [showInvalid, setShowInvalid] = React.useState(false)
     const [isConfirming, setIsConfirming] = React.useState(false)
-    const { mutate: recordAttendance, isPending, error, reset } = useRecordAttendance()
+    const { mutate: recordAttendance, isPending } = useRecordAttendance()
 
     const { data: defaultsResponse } = useGetAttendanceDefaults()
     const defaults = toValue<AttendanceDefaultsDto>(defaultsResponse)
@@ -111,7 +111,7 @@ export const RecordAttendanceCard = ({
 
     // Workers from all sites, Active, employed today and not yet marked (D-19); searched on the server
     const workerSearch = React.useDeferredValue(search.trim())
-    const { data: workersResponse, isLoading: isLoadingWorkers, error: workersError } =
+    const { data: workersResponse, isLoading: isLoadingWorkers } =
         useGetAvailableWorkers({ search: workerSearch || undefined })
     const workers = React.useMemo(() => toList<AttendanceWorkerDto>(workersResponse), [workersResponse])
 
@@ -176,7 +176,6 @@ export const RecordAttendanceCard = ({
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault()
-        reset()
         if (validationError) {
             setShowInvalid(true)
             return
@@ -228,11 +227,6 @@ export const RecordAttendanceCard = ({
                     </CardHeader>
 
                     <CardContent className="flex min-h-0 flex-col gap-4 overflow-y-auto">
-                        {error instanceof Error && (
-                            <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                                {error.message}
-                            </div>
-                        )}
                         {showInvalid && validationError && (
                             <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
                                 {validationError}
@@ -298,11 +292,6 @@ export const RecordAttendanceCard = ({
                                         onChange={(event) => setSearch(event.target.value)}
                                     />
                                 </div>
-                                {workersError instanceof Error && (
-                                    <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                                        {workersError.message}
-                                    </div>
-                                )}
                                 <ScrollArea className="h-72 rounded-lg border bg-background">
                                     {workers.map((worker) => {
                                         const code = worker.employeeCode ?? ""

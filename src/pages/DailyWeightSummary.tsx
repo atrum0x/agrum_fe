@@ -2,7 +2,7 @@ import React from "react"
 import { PageTitle } from "@/components/page-title"
 import { format, isSameDay, startOfToday, subDays } from "date-fns"
 import type { DateRange } from "react-day-picker"
-import { IconCalendar, IconDownload, IconRefresh, IconX } from "@tabler/icons-react"
+import { IconCalendar, IconDownload, IconRefresh } from "@tabler/icons-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -25,6 +25,7 @@ import {
     unwrap,
 } from "@/lib/weight-format"
 import { downloadFile } from "@/api/download"
+import { notifyError, notifyInfo, notifySuccess } from "@/lib/notify"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
 import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
 import { useGetWorkTypes } from "@/api/generated/endpoints/work-type-controller/work-type-controller"
@@ -78,9 +79,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
     const [month, setMonth] = React.useState<Date>(yesterday)
     const [draftFilters, setDraftFilters] = React.useState<Filters>(emptyFilters)
     const [filters, setFilters] = React.useState<Filters>(emptyFilters)
-    const [message, setMessage] = React.useState<string | null>(null)
     const [isExporting, setIsExporting] = React.useState(false)
-    const [actionError, setActionError] = React.useState<string | null>(null)
     const recalculate = useRecalculateDailyWeightSummary()
 
     const { data: estatesResponse } = useGetAllEstates()
@@ -117,7 +116,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
     const employeeCode = mine ? undefined : blankToUndefined(filters.employeeCode)
     const allSearch = useSearchDailyWeightSummary({ ...params, employeeCode }, { query: { enabled: !mine } })
     const mySearch = useSearchMyDailyWeightSummary(params, { query: { enabled: mine } })
-    const { data: response, isLoading, error: listError } = mine ? mySearch : allSearch
+    const { data: response, isLoading } = mine ? mySearch : allSearch
     const result = unwrap<DailyWeightSummaryResultDto>(response)
     const rows = result?.rows ?? []
 
@@ -144,30 +143,25 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
     }
 
     const exportRows = async () => {
-        setActionError(null)
         setIsExporting(true)
         try {
             await downloadFile(mine ? "/api/daily-weight-summary/mine/export" : "/api/daily-weight-summary/export",
                 { ...params, employeeCode })
         } catch (error) {
-            setActionError(error instanceof Error ? error.message : "Export failed.")
+            notifyError(error, "Export failed.")
         } finally {
             setIsExporting(false)
         }
     }
 
     const recalculateNow = () => {
-        setActionError(null)
-        setMessage(null)
         recalculate.mutate(undefined, {
             onSuccess: (dates) => {
                 const count = toList<string>(dates).length
-                setMessage(count
-                    ? `Summary recalculated for ${count} ${count === 1 ? "date" : "dates"}.`
-                    : "A recalculation is already running. Try again in a moment.")
+                if (count) notifySuccess(`Summary recalculated for ${count} ${count === 1 ? "date" : "dates"}.`)
+                else notifyInfo("A recalculation is already running. Try again in a moment.")
                 void queryClient.invalidateQueries({ queryKey: getSearchDailyWeightSummaryQueryKey().slice(0, 1) })
             },
-            onError: (error) => setActionError(error instanceof Error ? error.message : "Recalculation failed."),
         })
     }
 
@@ -310,20 +304,6 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                         )}
                     </div>
                 </div>
-
-                {message && (
-                    <div className="mx-4 mb-2 flex items-center justify-between gap-2 rounded-md bg-green-50 p-3 text-sm font-medium text-green-700 lg:mx-6 dark:bg-green-950 dark:text-green-300">
-                        <span>{message}</span>
-                        <Button variant="ghost" size="icon-sm" aria-label="Dismiss" onClick={() => setMessage(null)}>
-                            <IconX />
-                        </Button>
-                    </div>
-                )}
-                {(listError instanceof Error || actionError) && (
-                    <div className="mx-4 mb-2 rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive lg:mx-6">
-                        {actionError ?? (listError as Error).message}
-                    </div>
-                )}
 
                 <div className="px-4 pt-2 lg:px-6">
                     <div className="relative overflow-x-auto rounded-lg border bg-background">

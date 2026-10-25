@@ -39,14 +39,14 @@ export const GrantedUsersTable = ({ estateId }: { estateId: string }) => {
     const [selectedCodes, setSelectedCodes] = React.useState<string[]>([])
     const [selectedUnassignedCodes, setSelectedUnassignedCodes] = React.useState<string[]>([])
 
-    const { data: grantedResponse, isLoading, error: listError } = useGetGrantedUsers(estateId, { search: search || undefined })
+    const { data: grantedResponse, isLoading } = useGetGrantedUsers(estateId, { search: search || undefined })
     const { data: unassignedResponse } = useGetUnassignedUsers(
         estateId,
         { search: unassignedSearch || undefined },
         { query: { enabled: isAssignOpen } },
     )
-    const { mutate: grantUsers, isPending: isGranting, error: grantError } = useGrantUsers()
-    const { mutate: revokeUsers, isPending: isRevoking, error: revokeError } = useRevokeUsers()
+    const { mutate: grantUsers, isPending: isGranting } = useGrantUsers()
+    const { mutate: revokeUsers, isPending: isRevoking } = useRevokeUsers()
     const grantedUsers = React.useMemo(() => toEmployees(grantedResponse), [grantedResponse])
     const unassignedUsers = React.useMemo(() => toEmployees(unassignedResponse), [unassignedResponse])
     const grantedCodes = codesOf(grantedUsers)
@@ -63,7 +63,6 @@ export const GrantedUsersTable = ({ estateId }: { estateId: string }) => {
         setSelectedUnassignedCodes([])
     }
 
-    const error = listError ?? revokeError
 
     return (
         <>
@@ -91,11 +90,6 @@ export const GrantedUsersTable = ({ estateId }: { estateId: string }) => {
                                 onChange={(event) => setUnassignedSearch(event.target.value)}
                                 aria-label="Search unassigned users"
                             />
-                            {grantError instanceof Error && (
-                                <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                                    {grantError.message}
-                                </div>
-                            )}
                             {selectedUnassignedCodes.length > 0 && (
                                 <Button
                                     type="button"
@@ -152,11 +146,6 @@ export const GrantedUsersTable = ({ estateId }: { estateId: string }) => {
                 </Sheet>
             </div>
 
-            {error instanceof Error && (
-                <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                    {error.message}
-                </div>
-            )}
 
             <div className="relative rounded-lg border bg-background">
                 {selectedCodes.length > 0 && (

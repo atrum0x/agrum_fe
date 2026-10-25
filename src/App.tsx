@@ -6,7 +6,9 @@ import RequirePermission from "./components/RequirePermission";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import MainLayout from "./layout/MainLayout";
 import Landing from "./pages/Landing";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/toast";
+import { notifyError } from "@/lib/notify";
 import { AuthProvider } from "./context/AuthContext";
 import { PermissionSets } from "./pages/PermissionSets";
 import { Estates } from "./pages/Estates";
@@ -17,6 +19,17 @@ import { DailyWeightSummary } from "./pages/DailyWeightSummary";
 
 
 const queryClient = new QueryClient({
+  // Every failed API call shows its message as a toast, unless the caller opts out with meta.errorToast
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      if (query.meta?.errorToast !== false) notifyError(error);
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: (error, _variables, _context, mutation) => {
+      if (mutation.meta?.errorToast !== false) notifyError(error);
+    },
+  }),
   defaultOptions: {
     queries: {
       retry: 1, 
@@ -75,7 +88,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <Toaster>
           <RouterProvider router={router} />
+        </Toaster>
       </TooltipProvider>
     </QueryClientProvider>
   );

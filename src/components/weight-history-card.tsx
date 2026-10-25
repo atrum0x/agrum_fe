@@ -53,7 +53,7 @@ const ChangeEntry = ({ change }: { change: WeightChangeDto }) => (
  * Mount it only while it should be shown.
  */
 export const WeightHistoryCard = ({ weightId, onClose }: { weightId: string; onClose: () => void }) => {
-    const { data: response, isLoading, error } = useGetWeightHistory(weightId)
+    const { data: response, isLoading } = useGetWeightHistory(weightId)
     const audit = unwrap<WeightAuditDto>(response)
     const weighing = audit?.weighing
     const changes = audit?.changes ?? []
@@ -83,11 +83,6 @@ export const WeightHistoryCard = ({ weightId, onClose }: { weightId: string; onC
                 </CardHeader>
 
                 <CardContent className="flex min-h-0 flex-col gap-4 overflow-y-auto pb-4">
-                    {error instanceof Error && (
-                        <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                            {error.message}
-                        </div>
-                    )}
                     {isLoading && <p className="p-4 text-center text-sm text-muted-foreground">Loading history...</p>}
 
                     {weighing && (

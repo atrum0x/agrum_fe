@@ -1,6 +1,5 @@
 import React from "react"
 import { PageTitle } from "@/components/page-title"
-import { IconX } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -8,17 +7,17 @@ import { WeightDecisionCard } from "@/components/weight-decision-card"
 import { useGetPendingWeightChanges } from "@/api/generated/endpoints/weight-approval-controller/weight-approval-controller"
 import type { WeightChangeDto } from "@/api/generated/models"
 import { changeTypeLabels, formatDate, formatDateTime, formatKg, toList } from "@/lib/weight-format"
+import { notifySuccess } from "@/lib/notify"
 
 /**
  * "Authorize Weight Lines": every pending correction / cancellation at the user's sites, oldest first.
  * Click a request to approve or disapprove it.
  */
 export const WeightApprovals = () => {
-    const { data: response, isLoading, error } = useGetPendingWeightChanges()
+    const { data: response, isLoading } = useGetPendingWeightChanges()
     const changes = React.useMemo(() => toList<WeightChangeDto>(response), [response])
     const [openId, setOpenId] = React.useState<number | null>(null)
     const closeDecision = React.useCallback(() => setOpenId(null), [])
-    const [successMessage, setSuccessMessage] = React.useState<string | null>(null)
     const open = changes.find((change) => change.changeId === openId)
 
     return (
@@ -35,22 +34,8 @@ export const WeightApprovals = () => {
                     key={open.changeId}
                     change={open}
                     onClose={closeDecision}
-                    onSaved={setSuccessMessage}
+                    onSaved={notifySuccess}
                 />
-            )}
-
-            {successMessage && (
-                <div className="mx-4 mb-2 flex items-center justify-between gap-2 rounded-md bg-green-50 p-3 text-sm font-medium text-green-700 lg:mx-6 dark:bg-green-950 dark:text-green-300">
-                    <span>{successMessage}</span>
-                    <Button variant="ghost" size="icon-sm" aria-label="Dismiss" onClick={() => setSuccessMessage(null)}>
-                        <IconX />
-                    </Button>
-                </div>
-            )}
-            {error instanceof Error && (
-                <div className="mx-4 mb-2 rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive lg:mx-6">
-                    {error.message}
-                </div>
             )}
 
             <div className="px-4 pt-2 lg:px-6">
@@ -70,10 +55,7 @@ export const WeightApprovals = () => {
                         </TableHeader>
                         <TableBody>
                             {changes.map((change) => (
-                                <TableRow key={change.changeId} className="cursor-pointer" onClick={() => {
-                                    setSuccessMessage(null)
-                                    setOpenId(change.changeId ?? null)
-                                }}>
+                                <TableRow key={change.changeId} className="cursor-pointer" onClick={() => setOpenId(change.changeId ?? null)}>
                                     <TableCell className="whitespace-nowrap">
                                         <p>{change.requestedBy}</p>
                                         <p className="text-xs text-muted-foreground">{formatDateTime(change.requestedAt)}</p>

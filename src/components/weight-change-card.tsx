@@ -51,7 +51,6 @@ export const WeightChangeCard = ({
     const correction = useRequestWeightCorrection()
     const cancellation = useRequestWeightCancellation()
     const isPending = correction.isPending || cancellation.isPending
-    const error = correction.error ?? cancellation.error
 
     React.useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
@@ -121,11 +120,6 @@ export const WeightChangeCard = ({
                     </CardHeader>
 
                     <CardContent className="flex min-h-0 flex-col gap-4 overflow-y-auto">
-                        {error instanceof Error && (
-                            <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                                {error.message}
-                            </div>
-                        )}
                         {validationError && (
                             <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
                                 {validationError}

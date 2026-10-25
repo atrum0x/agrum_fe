@@ -33,6 +33,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         query: {
             retry: false, // Don't spam retries if the user isn't logged in
             refetchOnWindowFocus: false,
+            // Not being logged in is not an error: ProtectedRoute sends the user to /login
+            meta: { errorToast: false },
         }
     });
 

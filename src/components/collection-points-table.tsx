@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
+import { errorMessage, notifyError } from "@/lib/notify"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover"
@@ -53,15 +54,14 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
     const [selectedCodes, setSelectedCodes] = React.useState<string[]>([])
     const [drafts, setDrafts] = React.useState<Draft[]>([])
     const [showInvalid, setShowInvalid] = React.useState(false)
-    const [saveErrors, setSaveErrors] = React.useState<string[]>([])
     const [isSaving, setIsSaving] = React.useState(false)
     const [isDeleteOpen, setIsDeleteOpen] = React.useState(false)
     const nextNewKey = React.useRef(0)
 
-    const { data: response, isLoading, error: listError } = useGetCollectionPoints(estateId, { search: search || undefined })
-    const { mutateAsync: createCollectionPoint } = useCreateCollectionPoint()
-    const { mutateAsync: updateCollectionPoint } = useUpdateCollectionPoint()
-    const { mutate: deleteCollectionPoints, isPending: isDeleting, error: deleteError } = useDeleteCollectionPoints()
+    const { data: response, isLoading } = useGetCollectionPoints(estateId, { search: search || undefined })
+    const { mutateAsync: createCollectionPoint } = useCreateCollectionPoint({ mutation: { meta: { errorToast: false } } })
+    const { mutateAsync: updateCollectionPoint } = useUpdateCollectionPoint({ mutation: { meta: { errorToast: false } } })
+    const { mutate: deleteCollectionPoints, isPending: isDeleting } = useDeleteCollectionPoints()
     const collectionPoints = React.useMemo<CollectionPointDto[]>(() => {
         const value = response as unknown
         if (Array.isArray(value)) return value as CollectionPointDto[]
@@ -104,7 +104,6 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
     const cancel = () => {
         setDrafts([])
         setShowInvalid(false)
-        setSaveErrors([])
     }
 
     const isInvalid = (draft: Draft, field: "cpCode" | "name") => showInvalid && !draft[field].trim()
@@ -115,11 +114,9 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
             return
         }
         setIsSaving(true)
-        setSaveErrors([])
         // Save the new default last so it is the one left standing
         const ordered = [...drafts].sort((a, b) => Number(a.isDefault && !a.wasDefault) - Number(b.isDefault && !b.wasDefault))
         const failed: Draft[] = []
-        const errors: string[] = []
         for (const draft of ordered) {
             const data = { name: draft.name.trim(), description: draft.description.trim() || undefined, isDefault: draft.isDefault }
             try {
@@ -130,13 +127,12 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
                 }
             } catch (error) {
                 failed.push(draft)
-                errors.push(`${draft.cpCode.trim()}: ${error instanceof Error ? error.message : "Save failed"}`)
+                notifyError(`${draft.cpCode.trim()}: ${errorMessage(error, "Save failed")}`)
             }
         }
         await refresh()
         // Keep only the rows that failed open, in their original order
         setDrafts(drafts.filter((draft) => failed.includes(draft)))
-        setSaveErrors(errors)
         setShowInvalid(false)
         setIsSaving(false)
     }
@@ -211,7 +207,6 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
         </>
     )
 
-    const error = listError ?? deleteError
     const allSelected = visibleCodes.length > 0 && visibleCodes.every((code) => activeSelection.includes(code))
 
     return (
@@ -286,17 +281,6 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
                     </div>
                 )}
             </div>
-
-            {error instanceof Error && (
-                <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                    {error.message}
-                </div>
-            )}
-            {saveErrors.length > 0 && (
-                <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
-                    {saveErrors.map((message) => <p key={message}>{message}</p>)}
-                </div>
-            )}
 
             <div className="relative rounded-lg border bg-background">
                 <Table>

@@ -12,7 +12,6 @@ import {
     IconHistory,
     IconLayoutColumns,
     IconTrash,
-    IconX,
 } from "@tabler/icons-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -50,6 +49,7 @@ import {
     type LineState,
 } from "@/lib/weight-format"
 import { downloadFile } from "@/api/download"
+import { notifyError, notifySuccess } from "@/lib/notify"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
 import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
 import { useGetWorkTypes } from "@/api/generated/endpoints/work-type-controller/work-type-controller"
@@ -211,9 +211,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
     const [selectedId, setSelectedId] = React.useState<string | null>(null)
     const [dialog, setDialog] = React.useState<ChangeType | "history" | null>(null)
     const closeDialog = React.useCallback(() => setDialog(null), [])
-    const [successMessage, setSuccessMessage] = React.useState<string | null>(null)
     const [isExporting, setIsExporting] = React.useState(false)
-    const [exportError, setExportError] = React.useState<string | null>(null)
     const columnsStorageKey = mine ? "agrum.myWeighings.hiddenColumns" : "agrum.weightHistory.hiddenColumns"
     const [hiddenColumns, setHiddenColumns] = React.useState<string[]>(() => readHiddenColumns(columnsStorageKey))
     const visibleColumns = columns.filter((column) => !hiddenColumns.includes(column.id))
@@ -275,7 +273,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
         { ...dateParams, ...filterParams, employeeCode: blankToUndefined(filters.employeeCode), pageable },
         { query: { enabled: !mine } })
     const mySearch = useSearchMyWeights({ ...dateParams, ...filterParams, pageable }, { query: { enabled: mine } })
-    const { data: searchResponse, isLoading, error: listError } = mine ? mySearch : allSearch
+    const { data: searchResponse, isLoading } = mine ? mySearch : allSearch
     const result = unwrap<PageWeightHistoryRowDto>(searchResponse)
     const rows = React.useMemo(
         () => (result?.content ?? []).filter((row: WeightHistoryRowDto) => row.weightId),
@@ -317,13 +315,9 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
         selectRange({ from: today, to: today })
     }
 
-    const openDialog = (next: ChangeType | "history") => {
-        setSuccessMessage(null)
-        setDialog(next)
-    }
+    const openDialog = (next: ChangeType | "history") => setDialog(next)
 
     const exportRows = async () => {
-        setExportError(null)
         setIsExporting(true)
         try {
             await downloadFile(mine ? "/api/weights/mine/export" : "/api/weights/export", {
@@ -332,7 +326,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                 employeeCode: mine ? undefined : blankToUndefined(filters.employeeCode),
             })
         } catch (error) {
-            setExportError(error instanceof Error ? error.message : "Export failed.")
+            notifyError(error, "Export failed.")
         } finally {
             setIsExporting(false)
         }
@@ -568,22 +562,8 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                         weighing={selected}
                         changeType={dialog}
                         onClose={closeDialog}
-                        onSaved={setSuccessMessage}
+                        onSaved={notifySuccess}
                     />
-                )}
-
-                {successMessage && (
-                    <div className="mx-4 mb-2 flex items-center justify-between gap-2 rounded-md bg-green-50 p-3 text-sm font-medium text-green-700 lg:mx-6 dark:bg-green-950 dark:text-green-300">
-                        <span>{successMessage}</span>
-                        <Button variant="ghost" size="icon-sm" aria-label="Dismiss" onClick={() => setSuccessMessage(null)}>
-                            <IconX />
-                        </Button>
-                    </div>
-                )}
-                {(listError instanceof Error || exportError) && (
-                    <div className="mx-4 mb-2 rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive lg:mx-6">
-                        {exportError ?? (listError as Error).message}
-                    </div>
                 )}
 
                 <div className="px-4 pt-2 lg:px-6">

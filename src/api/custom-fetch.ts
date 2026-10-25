@@ -1,4 +1,22 @@
+// A 401 from these means bad credentials or a dead session, not an expired access cookie
+const NO_REFRESH_PATHS = ['/api/auth/login/', '/api/auth/refresh/', '/api/auth/logout/'];
 
+// Each refresh replaces the refresh token, so requests that fail together must share one refresh call:
+// a second call would send the token the first one just replaced and end the session
+let refreshInFlight: Promise<boolean> | null = null;
+
+const refreshSession = (baseUrl: string): Promise<boolean> => {
+  refreshInFlight ??= fetch(`${baseUrl}/api/auth/refresh/web`, {
+    method: 'POST',
+    credentials: 'include',
+  })
+    .then((response) => response.ok)
+    .catch(() => false)
+    .finally(() => {
+      refreshInFlight = null;
+    });
+  return refreshInFlight;
+};
 
 export const customFetch = async <T>(
   url: string,
@@ -30,7 +48,7 @@ export const customFetch = async <T>(
 
   const fullUrl = url.startsWith('http') ? url : `${baseUrl}${url}`;
 
-  const response = await fetch(fullUrl, {
+  const send = () => fetch(fullUrl, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -38,6 +56,19 @@ export const customFetch = async <T>(
     },
     credentials: 'include', // Keeps your HttpOnly cookies working!
   });
+
+  let response = await send();
+
+  // The access cookie lives 15 minutes: on a 401, renew it with the refresh cookie and retry once
+  if (response.status === 401 && !NO_REFRESH_PATHS.some((path) => url.includes(path))) {
+    if (await refreshSession(baseUrl)) {
+      response = await send();
+    } else if (window.location.pathname !== '/login') {
+      // The refresh token expired or was revoked: a full reload to the login page drops all cached data
+      localStorage.removeItem('isAuthenticated');
+      window.location.assign('/login');
+    }
+  }
 
   if (!response.ok) {
     let errorMessage = `API Error (${response.status})`;

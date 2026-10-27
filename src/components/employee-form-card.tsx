@@ -73,7 +73,7 @@ const textFields: { key: TextField; label: string; required?: boolean }[] = [
     { key: "employeeCode", label: "Employee Code", required: true },
     { key: "firstName", label: "First Name", required: true },
     { key: "lastName", label: "Last Name", required: true },
-    { key: "nic", label: "NIC" },
+    { key: "nic", label: "NIC", required: true },
     { key: "phoneNumber", label: "Phone" },
     { key: "designation", label: "Designation" },
 ]
@@ -239,7 +239,7 @@ export const EmployeeFormCard = ({
                                 />
                             </Field>
                             {([
-                                ["startDate", "Start Date"],
+                                ["startDate", "Start Date *"],
                                 ["endDate", "End Date"],
                             ] as const).map(([key, label]) => {
                                 const value = toDate(form[key])
@@ -284,8 +284,8 @@ export const EmployeeFormCard = ({
                                 )
                             })}
                             {([
-                                ["homeEstateId", "Home Site"],
-                                ["defaultEstateId", "Default Site"],
+                                ["homeEstateId", "Home Site *"],
+                                ["defaultEstateId", "Default Site *"],
                             ] as const).map(([key, label]) => (
                                 <Field key={key}>
                                     <FieldLabel htmlFor={`employee-form-${key}`} className="text-muted-foreground">{label}</FieldLabel>

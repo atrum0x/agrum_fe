@@ -3,6 +3,7 @@ import { useGetCurrentUser, useLogoutWeb } from "@/api/generated/endpoints/auth-
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { hasPermission, type Permission } from "@/lib/permissions";
+import { HAD_SESSION_KEY } from "@/api/custom-fetch";
 
 export type UserProfile = {
     username: string;
@@ -48,7 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             {
                 onSuccess: () => {
                     queryClient.clear();
-                    localStorage.removeItem("isAuthenticated");
+                    localStorage.removeItem(HAD_SESSION_KEY);
                     navigate("/login");
                 },
             }

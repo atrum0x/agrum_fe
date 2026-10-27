@@ -1,3 +1,6 @@
+// Set at web login; tells a session that ended (LG-06) apart from a visitor who never logged in
+export const HAD_SESSION_KEY = 'hadSession';
+
 // A 401 from these means bad credentials or a dead session, not an expired access cookie
 const NO_REFRESH_PATHS = ['/api/auth/login/', '/api/auth/refresh/', '/api/auth/logout/'];
 
@@ -64,9 +67,11 @@ export const customFetch = async <T>(
     if (await refreshSession(baseUrl)) {
       response = await send();
     } else if (window.location.pathname !== '/login') {
-      // The refresh token expired or was revoked: a full reload to the login page drops all cached data
-      localStorage.removeItem('isAuthenticated');
-      window.location.assign('/login');
+      // The refresh token expired or was revoked (LG-06: idle too long): a full reload to the login page
+      // drops all cached data, and the login page says the session expired
+      const hadSession = localStorage.getItem(HAD_SESSION_KEY) !== null;
+      localStorage.removeItem(HAD_SESSION_KEY);
+      window.location.assign(hadSession ? '/login?expired=1' : '/login');
     }
   }
 

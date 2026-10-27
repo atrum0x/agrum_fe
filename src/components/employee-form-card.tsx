@@ -70,7 +70,7 @@ type DateField = "startDate" | "endDate"
 type TextField = "employeeCode" | "firstName" | "lastName" | "nic" | "phoneNumber" | "designation"
 
 const textFields: { key: TextField; label: string; required?: boolean }[] = [
-    { key: "employeeCode", label: "Employee Code", required: true },
+    { key: "employeeCode", label: "Employee No", required: true },
     { key: "firstName", label: "First Name", required: true },
     { key: "lastName", label: "Last Name", required: true },
     { key: "nic", label: "NIC", required: true },
@@ -230,7 +230,7 @@ export const EmployeeFormCard = ({
                                 />
                             </Field>
                             <Field>
-                                <FieldLabel htmlFor="employee-form-status" className="text-muted-foreground">Status</FieldLabel>
+                                <FieldLabel htmlFor="employee-form-status" className="text-muted-foreground">Worker Status</FieldLabel>
                                 <LovSelect
                                     id="employee-form-status"
                                     value={form.employmentStatus ?? ""}
@@ -261,7 +261,7 @@ export const EmployeeFormCard = ({
                                                 }
                                             >
                                                 <span className={value ? "" : "text-muted-foreground"}>
-                                                    {value ? format(value, "yyyy-MM-dd") : "Select a date"}
+                                                    {value ? format(value, "dd/MM/yyyy") : "Select a date"}
                                                 </span>
                                                 <IconCalendar className="text-muted-foreground" />
                                             </PopoverTrigger>
@@ -350,7 +350,7 @@ export const EmployeeFormCard = ({
                                         />
                                     </Field>
                                 )}
-                                <p className="text-xs text-muted-foreground sm:col-span-2 md:col-span-3">
+                                <p className="text-sm text-muted-foreground sm:col-span-2 md:col-span-3">
                                     The username will be the employee code.
                                 </p>
                             </div>

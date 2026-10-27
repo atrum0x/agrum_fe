@@ -194,7 +194,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                         className="mx-auto bg-transparent p-0 [--cell-size:--spacing(8)] [&_button:not(:focus-visible)]:ring-0"
                     />
                     <div className="mt-1 flex items-center justify-between gap-2 px-1">
-                        <p className="truncate text-xs text-muted-foreground">{formatRange(range)}</p>
+                        <p className="truncate text-sm text-muted-foreground">{formatRange(range)}</p>
                         {!isYesterday && (
                             <Button variant="ghost" size="sm" onClick={() => selectRange({ from: yesterday, to: yesterday })}>
                                 Yesterday
@@ -284,7 +284,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                         <p className="text-sm text-muted-foreground">
                             {rows.length} {rows.length === 1 ? "row" : "rows"} · {formatRange(range)}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                             Last updated: {result?.lastCalculatedAt ? formatDateTime(result.lastCalculatedAt) : "not calculated yet"}
                             {" "}· recalculated every night at 10 pm
                         </p>
@@ -314,7 +314,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                                     {/* EMP No stays fixed while the wide table scrolls */}
                                     <TableHead className="sticky left-0 z-20 bg-muted">EMP No</TableHead>
                                     <TableHead>Worker Name</TableHead>
-                                    <TableHead>Category</TableHead>
+                                    <TableHead>Attendance Category</TableHead>
                                     <TableHead>Site</TableHead>
                                     <TableHead>Collection Point</TableHead>
                                     <TableHead>Work Type</TableHead>

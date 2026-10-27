@@ -79,12 +79,12 @@ const HistoryEntry = ({ correction }: { correction: AttendanceCorrectionDto }) =
         <div className="flex flex-col gap-1 border-b px-3 py-2 text-sm last:border-b-0">
             <div className="flex items-center justify-between gap-2">
                 <Badge variant={isDelete ? "destructive" : "outline"}>{isDelete ? "Deleted" : "Corrected"}</Badge>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-sm text-muted-foreground">
                     {correction.correctedBy} · {formatDateTime(correction.correctedAt)}
                 </span>
             </div>
             <p className="wrap-break-word">{correction.reason}</p>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
                 {changed.map(({ key, label }) => (
                     <p key={key}>
                         {label}: {snapshotValue(correction.oldValues, key)}
@@ -319,7 +319,7 @@ export const CorrectAttendanceCard = ({
                                     aria-invalid={showInvalid && Boolean(reasonError)}
                                     className="bg-background"
                                 />
-                                <p className="text-right text-xs text-muted-foreground">
+                                <p className="text-right text-sm text-muted-foreground">
                                     {reason.length}/{MAX_REASON_LENGTH}
                                 </p>
                             </Field>

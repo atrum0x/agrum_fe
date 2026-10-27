@@ -50,7 +50,7 @@ export const SearchAutocomplete = ({
         <Autocomplete.Portal>
             <Autocomplete.Positioner sideOffset={4} className="isolate z-50">
                 <Autocomplete.Popup className="max-h-[min(var(--available-height),18rem)] w-(--anchor-width) overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 empty:hidden">
-                    <Autocomplete.Empty className="px-1.5 py-1 text-xs text-muted-foreground empty:hidden">
+                    <Autocomplete.Empty className="px-1.5 py-1 text-sm text-muted-foreground empty:hidden">
                         {emptyText}
                     </Autocomplete.Empty>
                     <Autocomplete.List>
@@ -62,7 +62,7 @@ export const SearchAutocomplete = ({
                             >
                                 <span className="font-medium">{option.value}</span>
                                 {option.description && (
-                                    <span className="text-xs text-muted-foreground">{option.description}</span>
+                                    <span className="text-sm text-muted-foreground">{option.description}</span>
                                 )}
                             </Autocomplete.Item>
                         )}

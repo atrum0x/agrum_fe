@@ -1,4 +1,5 @@
 import { Separator } from "@/components/ui/separator"
+import { formatDate } from "@/lib/weight-format";
 import { PageTitle } from "@/components/page-title"
 import { Input } from "@/components/ui/input"
 import {
@@ -52,6 +53,10 @@ const TruncatedCell = ({ value, className = "max-w-xs" }: { value: string; class
         </TooltipContent>
     </Tooltip>
 )
+
+
+const statusLabel = (status?: string) =>
+    status ? status.charAt(0) + status.slice(1).toLowerCase() : "-"
 
 export const Users = () => {
 
@@ -227,7 +232,7 @@ export const Users = () => {
                                     <p className="truncate">
                                         {[item.firstName, item.lastName].filter(Boolean).join(" ") || item.employeeCode}
                                     </p>
-                                    <p className={` truncate pt-1 text-xs text-muted-foreground ${isSelected ? "font-medium" : ""}`}>
+                                    <p className={` truncate pt-1 text-sm text-muted-foreground ${isSelected ? "font-medium" : ""}`}>
                                         {item.employeeCode}
                                     </p>
                                 </div>
@@ -303,7 +308,7 @@ export const Users = () => {
                 <div className="flex flex-col gap-6 pt-0 px-4 lg:px-6 shrink-0">
                     <div className="grid auto-rows-min gap-4 sm:grid-cols-2 md:grid-cols-6 rounded-xl bg-muted/50 p-4 ">
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Employee Code</p>
+                            <p className="text-sm text-muted-foreground">Employee No</p>
                             <TruncatedCell value={selectedEmployee?.employeeCode ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
@@ -323,24 +328,24 @@ export const Users = () => {
                             <TruncatedCell value={selectedEmployee?.designation ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Category</p>
+                            <p className="text-sm text-muted-foreground">Employment Category</p>
                             <TruncatedCell value={selectedEmployee?.employeeCategory ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Status</p>
+                            <p className="text-sm text-muted-foreground">Worker Status</p>
                             <Badge className={selectedEmployee?.employmentStatus?.toLowerCase() === "active"
                                 ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
                                 : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"}>
-                                {selectedEmployee?.employmentStatus ?? "-"}
+                                {statusLabel(selectedEmployee?.employmentStatus)}
                             </Badge>
                         </div>
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Start Date</p>
-                            <TruncatedCell value={selectedEmployee?.startDate ?? "-"} />
+                            <TruncatedCell value={selectedEmployee?.startDate ? formatDate(selectedEmployee.startDate) : "-"} />
                         </div>
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">End Date</p>
-                            <TruncatedCell value={selectedEmployee?.endDate ?? "-"} />
+                            <TruncatedCell value={selectedEmployee?.endDate ? formatDate(selectedEmployee.endDate) : "-"} />
                         </div>
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Home Site</p>
@@ -674,7 +679,7 @@ export const Users = () => {
                                                     />
                                                 </TableHead>
                                                 <TableHead>Site</TableHead>
-                                                <TableHead>Status</TableHead>
+                                                <TableHead>Site Status</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>

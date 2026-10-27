@@ -131,7 +131,7 @@ export const GrantedUsersTable = ({ estateId }: { estateId: string }) => {
                                                     </TableCell>
                                                     <TableCell>
                                                         <p className="truncate">{fullName(employee)}</p>
-                                                        <p className="truncate pt-1 text-xs text-muted-foreground">{code}</p>
+                                                        <p className="truncate pt-1 text-sm text-muted-foreground">{code}</p>
                                                     </TableCell>
                                                 </TableRow>
                                             )
@@ -171,10 +171,10 @@ export const GrantedUsersTable = ({ estateId }: { estateId: string }) => {
                                     aria-label="Select all granted users"
                                 />
                             </TableHead>
-                            <TableHead>Employee Code</TableHead>
+                            <TableHead>Employee No</TableHead>
                             <TableHead>Full Name</TableHead>
                             <TableHead>Designation</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead>Worker Status</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>

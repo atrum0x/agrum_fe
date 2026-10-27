@@ -144,7 +144,7 @@ const createColumns = (
     }),
     columnHelper.accessor("urlPath", {
         header: "Endpoint",
-        cell: ({ row }) => <TruncatedCell value={row.original.urlPath} className="max-w-56 font-mono text-xs" />,
+        cell: ({ row }) => <TruncatedCell value={row.original.urlPath} className="max-w-56 font-mono text-sm" />,
     }),
 ])
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -404,7 +404,7 @@ export const PermissionSets = () => {
                                         setPagination((current) => ({ ...current, pageIndex: 0 }))
                                     }}>
                                     <p className="truncate">{item.permissionSetId}</p>
-                                    <p className={` truncate pt-1 text-xs text-muted-foreground ${isSelected ? "font-medium" : ""}`}>
+                                    <p className={` truncate pt-1 text-sm text-muted-foreground ${isSelected ? "font-medium" : ""}`}>
                                         {item.description}
                                     </p>
                                 </div>

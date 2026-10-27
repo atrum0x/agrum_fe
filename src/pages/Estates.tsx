@@ -1,4 +1,5 @@
 import { Separator } from "@/components/ui/separator"
+import { formatKg, formatVariance } from "@/lib/weight-format";
 import { PageTitle } from "@/components/page-title"
 import { Input } from "@/components/ui/input"
 import {
@@ -108,7 +109,7 @@ export const Estates = () => {
                                     <p className="truncate">
                                         {item.name || item.id}
                                     </p>
-                                    <p className={` truncate pt-1 text-xs text-muted-foreground ${isSelected ? "font-medium" : ""}`}>
+                                    <p className={` truncate pt-1 text-sm text-muted-foreground ${isSelected ? "font-medium" : ""}`}>
                                         {item.id}
                                     </p>
                                 </div>
@@ -165,11 +166,11 @@ export const Estates = () => {
                 <div className="flex flex-col gap-6 pt-0 px-4 lg:px-6 shrink-0">
                     <div className="grid auto-rows-min gap-4 sm:grid-cols-2 md:grid-cols-4 rounded-xl bg-muted/50 p-4 ">
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Site ID</p>
+                            <p className="text-sm text-muted-foreground">Site Code</p>
                             <TruncatedCell value={selectedEstate?.id ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Name</p>
+                            <p className="text-sm text-muted-foreground">Site Name</p>
                             <TruncatedCell value={selectedEstate?.name ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
@@ -177,28 +178,28 @@ export const Estates = () => {
                             <TruncatedCell value={selectedEstate?.address ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Status</p>
+                            <p className="text-sm text-muted-foreground">Site Status</p>
                             <Badge className={selectedEstate?.active
                                 ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
                                 : "bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300"}>
-                                {selectedEstate ? (selectedEstate.active ? "ACTIVE" : "INACTIVE") : "-"}
+                                {selectedEstate ? (selectedEstate.active ? "Active" : "Inactive") : "-"}
                             </Badge>
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Full Day Qty (kg)</p>
-                            <TruncatedCell value={selectedEstate?.fullDayQtyKg?.toString() ?? "-"} />
+                            <p className="text-sm text-muted-foreground">Standard Full-Day Quantity (kg)</p>
+                            <TruncatedCell value={selectedEstate?.fullDayQtyKg != null ? formatKg(selectedEstate.fullDayQtyKg) : "-"} />
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Half Day Qty (kg)</p>
-                            <TruncatedCell value={selectedEstate?.halfDayQtyKg?.toString() ?? "-"} />
+                            <p className="text-sm text-muted-foreground">Half-Day Standard Quantity (kg)</p>
+                            <TruncatedCell value={selectedEstate?.halfDayQtyKg != null ? formatKg(selectedEstate.halfDayQtyKg) : "-"} />
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Max Daily Transactions</p>
+                            <p className="text-sm text-muted-foreground">Maximum Weight Transactions / Worker / Day</p>
                             <TruncatedCell value={selectedEstate?.maxDailyTransactions?.toString() ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Variance %</p>
-                            <TruncatedCell value={selectedEstate?.variancePercent != null ? `${selectedEstate.variancePercent}%` : "-"} />
+                            <p className="text-sm text-muted-foreground">Weight Variance (%)</p>
+                            <TruncatedCell value={selectedEstate?.variancePercent != null ? `${formatVariance(selectedEstate.variancePercent)}%` : "-"} />
                         </div>
                     </div>
                 </div>

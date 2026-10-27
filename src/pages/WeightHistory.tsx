@@ -125,7 +125,7 @@ const columns: Column[] = [
         cell: (row) => (
             <>
                 <p>{row.estateName || row.estateId}</p>
-                <p className="text-xs text-muted-foreground">{row.cpCode} · {row.workType}</p>
+                <p className="text-sm text-muted-foreground">{row.cpCode} · {row.workType}</p>
             </>
         ),
     },
@@ -149,7 +149,7 @@ const columns: Column[] = [
         cell: (row) => row.requestedBy ? (
             <>
                 <p>{row.requestedBy}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                     {row.changeType && changeTypeLabels[row.changeType]} · {formatDateTime(row.requestedAt)}
                 </p>
             </>
@@ -164,12 +164,12 @@ const columns: Column[] = [
         cell: (row) => row.decidedBy ? (
             <>
                 <p>{row.decidedBy}</p>
-                <p className="text-xs text-muted-foreground">{formatDateTime(row.decidedAt)}</p>
+                <p className="text-sm text-muted-foreground">{formatDateTime(row.decidedAt)}</p>
             </>
         ) : <Empty />,
     },
     {
-        id: "weightId", label: "Weight Record ID", className: "font-mono text-xs text-muted-foreground",
+        id: "weightId", label: "Weight Record ID", className: "font-mono text-sm text-muted-foreground",
         cell: (row) => <span title={row.weightId}>{row.weightId?.slice(0, 8)}</span>,
     },
 ]
@@ -362,7 +362,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                         className="mx-auto bg-transparent p-0 [--cell-size:--spacing(8)] [&_button:not(:focus-visible)]:ring-0"
                     />
                     <div className="mt-1 flex items-center justify-between gap-2 px-1">
-                        <p className="truncate text-xs text-muted-foreground">{formatRange(range)}</p>
+                        <p className="truncate text-sm text-muted-foreground">{formatRange(range)}</p>
                         {!isToday && (
                             <Button variant="ghost" size="sm" onClick={() => selectRange({ from: today, to: today })}>
                                 Today

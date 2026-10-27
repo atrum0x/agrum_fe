@@ -205,7 +205,7 @@ export const Attendance = () => {
                         className="mx-auto bg-transparent p-0 [--cell-size:--spacing(8)] [&_button:not(:focus-visible)]:ring-0"
                     />
                     <div className="mt-1 flex items-center justify-between gap-2 px-1">
-                        <p className="truncate text-xs text-muted-foreground">{formatRange(range)}</p>
+                        <p className="truncate text-sm text-muted-foreground">{formatRange(range)}</p>
                         {!isToday && (
                             <Button variant="ghost" size="sm" onClick={() => selectRange({ from: today, to: today })}>
                                 Today
@@ -374,7 +374,7 @@ export const Attendance = () => {
                                     <TableHead>Working Site</TableHead>
                                     <TableHead>Collection Point</TableHead>
                                     <TableHead>Work Type</TableHead>
-                                    <TableHead>Category</TableHead>
+                                    <TableHead>Attendance Category</TableHead>
                                     <TableHead>Recorded By / At</TableHead>
                                     <TableHead>Last Corrected By / At</TableHead>
                                 </TableRow>
@@ -400,7 +400,7 @@ export const Attendance = () => {
                                             <TableCell className="whitespace-nowrap">{row.estateName || row.estateId}</TableCell>
                                             <TableCell className="whitespace-nowrap">
                                                 <p>{row.cpCode}</p>
-                                                <p className="text-xs text-muted-foreground">{row.cpName}</p>
+                                                <p className="text-sm text-muted-foreground">{row.cpName}</p>
                                             </TableCell>
                                             <TableCell className="whitespace-nowrap">{row.workType}</TableCell>
                                             <TableCell>
@@ -410,13 +410,13 @@ export const Attendance = () => {
                                             </TableCell>
                                             <TableCell className="whitespace-nowrap">
                                                 <p>{row.recordedBy}</p>
-                                                <p className="text-xs text-muted-foreground">{formatDateTime(row.recordedAt)}</p>
+                                                <p className="text-sm text-muted-foreground">{formatDateTime(row.recordedAt)}</p>
                                             </TableCell>
                                             <TableCell className="whitespace-nowrap">
                                                 {row.lastCorrectedBy && row.lastCorrectedAt ? (
                                                     <>
                                                         <p>{row.lastCorrectedBy}</p>
-                                                        <p className="text-xs text-muted-foreground">{formatDateTime(row.lastCorrectedAt)}</p>
+                                                        <p className="text-sm text-muted-foreground">{formatDateTime(row.lastCorrectedAt)}</p>
                                                     </>
                                                 ) : (
                                                     <span className="text-muted-foreground">—</span>

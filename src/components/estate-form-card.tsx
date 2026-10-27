@@ -35,10 +35,10 @@ const toForm = (estate?: Estate): EstateForm => ({
 })
 
 const numberFields: { key: NumberKey; label: string; step: string }[] = [
-    { key: "fullDayQtyKg", label: "Full Day Qty (kg)", step: "0.01" },
-    { key: "halfDayQtyKg", label: "Half Day Qty (kg)", step: "0.01" },
-    { key: "maxDailyTransactions", label: "Max Daily Transactions", step: "1" },
-    { key: "variancePercent", label: "Variance %", step: "0.01" },
+    { key: "fullDayQtyKg", label: "Standard Full-Day Quantity (kg)", step: "0.01" },
+    { key: "halfDayQtyKg", label: "Half-Day Standard Quantity (kg)", step: "0.01" },
+    { key: "maxDailyTransactions", label: "Maximum Weight Transactions / Worker / Day", step: "1" },
+    { key: "variancePercent", label: "Weight Variance (%)", step: "0.01" },
 ]
 
 /** Create a site, or edit `estate` when one is given. Mount it only while it should be shown. */
@@ -115,7 +115,7 @@ export const EstateFormCard = ({
                     <CardContent className="flex flex-col gap-4">
                         <div className="grid gap-4 rounded-xl bg-muted/50 p-4 md:grid-cols-2">
                             <Field>
-                                <FieldLabel htmlFor="estate-form-id" className="text-muted-foreground">Site ID *</FieldLabel>
+                                <FieldLabel htmlFor="estate-form-id" className="text-muted-foreground">Site Code *</FieldLabel>
                                 <Input
                                     id="estate-form-id"
                                     required
@@ -127,7 +127,7 @@ export const EstateFormCard = ({
                                 />
                             </Field>
                             <Field>
-                                <FieldLabel htmlFor="estate-form-name" className="text-muted-foreground">Name *</FieldLabel>
+                                <FieldLabel htmlFor="estate-form-name" className="text-muted-foreground">Site Name *</FieldLabel>
                                 <Input
                                     id="estate-form-name"
                                     required
@@ -146,14 +146,14 @@ export const EstateFormCard = ({
                                 />
                             </Field>
                             <Field>
-                                <FieldLabel htmlFor="estate-form-status" className="text-muted-foreground">Status *</FieldLabel>
+                                <FieldLabel htmlFor="estate-form-status" className="text-muted-foreground">Site Status *</FieldLabel>
                                 <LovSelect
                                     id="estate-form-status"
                                     value={form.active ? "ACTIVE" : "INACTIVE"}
                                     onValueChange={(value) => value && setField("active", value === "ACTIVE")}
                                     options={[
-                                        { value: "ACTIVE", label: "ACTIVE" },
-                                        { value: "INACTIVE", label: "INACTIVE" },
+                                        { value: "ACTIVE", label: "Active" },
+                                        { value: "INACTIVE", label: "Inactive" },
                                     ]}
                                 />
                             </Field>

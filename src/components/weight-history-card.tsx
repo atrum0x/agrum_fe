@@ -30,18 +30,18 @@ const ChangeEntry = ({ change }: { change: WeightChangeDto }) => (
                 <Badge variant="outline">{change.changeType ? changeTypeLabels[change.changeType] : ""}</Badge>
                 <ApprovalStatusBadge status={change.requestStatus} />
             </div>
-            <span className="text-xs text-muted-foreground">
+            <span className="text-sm text-muted-foreground">
                 {change.requestedBy} · {formatDateTime(change.requestedAt)}
             </span>
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
             {change.changeType === "CORRECTION"
                 ? <>Weight: {formatKg(change.previousWeightKg)} → <span className="text-foreground">{formatKg(change.proposedWeightKg)} kg</span></>
                 : <>Weight at request: {formatKg(change.previousWeightKg)} kg</>}
         </p>
         <p className="wrap-break-word">{change.comment}</p>
         {change.decidedBy && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
                 {change.requestStatus === "APPROVED" ? "Approved" : "Disapproved"} by {change.decidedBy} · {formatDateTime(change.decidedAt)}
             </p>
         )}

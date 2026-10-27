@@ -85,7 +85,7 @@ export function NavUser({
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{user.name}</span>
-              <span className="truncate text-xs">{user.email}</span>
+              <span className="truncate text-sm">{user.email}</span>
             </div>
             <ChevronsUpDownIcon className="ml-auto size-4" />
           </DropdownMenuTrigger>
@@ -104,7 +104,7 @@ export function NavUser({
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">{user.name}</span>
-                    <span className="truncate text-xs">{user.email}</span>
+                    <span className="truncate text-sm">{user.email}</span>
                   </div>
                 </div>
               </DropdownMenuLabel>
@@ -138,7 +138,7 @@ export function NavUser({
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-xs text-muted-foreground px-2 py-1">Appearance</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-sm text-muted-foreground px-2 py-1">Appearance</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => setTheme("light")} className={`cursor-pointer ${theme === "light" ? "font-bold bg-muted" : ""}`}>
                 <SunIcon />
                 Light

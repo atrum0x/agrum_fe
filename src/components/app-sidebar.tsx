@@ -49,7 +49,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">Agrum</span>
-                <span className="truncate text-xs">Admin Panel</span>
+                <span className="truncate text-sm">Admin Panel</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

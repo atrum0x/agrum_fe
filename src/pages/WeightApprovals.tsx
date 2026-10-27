@@ -58,15 +58,15 @@ export const WeightApprovals = () => {
                                 <TableRow key={change.changeId} className="cursor-pointer" onClick={() => setOpenId(change.changeId ?? null)}>
                                     <TableCell className="whitespace-nowrap">
                                         <p>{change.requestedBy}</p>
-                                        <p className="text-xs text-muted-foreground">{formatDateTime(change.requestedAt)}</p>
+                                        <p className="text-sm text-muted-foreground">{formatDateTime(change.requestedAt)}</p>
                                     </TableCell>
                                     <TableCell className="whitespace-nowrap">
                                         <p className="font-medium">{change.employeeCode}</p>
-                                        <p className="text-xs text-muted-foreground">{change.employeeName}</p>
+                                        <p className="text-sm text-muted-foreground">{change.employeeName}</p>
                                     </TableCell>
                                     <TableCell className="whitespace-nowrap">
                                         <p>#{change.entrySequence} · {formatDate(change.weighDate)}</p>
-                                        <p className="text-xs text-muted-foreground">{change.estateId}</p>
+                                        <p className="text-sm text-muted-foreground">{change.estateId}</p>
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant={change.changeType === "CANCELLATION" ? "destructive" : "outline"}>

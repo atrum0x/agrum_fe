@@ -188,7 +188,7 @@ export const WeightChangeCard = ({
                                     aria-invalid={showInvalid && !trimmedComment}
                                     className="bg-background"
                                 />
-                                <p className="text-right text-xs text-muted-foreground">
+                                <p className="text-right text-sm text-muted-foreground">
                                     {comment.length}/{MAX_COMMENT_LENGTH}
                                 </p>
                             </Field>

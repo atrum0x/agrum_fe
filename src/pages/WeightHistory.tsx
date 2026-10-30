@@ -28,6 +28,7 @@ import { SearchAutocomplete, type AutocompleteOption } from "@/components/search
 import { ApprovalStatusBadge } from "@/components/weight-badges"
 import { WeightChangeCard } from "@/components/weight-change-card"
 import { WeightHistoryCard } from "@/components/weight-history-card"
+import { IdentifiedByCell } from "@/components/weighing-photo"
 import { collectionPointOptions, estateOptions, workTypeOptions } from "@/lib/lov-options"
 import {
     approvalStatusLabels,
@@ -139,6 +140,8 @@ const columns: Column[] = [
         cell: (row) => <span className={isCancelled(row) ? "line-through" : ""}>{formatKg(row.weightAfterVariance)}</span>,
     },
     { id: "entryType", label: "Entry Type", cell: (row) => row.entryType ? entryTypeLabels[row.entryType] : "" },
+    // How the phone picked the worker; Face rows have a photo button
+    { id: "identifiedBy", label: "Identified By", cell: (row) => <IdentifiedByCell row={row} /> },
     {
         id: "lineState", label: "Line State",
         cell: (row) => isCancelled(row) ? <Badge variant="secondary">Cancelled</Badge> : "Recorded",

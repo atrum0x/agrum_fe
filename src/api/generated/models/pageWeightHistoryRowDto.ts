@@ -10,14 +10,14 @@ import type { SortObject } from "./sortObject";
 import type { WeightHistoryRowDto } from "./weightHistoryRowDto";
 
 export interface PageWeightHistoryRowDto {
-  totalPages?: number;
   totalElements?: number;
+  totalPages?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: WeightHistoryRowDto[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;

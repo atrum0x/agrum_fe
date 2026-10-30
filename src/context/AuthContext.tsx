@@ -44,8 +44,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { mutate: doLogout } = useLogoutWeb();
 
     const logout = () => {
+        // The server ends the session in the refresh_jwt cookie; no body
         doLogout(
-            { data: { username: user?.username || "" } },
+            undefined,
             {
                 onSuccess: () => {
                     queryClient.clear();

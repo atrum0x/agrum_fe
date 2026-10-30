@@ -10,6 +10,7 @@ import type { WeightHistoryRowDtoAttendanceCategory } from "./weightHistoryRowDt
 import type { WeightHistoryRowDtoChangeStatus } from "./weightHistoryRowDtoChangeStatus";
 import type { WeightHistoryRowDtoChangeType } from "./weightHistoryRowDtoChangeType";
 import type { WeightHistoryRowDtoEntryType } from "./weightHistoryRowDtoEntryType";
+import type { WeightHistoryRowDtoIdentifiedBy } from "./weightHistoryRowDtoIdentifiedBy";
 import type { WeightHistoryRowDtoLineState } from "./weightHistoryRowDtoLineState";
 
 export interface WeightHistoryRowDto {
@@ -28,6 +29,8 @@ export interface WeightHistoryRowDto {
   cpName?: string;
   workType?: string;
   entryType?: WeightHistoryRowDtoEntryType;
+  identifiedBy?: WeightHistoryRowDtoIdentifiedBy;
+  faceSimilarity?: number;
   originalWeightKg?: number;
   weightKg?: number;
   variancePercent?: number;

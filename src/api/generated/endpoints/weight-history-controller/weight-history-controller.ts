@@ -207,6 +207,165 @@ export function useSearchWeights<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+export type getWeightPhotoResponse200 = {
+  data: Blob;
+  status: 200;
+};
+
+export type getWeightPhotoResponseSuccess = getWeightPhotoResponse200 & {
+  headers: Headers;
+};
+export type getWeightPhotoResponse = getWeightPhotoResponseSuccess;
+
+export const getGetWeightPhotoUrl = (weightId: string) => {
+  return `/api/weights/${weightId}/photo`;
+};
+
+/**
+ * @summary View the face photo of a weighing where the phone identified the worker by face
+ */
+export const getWeightPhoto = async (
+  weightId: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getWeightPhotoResponse> => {
+  return customFetch<getWeightPhotoResponse>(getGetWeightPhotoUrl(weightId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetWeightPhotoQueryKey = (weightId: string) => {
+  return [`/api/weights/${weightId}/photo`] as const;
+};
+
+export const getGetWeightPhotoQueryOptions = <
+  TData = Awaited<ReturnType<typeof getWeightPhoto>>,
+  TError = unknown,
+>(
+  weightId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getWeightPhoto>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetWeightPhotoQueryKey(weightId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getWeightPhoto>>> = ({
+    signal,
+  }) => getWeightPhoto(weightId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: weightId !== null && weightId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getWeightPhoto>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetWeightPhotoQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getWeightPhoto>>
+>;
+export type GetWeightPhotoQueryError = unknown;
+
+export function useGetWeightPhoto<
+  TData = Awaited<ReturnType<typeof getWeightPhoto>>,
+  TError = unknown,
+>(
+  weightId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getWeightPhoto>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getWeightPhoto>>,
+          TError,
+          Awaited<ReturnType<typeof getWeightPhoto>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetWeightPhoto<
+  TData = Awaited<ReturnType<typeof getWeightPhoto>>,
+  TError = unknown,
+>(
+  weightId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getWeightPhoto>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getWeightPhoto>>,
+          TError,
+          Awaited<ReturnType<typeof getWeightPhoto>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetWeightPhoto<
+  TData = Awaited<ReturnType<typeof getWeightPhoto>>,
+  TError = unknown,
+>(
+  weightId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getWeightPhoto>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary View the face photo of a weighing where the phone identified the worker by face
+ */
+
+export function useGetWeightPhoto<
+  TData = Awaited<ReturnType<typeof getWeightPhoto>>,
+  TError = unknown,
+>(
+  weightId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getWeightPhoto>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetWeightPhotoQueryOptions(weightId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 export type getWeightHistoryResponse200 = {
   data: WeightAuditDto;
   status: 200;

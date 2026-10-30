@@ -6,6 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { RecordWeightRequestEntryType } from "./recordWeightRequestEntryType";
+import type { RecordWeightRequestIdentifiedBy } from "./recordWeightRequestIdentifiedBy";
 
 export interface RecordWeightRequest {
   weightId?: string;
@@ -16,4 +17,7 @@ export interface RecordWeightRequest {
   entryType?: RecordWeightRequestEntryType;
   variancePercent?: number;
   provisionalSequence?: number;
+  identifiedBy?: RecordWeightRequestIdentifiedBy;
+  faceSimilarity?: number;
+  photo?: string;
 }

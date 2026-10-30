@@ -22,6 +22,11 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  BiometricChallengeResponse,
+  BiometricKeyRequest,
+  BiometricLoginRequest,
+  BiometricRegisterRequest,
+  BiometricRegisterResponse,
   CurrentUserProfileResponse,
   LoginRequest,
   LoginWeb200,
@@ -30,6 +35,7 @@ import type {
   LogoutWeb200,
   RefreshRequest,
   RefreshWeb200,
+  RemoveBiometric200,
   TokenResponse,
 } from "../../models";
 
@@ -270,25 +276,11 @@ export const getLogoutWebUrl = () => {
  * @summary Log out of the web app
  */
 export const logoutWeb = async (
-  logoutRequest: LogoutRequest,
   options?: Parameters<typeof customFetch>[1],
 ): Promise<logoutWebResponse> => {
-  const getHeaders = (
-    h?: NonNullable<RequestInit["headers"]>,
-  ): Record<string, string | readonly string[]> => {
-    if (!h) return {};
-    if (h instanceof Headers) return Object.fromEntries(h.entries());
-    if (Array.isArray(h)) return Object.fromEntries(h);
-    return h;
-  };
   return customFetch<logoutWebResponse>(getLogoutWebUrl(), {
     ...options,
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getHeaders(options?.headers),
-    },
-    body: JSON.stringify(logoutRequest),
   });
 };
 
@@ -299,14 +291,14 @@ export const getLogoutWebMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof logoutWeb>>,
     TError,
-    LogoutWebMutationVariables,
+    void,
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof logoutWeb>>,
   TError,
-  LogoutWebMutationVariables,
+  void,
   TContext
 > => {
   const mutationKey = ["logoutWeb"];
@@ -320,11 +312,9 @@ export const getLogoutWebMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof logoutWeb>>,
-    LogoutWebMutationVariables
-  > = (props) => {
-    const { data } = props ?? {};
-
-    return logoutWeb(data, requestOptions);
+    void
+  > = () => {
+    return logoutWeb(requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -333,9 +323,8 @@ export const getLogoutWebMutationOptions = <
 export type LogoutWebMutationResult = NonNullable<
   Awaited<ReturnType<typeof logoutWeb>>
 >;
-export type LogoutWebMutationBody = LogoutRequest;
+
 export type LogoutWebMutationError = unknown;
-export type LogoutWebMutationVariables = { data: LogoutRequest };
 
 /**
  * @summary Log out of the web app
@@ -345,7 +334,7 @@ export const useLogoutWeb = <TError = unknown, TContext = unknown>(
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof logoutWeb>>,
       TError,
-      LogoutWebMutationVariables,
+      void,
       TContext
     >;
     request?: SecondParameter<typeof customFetch>;
@@ -354,7 +343,7 @@ export const useLogoutWeb = <TError = unknown, TContext = unknown>(
 ): UseMutationResult<
   Awaited<ReturnType<typeof logoutWeb>>,
   TError,
-  LogoutWebMutationVariables,
+  void,
   TContext
 > => {
   return useMutation(getLogoutWebMutationOptions(options), queryClient);
@@ -679,6 +668,440 @@ export const useLoginMobile = <TError = unknown, TContext = unknown>(
   TContext
 > => {
   return useMutation(getLoginMobileMutationOptions(options), queryClient);
+};
+export type loginBiometricResponse200 = {
+  data: TokenResponse;
+  status: 200;
+};
+
+export type loginBiometricResponseSuccess = loginBiometricResponse200 & {
+  headers: Headers;
+};
+export type loginBiometricResponse = loginBiometricResponseSuccess;
+
+export const getLoginBiometricUrl = () => {
+  return `/api/auth/login/biometric/mobile`;
+};
+
+/**
+ * @summary Log in to the mobile app with a fingerprint
+ */
+export const loginBiometric = async (
+  biometricLoginRequest: BiometricLoginRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<loginBiometricResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<loginBiometricResponse>(getLoginBiometricUrl(), {
+    ...options,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(biometricLoginRequest),
+  });
+};
+
+export const getLoginBiometricMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof loginBiometric>>,
+    TError,
+    LoginBiometricMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof loginBiometric>>,
+  TError,
+  LoginBiometricMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["loginBiometric"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof loginBiometric>>,
+    LoginBiometricMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return loginBiometric(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type LoginBiometricMutationResult = NonNullable<
+  Awaited<ReturnType<typeof loginBiometric>>
+>;
+export type LoginBiometricMutationBody = BiometricLoginRequest;
+export type LoginBiometricMutationError = unknown;
+export type LoginBiometricMutationVariables = { data: BiometricLoginRequest };
+
+/**
+ * @summary Log in to the mobile app with a fingerprint
+ */
+export const useLoginBiometric = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof loginBiometric>>,
+      TError,
+      LoginBiometricMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof loginBiometric>>,
+  TError,
+  LoginBiometricMutationVariables,
+  TContext
+> => {
+  return useMutation(getLoginBiometricMutationOptions(options), queryClient);
+};
+export type removeBiometricResponse200 = {
+  data: RemoveBiometric200;
+  status: 200;
+};
+
+export type removeBiometricResponseSuccess = removeBiometricResponse200 & {
+  headers: Headers;
+};
+export type removeBiometricResponse = removeBiometricResponseSuccess;
+
+export const getRemoveBiometricUrl = () => {
+  return `/api/auth/biometric/remove/mobile`;
+};
+
+/**
+ * @summary Turn off fingerprint login on a phone
+ */
+export const removeBiometric = async (
+  biometricKeyRequest: BiometricKeyRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<removeBiometricResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<removeBiometricResponse>(getRemoveBiometricUrl(), {
+    ...options,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(biometricKeyRequest),
+  });
+};
+
+export const getRemoveBiometricMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof removeBiometric>>,
+    TError,
+    RemoveBiometricMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof removeBiometric>>,
+  TError,
+  RemoveBiometricMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["removeBiometric"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof removeBiometric>>,
+    RemoveBiometricMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return removeBiometric(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RemoveBiometricMutationResult = NonNullable<
+  Awaited<ReturnType<typeof removeBiometric>>
+>;
+export type RemoveBiometricMutationBody = BiometricKeyRequest;
+export type RemoveBiometricMutationError = unknown;
+export type RemoveBiometricMutationVariables = { data: BiometricKeyRequest };
+
+/**
+ * @summary Turn off fingerprint login on a phone
+ */
+export const useRemoveBiometric = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof removeBiometric>>,
+      TError,
+      RemoveBiometricMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof removeBiometric>>,
+  TError,
+  RemoveBiometricMutationVariables,
+  TContext
+> => {
+  return useMutation(getRemoveBiometricMutationOptions(options), queryClient);
+};
+export type registerBiometricResponse200 = {
+  data: BiometricRegisterResponse;
+  status: 200;
+};
+
+export type registerBiometricResponseSuccess = registerBiometricResponse200 & {
+  headers: Headers;
+};
+export type registerBiometricResponse = registerBiometricResponseSuccess;
+
+export const getRegisterBiometricUrl = () => {
+  return `/api/auth/biometric/register/mobile`;
+};
+
+/**
+ * @summary Set up fingerprint login on a phone
+ */
+export const registerBiometric = async (
+  biometricRegisterRequest: BiometricRegisterRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<registerBiometricResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<registerBiometricResponse>(getRegisterBiometricUrl(), {
+    ...options,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(biometricRegisterRequest),
+  });
+};
+
+export const getRegisterBiometricMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof registerBiometric>>,
+    TError,
+    RegisterBiometricMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof registerBiometric>>,
+  TError,
+  RegisterBiometricMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["registerBiometric"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof registerBiometric>>,
+    RegisterBiometricMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return registerBiometric(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RegisterBiometricMutationResult = NonNullable<
+  Awaited<ReturnType<typeof registerBiometric>>
+>;
+export type RegisterBiometricMutationBody = BiometricRegisterRequest;
+export type RegisterBiometricMutationError = unknown;
+export type RegisterBiometricMutationVariables = {
+  data: BiometricRegisterRequest;
+};
+
+/**
+ * @summary Set up fingerprint login on a phone
+ */
+export const useRegisterBiometric = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof registerBiometric>>,
+      TError,
+      RegisterBiometricMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof registerBiometric>>,
+  TError,
+  RegisterBiometricMutationVariables,
+  TContext
+> => {
+  return useMutation(getRegisterBiometricMutationOptions(options), queryClient);
+};
+export type biometricChallengeResponse200 = {
+  data: BiometricChallengeResponse;
+  status: 200;
+};
+
+export type biometricChallengeResponseSuccess =
+  biometricChallengeResponse200 & {
+    headers: Headers;
+  };
+export type biometricChallengeResponse = biometricChallengeResponseSuccess;
+
+export const getBiometricChallengeUrl = () => {
+  return `/api/auth/biometric/challenge/mobile`;
+};
+
+/**
+ * @summary Get a one-time challenge for fingerprint login
+ */
+export const biometricChallenge = async (
+  biometricKeyRequest: BiometricKeyRequest,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<biometricChallengeResponse> => {
+  const getHeaders = (
+    h?: NonNullable<RequestInit["headers"]>,
+  ): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Array.isArray(h)) return Object.fromEntries(h);
+    return h;
+  };
+  return customFetch<biometricChallengeResponse>(getBiometricChallengeUrl(), {
+    ...options,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...getHeaders(options?.headers),
+    },
+    body: JSON.stringify(biometricKeyRequest),
+  });
+};
+
+export const getBiometricChallengeMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof biometricChallenge>>,
+    TError,
+    BiometricChallengeMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof biometricChallenge>>,
+  TError,
+  BiometricChallengeMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["biometricChallenge"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof biometricChallenge>>,
+    BiometricChallengeMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return biometricChallenge(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type BiometricChallengeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof biometricChallenge>>
+>;
+export type BiometricChallengeMutationBody = BiometricKeyRequest;
+export type BiometricChallengeMutationError = unknown;
+export type BiometricChallengeMutationVariables = { data: BiometricKeyRequest };
+
+/**
+ * @summary Get a one-time challenge for fingerprint login
+ */
+export const useBiometricChallenge = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof biometricChallenge>>,
+      TError,
+      BiometricChallengeMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof biometricChallenge>>,
+  TError,
+  BiometricChallengeMutationVariables,
+  TContext
+> => {
+  return useMutation(
+    getBiometricChallengeMutationOptions(options),
+    queryClient,
+  );
 };
 export type getCurrentUserResponse200 = {
   data: CurrentUserProfileResponse;

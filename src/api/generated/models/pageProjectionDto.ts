@@ -10,14 +10,14 @@ import type { ProjectionDto } from "./projectionDto";
 import type { SortObject } from "./sortObject";
 
 export interface PageProjectionDto {
-  totalPages?: number;
   totalElements?: number;
+  totalPages?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: ProjectionDto[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;

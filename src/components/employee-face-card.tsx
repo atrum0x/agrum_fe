@@ -22,6 +22,14 @@ import type { FaceRegistrationDto } from "@/api/generated/models"
 import { notifyError, notifySuccess } from "@/lib/notify"
 import { formatDateTime, unwrap } from "@/lib/weight-format"
 
+// Label above value, like the employee details beside the card
+const Detail = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div className="min-w-0">
+        <p className="text-sm text-muted-foreground">{label}</p>
+        <p className="truncate">{children}</p>
+    </div>
+)
+
 // A worker without a registered face answers 404
 const isNotFound = (error: unknown) => error instanceof Error && error.message.includes("(404)")
 
@@ -33,9 +41,9 @@ const FacePhoto = ({ registration }: { registration: FaceRegistrationDto }) => {
     if (url === undefined) return <span className="text-sm text-muted-foreground">Loading…</span>
     if (url === null) {
         return (
-            <span className="flex flex-col items-center gap-1 px-4 text-center text-sm text-muted-foreground">
+            <span className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
                 <IconPhotoOff />
-                No photo. Registered before photos were kept; register again on the phone to add one.
+                No photo
             </span>
         )
     }
@@ -106,29 +114,32 @@ export const EmployeeFaceCard = ({ employeeCode }: { employeeCode?: string }) =>
                     </CardAction>
                 )}
             </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-                <div className="flex aspect-square w-full max-w-64 items-center justify-center self-center overflow-hidden rounded-lg border bg-muted">
-                    {!employeeCode || isLoading ? (
-                        <span className="text-sm text-muted-foreground">{employeeCode ? "Loading…" : "Select an employee"}</span>
-                    ) : hasFace && registration ? (
-                        can("GET:/api/face-templates/{employeeCode}/photo")
-                            ? <FacePhoto registration={registration} />
-                            : <IconFaceId className="size-16 text-muted-foreground" />
+            {/* Photo beside the details, so the card is no taller than the employee details next to it */}
+            <CardContent className="flex items-start gap-4">
+                <div className="flex size-32 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-muted">
+                    {employeeCode && isLoading ? (
+                        <span className="text-sm text-muted-foreground">Loading…</span>
+                    ) : hasFace && registration && can("GET:/api/face-templates/{employeeCode}/photo") ? (
+                        <FacePhoto registration={registration} />
                     ) : (
-                        <span className="flex flex-col items-center gap-2 px-4 text-center text-sm text-muted-foreground">
-                            <IconFaceId className="size-12" />
+                        <IconFaceId className="size-12 text-muted-foreground" />
+                    )}
+                </div>
+                <div className="flex min-w-0 flex-col gap-2">
+                    {hasFace && registration ? (
+                        <>
+                            <Detail label="Registered">{formatDateTime(registration.registeredAt)}</Detail>
+                            <Detail label="By">{registration.registeredBy || "—"}</Detail>
+                            <Detail label="Poses">{registration.sampleCount}</Detail>
+                        </>
+                    ) : !employeeCode || isLoading ? null : (
+                        <p className="text-sm text-muted-foreground">
                             {error && !isNotFound(error)
                                 ? (error instanceof Error ? error.message : "The face could not be loaded.")
                                 : "No face registered. Register it on the phone: More → Face Registration."}
-                        </span>
+                        </p>
                     )}
                 </div>
-                {hasFace && registration && (
-                    <p className="text-center text-sm text-muted-foreground">
-                        Registered {formatDateTime(registration.registeredAt)} by {registration.registeredBy || "—"}
-                        {" · "}{registration.sampleCount} poses
-                    </p>
-                )}
             </CardContent>
         </Card>
     )

@@ -43,6 +43,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet"
 import { EmployeeFormCard } from "@/components/employee-form-card"
+import { EmployeeFaceCard } from "@/components/employee-face-card"
 import { SetPasswordCard } from "@/components/set-password-card"
 
 const TruncatedCell = ({ value, className = "max-w-xs" }: { value: string; className?: string }) => (
@@ -102,6 +103,7 @@ export const Users = () => {
         (item) => item.employeeCode === activeSelectedItemId
     )
     const hasUserAccount = Boolean(selectedEmployee?.hasUserAccount && activeSelectedItemId)
+    const showFace = can("GET:/api/face-templates/{employeeCode}")
     const { data: permissionSetsResponse } = useGetPermissionSets(
         activeSelectedItemId ?? "",
         { search: permissionSearch || undefined },
@@ -305,8 +307,9 @@ export const Users = () => {
                     />
                 )}
 
-                <div className="flex flex-col gap-6 pt-0 px-4 lg:px-6 shrink-0">
-                    <div className="grid auto-rows-min gap-4 sm:grid-cols-2 md:grid-cols-6 rounded-xl bg-muted/50 p-4 ">
+                {/* Details, with the registered face beside them when the user may see faces */}
+                <div className={`grid items-start gap-4 pt-0 px-4 lg:px-6 shrink-0 ${showFace ? "lg:grid-cols-[minmax(0,1fr)_18rem]" : ""}`}>
+                    <div className={`grid auto-rows-min gap-4 sm:grid-cols-2 rounded-xl bg-muted/50 p-4 ${showFace ? "md:grid-cols-3 xl:grid-cols-4" : "md:grid-cols-6"}`}>
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Employee No</p>
                             <TruncatedCell value={selectedEmployee?.employeeCode ?? "-"} />
@@ -368,6 +371,7 @@ export const Users = () => {
                             </Badge>
                         </div>
                     </div>
+                    {showFace && <EmployeeFaceCard key={activeSelectedItemId ?? ""} employeeCode={activeSelectedItemId ?? undefined} />}
                 </div>
                 <Tabs
                     value={view}

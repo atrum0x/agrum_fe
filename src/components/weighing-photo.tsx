@@ -3,36 +3,11 @@ import { IconCamera, IconPhotoOff } from "@tabler/icons-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useAuth } from "@/context/AuthContext"
+import { useApiImage } from "@/api/api-image"
 import type { WeightHistoryRowDto } from "@/api/generated/models"
 import { formatDateTime } from "@/lib/weight-format"
 
 const percent = (similarity?: number) => similarity == null ? "" : ` ${Math.round(similarity * 100)}%`
-
-/**
- * A JPEG from the API, as an object URL. Fetched with the login cookie, because an <img> pointing at
- * another origin may be sent without it. undefined while loading, null when there is none.
- */
-const useApiImage = (path: string) => {
-    const [url, setUrl] = React.useState<string | null | undefined>(undefined)
-    React.useEffect(() => {
-        let objectUrl: string | null = null
-        let cancelled = false
-        const baseUrl = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "")
-        fetch(`${baseUrl}${path}`, { credentials: "include" })
-            .then((response) => response.ok ? response.blob() : null)
-            .then((blob) => {
-                if (cancelled) return
-                objectUrl = blob ? URL.createObjectURL(blob) : null
-                setUrl(objectUrl)
-            })
-            .catch(() => !cancelled && setUrl(null))
-        return () => {
-            cancelled = true
-            if (objectUrl) URL.revokeObjectURL(objectUrl)
-        }
-    }, [path])
-    return url
-}
 
 const Photo = ({ path, label }: { path: string; label: string }) => {
     const url = useApiImage(path)

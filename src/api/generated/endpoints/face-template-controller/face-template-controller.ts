@@ -22,6 +22,7 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  FaceRegistrationDto,
   FaceTemplateDto,
   SyncFaceTemplateRequest,
   SyncFaceTemplateResult,
@@ -301,6 +302,285 @@ export function useGetTemplates<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+export type getRegistrationResponse200 = {
+  data: FaceRegistrationDto;
+  status: 200;
+};
+
+export type getRegistrationResponseSuccess = getRegistrationResponse200 & {
+  headers: Headers;
+};
+export type getRegistrationResponse = getRegistrationResponseSuccess;
+
+export const getGetRegistrationUrl = (employeeCode: string) => {
+  return `/api/face-templates/${employeeCode}`;
+};
+
+/**
+ * @summary View whether a worker has a registered face, and when and by whom it was registered (employee page)
+ */
+export const getRegistration = async (
+  employeeCode: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getRegistrationResponse> => {
+  return customFetch<getRegistrationResponse>(
+    getGetRegistrationUrl(employeeCode),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetRegistrationQueryKey = (employeeCode: string) => {
+  return [`/api/face-templates/${employeeCode}`] as const;
+};
+
+export const getGetRegistrationQueryOptions = <
+  TData = Awaited<ReturnType<typeof getRegistration>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getRegistration>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetRegistrationQueryKey(employeeCode);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getRegistration>>> = ({
+    signal,
+  }) => getRegistration(employeeCode, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: employeeCode !== null && employeeCode !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getRegistration>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetRegistrationQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getRegistration>>
+>;
+export type GetRegistrationQueryError = unknown;
+
+export function useGetRegistration<
+  TData = Awaited<ReturnType<typeof getRegistration>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getRegistration>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRegistration>>,
+          TError,
+          Awaited<ReturnType<typeof getRegistration>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetRegistration<
+  TData = Awaited<ReturnType<typeof getRegistration>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getRegistration>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRegistration>>,
+          TError,
+          Awaited<ReturnType<typeof getRegistration>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetRegistration<
+  TData = Awaited<ReturnType<typeof getRegistration>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getRegistration>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary View whether a worker has a registered face, and when and by whom it was registered (employee page)
+ */
+
+export function useGetRegistration<
+  TData = Awaited<ReturnType<typeof getRegistration>>,
+  TError = unknown,
+>(
+  employeeCode: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getRegistration>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetRegistrationQueryOptions(employeeCode, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type removeTemplateResponse200 = {
+  data: void;
+  status: 200;
+};
+
+export type removeTemplateResponseSuccess = removeTemplateResponse200 & {
+  headers: Headers;
+};
+export type removeTemplateResponse = removeTemplateResponseSuccess;
+
+export const getRemoveTemplateUrl = (employeeCode: string) => {
+  return `/api/face-templates/${employeeCode}`;
+};
+
+/**
+ * @summary Remove a worker's registered face, e.g. one registered to the wrong employee. Give to users who manage face registration
+ */
+export const removeTemplate = async (
+  employeeCode: string,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<removeTemplateResponse> => {
+  return customFetch<removeTemplateResponse>(
+    getRemoveTemplateUrl(employeeCode),
+    {
+      ...options,
+      method: "DELETE",
+    },
+  );
+};
+
+export const getRemoveTemplateMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof removeTemplate>>,
+    TError,
+    RemoveTemplateMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof removeTemplate>>,
+  TError,
+  RemoveTemplateMutationVariables,
+  TContext
+> => {
+  const mutationKey = ["removeTemplate"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof removeTemplate>>,
+    RemoveTemplateMutationVariables
+  > = (props) => {
+    const { employeeCode } = props ?? {};
+
+    return removeTemplate(employeeCode, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RemoveTemplateMutationResult = NonNullable<
+  Awaited<ReturnType<typeof removeTemplate>>
+>;
+
+export type RemoveTemplateMutationError = unknown;
+export type RemoveTemplateMutationVariables = { employeeCode: string };
+
+/**
+ * @summary Remove a worker's registered face, e.g. one registered to the wrong employee. Give to users who manage face registration
+ */
+export const useRemoveTemplate = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof removeTemplate>>,
+      TError,
+      RemoveTemplateMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof removeTemplate>>,
+  TError,
+  RemoveTemplateMutationVariables,
+  TContext
+> => {
+  return useMutation(getRemoveTemplateMutationOptions(options), queryClient);
+};
 export type getFacePhotoResponse200 = {
   data: Blob;
   status: 200;

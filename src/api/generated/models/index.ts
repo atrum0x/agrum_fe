@@ -59,6 +59,7 @@ export * from "./exportWeightsAttendanceCategory";
 export * from "./exportWeightsEntryType";
 export * from "./exportWeightsLineState";
 export * from "./exportWeightsParams";
+export * from "./faceRegistrationDto";
 export * from "./faceTemplateDto";
 export * from "./getAllEmployeesParams";
 export * from "./getAllPermissionSetsParams";

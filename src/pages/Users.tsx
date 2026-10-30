@@ -308,7 +308,7 @@ export const Users = () => {
                 )}
 
                 {/* Details, with the registered face beside them when the user may see faces */}
-                <div className={`grid items-start gap-4 pt-0 px-4 lg:px-6 shrink-0 ${showFace ? "lg:grid-cols-[minmax(0,1fr)_18rem]" : ""}`}>
+                <div className={`grid gap-4 pt-0 px-4 lg:px-6 shrink-0 ${showFace ? "lg:grid-cols-[minmax(0,1fr)_20rem]" : ""}`}>
                     <div className={`grid auto-rows-min gap-4 sm:grid-cols-2 rounded-xl bg-muted/50 p-4 ${showFace ? "md:grid-cols-3 xl:grid-cols-4" : "md:grid-cols-6"}`}>
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Employee No</p>

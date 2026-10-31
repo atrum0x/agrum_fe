@@ -59,7 +59,12 @@ export const EmployeeFaceCard = ({ employeeCode }: { employeeCode?: string }) =>
     const queryClient = useQueryClient()
     const [isRemoveOpen, setIsRemoveOpen] = React.useState(false)
     const { data, error, isLoading } = useGetRegistration(employeeCode ?? "", {
-        query: { enabled: Boolean(employeeCode), retry: (count, e) => !isNotFound(e) && count < 2 },
+        query: {
+            enabled: Boolean(employeeCode),
+            retry: (count, e) => !isNotFound(e) && count < 2,
+            // The card shows "No face registered" or the error itself, so no error toast as well
+            meta: { errorToast: false },
+        },
     })
     const registration = unwrap<FaceRegistrationDto>(data)
     const { mutate: removeFace, isPending: isRemoving } = useRemoveTemplate({

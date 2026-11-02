@@ -9,14 +9,27 @@ import {
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { useSidebar } from "@/components/ui/sidebar"
-import { PanelLeftIcon } from "lucide-react"
-import { Fragment } from "react"
+import { PanelLeftIcon, RefreshCwIcon } from "lucide-react"
+import { Fragment, useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Link, useLocation } from "react-router-dom"
 import { findNavTrail } from "@/components/nav-data"
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar()
   const { pathname } = useLocation()
+  const queryClient = useQueryClient()
+  const [refreshing, setRefreshing] = useState(false)
+
+  // Re-run the queries the current page shows; filters, search and paging stay as they are
+  const refresh = async () => {
+    setRefreshing(true)
+    try {
+      await queryClient.refetchQueries({ type: "active" })
+    } finally {
+      setRefreshing(false)
+    }
+  }
 
   // Drop a group crumb that just repeats the page name (e.g. "Sites > Sites")
   const crumbs = findNavTrail(pathname).filter(
@@ -65,6 +78,17 @@ export function SiteHeader() {
           </BreadcrumbList>
         </Breadcrumb>
         {/* <SearchForm className="w-full sm:ml-auto sm:w-auto" /> */}
+        <Button
+          className="ml-auto h-8 w-8"
+          variant="ghost"
+          size="icon"
+          title="Refresh"
+          aria-label="Refresh"
+          disabled={refreshing}
+          onClick={refresh}
+        >
+          <RefreshCwIcon className={refreshing ? "animate-spin" : undefined} />
+        </Button>
       </div>
     </header>
   )

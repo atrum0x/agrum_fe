@@ -25,6 +25,8 @@ import type {
   DailyWeightSummaryResultDto,
   ExportDailyWeightSummaryParams,
   ExportMyDailyWeightSummaryParams,
+  FilterOptionDto,
+  GetSummaryWorkerOptionsParams,
   SearchDailyWeightSummaryParams,
   SearchMyDailyWeightSummaryParams,
 } from "../../models";
@@ -743,6 +745,205 @@ export function useExportMyDailyWeightSummary<
     params,
     options,
   );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type getSummaryWorkerOptionsResponse200 = {
+  data: FilterOptionDto[];
+  status: 200;
+};
+
+export type getSummaryWorkerOptionsResponseSuccess =
+  getSummaryWorkerOptionsResponse200 & {
+    headers: Headers;
+  };
+export type getSummaryWorkerOptionsResponse =
+  getSummaryWorkerOptionsResponseSuccess;
+
+export const getGetSummaryWorkerOptionsUrl = (
+  params?: GetSummaryWorkerOptionsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/daily-weight-summary/filter-options/workers?${stringifiedParams}`
+    : `/api/daily-weight-summary/filter-options/workers`;
+};
+
+/**
+ * @summary Worker suggestions for the Daily Weight Summary filter (code and name only). Give with the summary search
+ */
+export const getSummaryWorkerOptions = async (
+  params?: GetSummaryWorkerOptionsParams,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getSummaryWorkerOptionsResponse> => {
+  return customFetch<getSummaryWorkerOptionsResponse>(
+    getGetSummaryWorkerOptionsUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetSummaryWorkerOptionsQueryKey = (
+  params?: GetSummaryWorkerOptionsParams,
+) => {
+  return [
+    `/api/daily-weight-summary/filter-options/workers`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetSummaryWorkerOptionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+  TError = unknown,
+>(
+  params?: GetSummaryWorkerOptionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetSummaryWorkerOptionsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getSummaryWorkerOptions>>
+  > = ({ signal }) =>
+    getSummaryWorkerOptions(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetSummaryWorkerOptionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getSummaryWorkerOptions>>
+>;
+export type GetSummaryWorkerOptionsQueryError = unknown;
+
+export function useGetSummaryWorkerOptions<
+  TData = Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+  TError = unknown,
+>(
+  params: undefined | GetSummaryWorkerOptionsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+          TError,
+          Awaited<ReturnType<typeof getSummaryWorkerOptions>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetSummaryWorkerOptions<
+  TData = Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+  TError = unknown,
+>(
+  params?: GetSummaryWorkerOptionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+          TError,
+          Awaited<ReturnType<typeof getSummaryWorkerOptions>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetSummaryWorkerOptions<
+  TData = Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+  TError = unknown,
+>(
+  params?: GetSummaryWorkerOptionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Worker suggestions for the Daily Weight Summary filter (code and name only). Give with the summary search
+ */
+
+export function useGetSummaryWorkerOptions<
+  TData = Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+  TError = unknown,
+>(
+  params?: GetSummaryWorkerOptionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getSummaryWorkerOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetSummaryWorkerOptionsQueryOptions(params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

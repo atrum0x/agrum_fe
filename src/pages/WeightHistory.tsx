@@ -54,16 +54,15 @@ import { notifyError, notifySuccess } from "@/lib/notify"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
 import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
 import { useGetWorkTypes } from "@/api/generated/endpoints/work-type-controller/work-type-controller"
-import { useGetAllEmployees } from "@/api/generated/endpoints/employee-controller/employee-controller"
-import { useFindAll } from "@/api/generated/endpoints/user-controller/user-controller"
+import { toAutocompleteOptions } from "@/lib/filter-options"
 import {
+    useGetWeightSupervisorOptions,
+    useGetWeightWorkerOptions,
     useSearchMyWeights,
     useSearchWeights,
 } from "@/api/generated/endpoints/weight-history-controller/weight-history-controller"
 import type {
-    AppUserDto,
     CollectionPointDto,
-    EmployeeDto,
     Estate,
     PageWeightHistoryRowDto,
     WeightHistoryRowDto,
@@ -236,25 +235,20 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
     })
     const workTypes = filterEstateId ? toList<WorkTypeDto>(workTypesResponse) : []
 
-    // Workers from all sites; searched on the server because the employee list can be long
+    // Suggestions come from the weighings the user can see, searched on the server because the list can be long.
+    // These endpoints return only code and name, so they're granted with the search instead of the employee/user lists
     const workerSearch = React.useDeferredValue(draftFilters.employeeCode.trim())
-    // The pickers only suggest values: skip them when the user has no grant, instead of a 403
-    const { data: employeesResponse } = useGetAllEmployees({ search: workerSearch || undefined }, {
-        query: { enabled: !mine && can("GET:/api/employees") },
+    const { data: employeesResponse } = useGetWeightWorkerOptions({ search: workerSearch || undefined }, {
+        query: { enabled: !mine && can("GET:/api/weights/filter-options/workers") },
     })
     const workerOptions = React.useMemo<AutocompleteOption[]>(
-        () => toList<EmployeeDto>(employeesResponse)
-            .filter((employee) => employee.employeeCode)
-            .map((employee) => ({
-                value: employee.employeeCode!,
-                description: [employee.firstName, employee.lastName].filter(Boolean).join(" "),
-            })),
+        () => toAutocompleteOptions(employeesResponse),
         [employeesResponse])
-    const { data: usersResponse } = useFindAll({ query: { enabled: !mine && can("GET:/api/users") } })
+    const { data: usersResponse } = useGetWeightSupervisorOptions({
+        query: { enabled: !mine && can("GET:/api/weights/filter-options/supervisors") },
+    })
     const supervisorOptions = React.useMemo<AutocompleteOption[]>(
-        () => toList<AppUserDto>(usersResponse)
-            .filter((user) => user.username)
-            .map((user) => ({ value: user.username! })),
+        () => toAutocompleteOptions(usersResponse),
         [usersResponse])
 
     const dateParams = {

@@ -20,15 +20,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
 import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
 import { useGetWorkTypes } from "@/api/generated/endpoints/work-type-controller/work-type-controller"
-import { useGetAllEmployees } from "@/api/generated/endpoints/employee-controller/employee-controller"
-import { useFindAll } from "@/api/generated/endpoints/user-controller/user-controller"
-import { useSearchAttendance } from "@/api/generated/endpoints/attendance-controller/attendance-controller"
+import { toAutocompleteOptions } from "@/lib/filter-options"
+import {
+    useGetAttendanceRecorderOptions,
+    useGetAttendanceWorkerOptions,
+    useSearchAttendance,
+} from "@/api/generated/endpoints/attendance-controller/attendance-controller"
 import type {
-    AppUserDto,
     AttendanceDto,
     AttendanceDtoAttendanceCategory,
     CollectionPointDto,
-    EmployeeDto,
     Estate,
     WorkTypeDto,
 } from "@/api/generated/models"
@@ -109,25 +110,20 @@ export const Attendance = () => {
         () => filterEstateId ? toList<WorkTypeDto>(workTypesResponse) : [],
         [filterEstateId, workTypesResponse])
 
-    // Workers from all sites; searched on the server because the employee list can be long
+    // Suggestions come from the attendance the user can see, searched on the server because the list can be long
     const workerSearch = React.useDeferredValue(draftFilters.employee.trim())
-    const { data: employeesResponse } = useGetAllEmployees({ search: workerSearch || undefined }, {
-        query: { enabled: can("GET:/api/employees") },
+    const { data: employeesResponse } = useGetAttendanceWorkerOptions({ search: workerSearch || undefined }, {
+        query: { enabled: can("GET:/api/attendance/filter-options/workers") },
     })
     const workerOptions = React.useMemo<AutocompleteOption[]>(
-        () => toList<EmployeeDto>(employeesResponse)
-            .filter((employee) => employee.employeeCode)
-            .map((employee) => ({
-                value: employee.employeeCode!,
-                description: [employee.firstName, employee.lastName].filter(Boolean).join(" "),
-            })),
+        () => toAutocompleteOptions(employeesResponse),
         [employeesResponse])
     // Recorded By is the username, which is the supervisor's employee code
-    const { data: usersResponse } = useFindAll({ query: { enabled: can("GET:/api/users") } })
+    const { data: usersResponse } = useGetAttendanceRecorderOptions({
+        query: { enabled: can("GET:/api/attendance/filter-options/recorders") },
+    })
     const recorderOptions = React.useMemo<AutocompleteOption[]>(
-        () => toList<AppUserDto>(usersResponse)
-            .filter((user) => user.username)
-            .map((user) => ({ value: user.username! })),
+        () => toAutocompleteOptions(usersResponse),
         [usersResponse])
 
     // The server limits the list to the user's granted sites and sorts it by date, site and EMP No

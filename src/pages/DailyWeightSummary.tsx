@@ -95,7 +95,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
     const workTypes = filterEstateId ? toList<WorkTypeDto>(workTypesResponse) : []
     const workerSearch = React.useDeferredValue(draftFilters.employeeCode.trim())
     const { data: employeesResponse } = useGetAllEmployees({ search: workerSearch || undefined }, {
-        query: { enabled: !mine },
+        query: { enabled: !mine && can("GET:/api/employees") },
     })
     const workerOptions = React.useMemo<AutocompleteOption[]>(
         () => toList<EmployeeDto>(employeesResponse)

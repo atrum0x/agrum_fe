@@ -111,7 +111,9 @@ export const Attendance = () => {
 
     // Workers from all sites; searched on the server because the employee list can be long
     const workerSearch = React.useDeferredValue(draftFilters.employee.trim())
-    const { data: employeesResponse } = useGetAllEmployees({ search: workerSearch || undefined })
+    const { data: employeesResponse } = useGetAllEmployees({ search: workerSearch || undefined }, {
+        query: { enabled: can("GET:/api/employees") },
+    })
     const workerOptions = React.useMemo<AutocompleteOption[]>(
         () => toList<EmployeeDto>(employeesResponse)
             .filter((employee) => employee.employeeCode)
@@ -121,7 +123,7 @@ export const Attendance = () => {
             })),
         [employeesResponse])
     // Recorded By is the username, which is the supervisor's employee code
-    const { data: usersResponse } = useFindAll()
+    const { data: usersResponse } = useFindAll({ query: { enabled: can("GET:/api/users") } })
     const recorderOptions = React.useMemo<AutocompleteOption[]>(
         () => toList<AppUserDto>(usersResponse)
             .filter((user) => user.username)

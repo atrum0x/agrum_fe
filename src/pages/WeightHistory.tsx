@@ -238,8 +238,9 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
 
     // Workers from all sites; searched on the server because the employee list can be long
     const workerSearch = React.useDeferredValue(draftFilters.employeeCode.trim())
+    // The pickers only suggest values: skip them when the user has no grant, instead of a 403
     const { data: employeesResponse } = useGetAllEmployees({ search: workerSearch || undefined }, {
-        query: { enabled: !mine },
+        query: { enabled: !mine && can("GET:/api/employees") },
     })
     const workerOptions = React.useMemo<AutocompleteOption[]>(
         () => toList<EmployeeDto>(employeesResponse)
@@ -249,7 +250,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                 description: [employee.firstName, employee.lastName].filter(Boolean).join(" "),
             })),
         [employeesResponse])
-    const { data: usersResponse } = useFindAll({ query: { enabled: !mine } })
+    const { data: usersResponse } = useFindAll({ query: { enabled: !mine && can("GET:/api/users") } })
     const supervisorOptions = React.useMemo<AutocompleteOption[]>(
         () => toList<AppUserDto>(usersResponse)
             .filter((user) => user.username)

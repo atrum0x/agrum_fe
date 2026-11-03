@@ -12,6 +12,7 @@ import { Field, FieldLabel } from "@/components/ui/field"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LovSelect } from "@/components/lov-select"
+import { MissingAccessHint } from "@/components/missing-access-hint"
 import { SearchAutocomplete, type AutocompleteOption } from "@/components/search-autocomplete"
 import { DayClassificationBadge } from "@/components/weight-badges"
 import { collectionPointOptions, estateOptions, workTypeOptions } from "@/lib/lov-options"
@@ -218,6 +219,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                                     options={workerOptions}
                                     filterOnServer
                                 />
+                                <MissingAccessHint feature="Suggestions" grant="GET:/api/daily-weight-summary/filter-options/workers" />
                             </Field>
                         )}
                         <Field>

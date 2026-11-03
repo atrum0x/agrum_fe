@@ -21,6 +21,8 @@ import type {
 import type {
   ExportMyWeightsParams,
   ExportWeightsParams,
+  FilterOptionDto,
+  GetWeightWorkerOptionsParams,
   PageWeightHistoryRowDto,
   SearchMyWeightsParams,
   SearchWeightsParams,
@@ -901,6 +903,376 @@ export function useExportMyWeights<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getExportMyWeightsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type getWeightWorkerOptionsResponse200 = {
+  data: FilterOptionDto[];
+  status: 200;
+};
+
+export type getWeightWorkerOptionsResponseSuccess =
+  getWeightWorkerOptionsResponse200 & {
+    headers: Headers;
+  };
+export type getWeightWorkerOptionsResponse =
+  getWeightWorkerOptionsResponseSuccess;
+
+export const getGetWeightWorkerOptionsUrl = (
+  params?: GetWeightWorkerOptionsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/weights/filter-options/workers?${stringifiedParams}`
+    : `/api/weights/filter-options/workers`;
+};
+
+/**
+ * @summary Worker suggestions for the Weight History filter (code and name only). Give with the Weight History search
+ */
+export const getWeightWorkerOptions = async (
+  params?: GetWeightWorkerOptionsParams,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getWeightWorkerOptionsResponse> => {
+  return customFetch<getWeightWorkerOptionsResponse>(
+    getGetWeightWorkerOptionsUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetWeightWorkerOptionsQueryKey = (
+  params?: GetWeightWorkerOptionsParams,
+) => {
+  return [
+    `/api/weights/filter-options/workers`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetWeightWorkerOptionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+  TError = unknown,
+>(
+  params?: GetWeightWorkerOptionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetWeightWorkerOptionsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getWeightWorkerOptions>>
+  > = ({ signal }) =>
+    getWeightWorkerOptions(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetWeightWorkerOptionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getWeightWorkerOptions>>
+>;
+export type GetWeightWorkerOptionsQueryError = unknown;
+
+export function useGetWeightWorkerOptions<
+  TData = Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+  TError = unknown,
+>(
+  params: undefined | GetWeightWorkerOptionsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+          TError,
+          Awaited<ReturnType<typeof getWeightWorkerOptions>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetWeightWorkerOptions<
+  TData = Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+  TError = unknown,
+>(
+  params?: GetWeightWorkerOptionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+          TError,
+          Awaited<ReturnType<typeof getWeightWorkerOptions>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetWeightWorkerOptions<
+  TData = Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+  TError = unknown,
+>(
+  params?: GetWeightWorkerOptionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Worker suggestions for the Weight History filter (code and name only). Give with the Weight History search
+ */
+
+export function useGetWeightWorkerOptions<
+  TData = Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+  TError = unknown,
+>(
+  params?: GetWeightWorkerOptionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getWeightWorkerOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetWeightWorkerOptionsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type getWeightSupervisorOptionsResponse200 = {
+  data: FilterOptionDto[];
+  status: 200;
+};
+
+export type getWeightSupervisorOptionsResponseSuccess =
+  getWeightSupervisorOptionsResponse200 & {
+    headers: Headers;
+  };
+export type getWeightSupervisorOptionsResponse =
+  getWeightSupervisorOptionsResponseSuccess;
+
+export const getGetWeightSupervisorOptionsUrl = () => {
+  return `/api/weights/filter-options/supervisors`;
+};
+
+/**
+ * @summary Supervisor suggestions for the Weight History filter. Give with the Weight History search
+ */
+export const getWeightSupervisorOptions = async (
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getWeightSupervisorOptionsResponse> => {
+  return customFetch<getWeightSupervisorOptionsResponse>(
+    getGetWeightSupervisorOptionsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetWeightSupervisorOptionsQueryKey = () => {
+  return [`/api/weights/filter-options/supervisors`] as const;
+};
+
+export const getGetWeightSupervisorOptionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetWeightSupervisorOptionsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getWeightSupervisorOptions>>
+  > = ({ signal }) => getWeightSupervisorOptions({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetWeightSupervisorOptionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getWeightSupervisorOptions>>
+>;
+export type GetWeightSupervisorOptionsQueryError = unknown;
+
+export function useGetWeightSupervisorOptions<
+  TData = Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+          TError,
+          Awaited<ReturnType<typeof getWeightSupervisorOptions>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetWeightSupervisorOptions<
+  TData = Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+          TError,
+          Awaited<ReturnType<typeof getWeightSupervisorOptions>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetWeightSupervisorOptions<
+  TData = Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Supervisor suggestions for the Weight History filter. Give with the Weight History search
+ */
+
+export function useGetWeightSupervisorOptions<
+  TData = Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getWeightSupervisorOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetWeightSupervisorOptionsQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

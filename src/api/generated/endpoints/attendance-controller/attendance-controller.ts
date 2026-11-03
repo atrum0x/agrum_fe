@@ -25,6 +25,8 @@ import type {
   AttendanceDefaultsDto,
   AttendanceDto,
   AttendanceWorkerDto,
+  FilterOptionDto,
+  GetAttendanceWorkerOptionsParams,
   GetAvailableWorkersParams,
   RecordAttendanceRequest,
   SearchAttendanceParams,
@@ -764,6 +766,380 @@ export function useGetAvailableWorkers<
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetAvailableWorkersQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type getAttendanceWorkerOptionsResponse200 = {
+  data: FilterOptionDto[];
+  status: 200;
+};
+
+export type getAttendanceWorkerOptionsResponseSuccess =
+  getAttendanceWorkerOptionsResponse200 & {
+    headers: Headers;
+  };
+export type getAttendanceWorkerOptionsResponse =
+  getAttendanceWorkerOptionsResponseSuccess;
+
+export const getGetAttendanceWorkerOptionsUrl = (
+  params?: GetAttendanceWorkerOptionsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/attendance/filter-options/workers?${stringifiedParams}`
+    : `/api/attendance/filter-options/workers`;
+};
+
+/**
+ * @summary Worker suggestions for the Attendance search filter (code and name only). Give with the attendance search
+ */
+export const getAttendanceWorkerOptions = async (
+  params?: GetAttendanceWorkerOptionsParams,
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getAttendanceWorkerOptionsResponse> => {
+  return customFetch<getAttendanceWorkerOptionsResponse>(
+    getGetAttendanceWorkerOptionsUrl(params),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetAttendanceWorkerOptionsQueryKey = (
+  params?: GetAttendanceWorkerOptionsParams,
+) => {
+  return [
+    `/api/attendance/filter-options/workers`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetAttendanceWorkerOptionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+  TError = unknown,
+>(
+  params?: GetAttendanceWorkerOptionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAttendanceWorkerOptionsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAttendanceWorkerOptions>>
+  > = ({ signal }) =>
+    getAttendanceWorkerOptions(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetAttendanceWorkerOptionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAttendanceWorkerOptions>>
+>;
+export type GetAttendanceWorkerOptionsQueryError = unknown;
+
+export function useGetAttendanceWorkerOptions<
+  TData = Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+  TError = unknown,
+>(
+  params: undefined | GetAttendanceWorkerOptionsParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+          TError,
+          Awaited<ReturnType<typeof getAttendanceWorkerOptions>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAttendanceWorkerOptions<
+  TData = Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+  TError = unknown,
+>(
+  params?: GetAttendanceWorkerOptionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+          TError,
+          Awaited<ReturnType<typeof getAttendanceWorkerOptions>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAttendanceWorkerOptions<
+  TData = Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+  TError = unknown,
+>(
+  params?: GetAttendanceWorkerOptionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Worker suggestions for the Attendance search filter (code and name only). Give with the attendance search
+ */
+
+export function useGetAttendanceWorkerOptions<
+  TData = Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+  TError = unknown,
+>(
+  params?: GetAttendanceWorkerOptionsParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAttendanceWorkerOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetAttendanceWorkerOptionsQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export type getAttendanceRecorderOptionsResponse200 = {
+  data: FilterOptionDto[];
+  status: 200;
+};
+
+export type getAttendanceRecorderOptionsResponseSuccess =
+  getAttendanceRecorderOptionsResponse200 & {
+    headers: Headers;
+  };
+export type getAttendanceRecorderOptionsResponse =
+  getAttendanceRecorderOptionsResponseSuccess;
+
+export const getGetAttendanceRecorderOptionsUrl = () => {
+  return `/api/attendance/filter-options/recorders`;
+};
+
+/**
+ * @summary Recorded By suggestions for the Attendance search filter. Give with the attendance search
+ */
+export const getAttendanceRecorderOptions = async (
+  options?: Parameters<typeof customFetch>[1],
+): Promise<getAttendanceRecorderOptionsResponse> => {
+  return customFetch<getAttendanceRecorderOptionsResponse>(
+    getGetAttendanceRecorderOptionsUrl(),
+    {
+      ...options,
+      method: "GET",
+    },
+  );
+};
+
+export const getGetAttendanceRecorderOptionsQueryKey = () => {
+  return [`/api/attendance/filter-options/recorders`] as const;
+};
+
+export const getGetAttendanceRecorderOptionsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<
+      Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+      TError,
+      TData
+    >
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetAttendanceRecorderOptionsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAttendanceRecorderOptions>>
+  > = ({ signal }) =>
+    getAttendanceRecorderOptions({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetAttendanceRecorderOptionsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAttendanceRecorderOptions>>
+>;
+export type GetAttendanceRecorderOptionsQueryError = unknown;
+
+export function useGetAttendanceRecorderOptions<
+  TData = Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+  TError = unknown,
+>(
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+          TError,
+          Awaited<ReturnType<typeof getAttendanceRecorderOptions>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAttendanceRecorderOptions<
+  TData = Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+          TError,
+          Awaited<ReturnType<typeof getAttendanceRecorderOptions>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetAttendanceRecorderOptions<
+  TData = Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Recorded By suggestions for the Attendance search filter. Give with the attendance search
+ */
+
+export function useGetAttendanceRecorderOptions<
+  TData = Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+  TError = unknown,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getAttendanceRecorderOptions>>,
+        TError,
+        TData
+      >
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetAttendanceRecorderOptionsQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

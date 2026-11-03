@@ -29,9 +29,10 @@ import { notifyError, notifyInfo, notifySuccess } from "@/lib/notify"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
 import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
 import { useGetWorkTypes } from "@/api/generated/endpoints/work-type-controller/work-type-controller"
-import { useGetAllEmployees } from "@/api/generated/endpoints/employee-controller/employee-controller"
+import { toAutocompleteOptions } from "@/lib/filter-options"
 import {
     getSearchDailyWeightSummaryQueryKey,
+    useGetSummaryWorkerOptions,
     useRecalculateDailyWeightSummary,
     useSearchDailyWeightSummary,
     useSearchMyDailyWeightSummary,
@@ -39,7 +40,6 @@ import {
 import type {
     CollectionPointDto,
     DailyWeightSummaryResultDto,
-    EmployeeDto,
     Estate,
     WorkTypeDto,
 } from "@/api/generated/models"
@@ -94,16 +94,11 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
     })
     const workTypes = filterEstateId ? toList<WorkTypeDto>(workTypesResponse) : []
     const workerSearch = React.useDeferredValue(draftFilters.employeeCode.trim())
-    const { data: employeesResponse } = useGetAllEmployees({ search: workerSearch || undefined }, {
-        query: { enabled: !mine && can("GET:/api/employees") },
+    const { data: employeesResponse } = useGetSummaryWorkerOptions({ search: workerSearch || undefined }, {
+        query: { enabled: !mine && can("GET:/api/daily-weight-summary/filter-options/workers") },
     })
     const workerOptions = React.useMemo<AutocompleteOption[]>(
-        () => toList<EmployeeDto>(employeesResponse)
-            .filter((employee) => employee.employeeCode)
-            .map((employee) => ({
-                value: employee.employeeCode!,
-                description: [employee.firstName, employee.lastName].filter(Boolean).join(" "),
-            })),
+        () => toAutocompleteOptions(employeesResponse),
         [employeesResponse])
 
     const params = {

@@ -33,6 +33,7 @@ import type {
     Estate,
     WorkTypeDto,
 } from "@/api/generated/models"
+import { MissingAccessHint } from "@/components/missing-access-hint"
 import { SearchAutocomplete, type AutocompleteOption } from "@/components/search-autocomplete"
 import { notifySuccess } from "@/lib/notify"
 
@@ -231,6 +232,7 @@ export const Attendance = () => {
                                 options={workerOptions}
                                 filterOnServer
                             />
+                            <MissingAccessHint feature="Suggestions" grant="GET:/api/attendance/filter-options/workers" />
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="attendance-filter-site" className="text-muted-foreground">Working Site</FieldLabel>
@@ -273,6 +275,7 @@ export const Attendance = () => {
                                 onValueChange={(value) => setDraft("recordedBy", value)}
                                 options={recorderOptions}
                             />
+                            <MissingAccessHint feature="Suggestions" grant="GET:/api/attendance/filter-options/recorders" />
                         </Field>
                         <div className="flex gap-2">
                             <Button type="submit" className="flex-1">Search</Button>

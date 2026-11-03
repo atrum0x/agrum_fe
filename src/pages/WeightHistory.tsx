@@ -24,6 +24,7 @@ import { Field, FieldLabel } from "@/components/ui/field"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LovSelect } from "@/components/lov-select"
+import { MissingAccessHint } from "@/components/missing-access-hint"
 import { SearchAutocomplete, type AutocompleteOption } from "@/components/search-autocomplete"
 import { ApprovalStatusBadge } from "@/components/weight-badges"
 import { WeightChangeCard } from "@/components/weight-change-card"
@@ -389,6 +390,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                                     options={workerOptions}
                                     filterOnServer
                                 />
+                                <MissingAccessHint feature="Suggestions" grant="GET:/api/weights/filter-options/workers" />
                             </Field>
                         )}
                         <Field>
@@ -400,6 +402,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                                 onValueChange={(value) => setDraft("supervisor", value)}
                                 options={supervisorOptions}
                             />
+                            <MissingAccessHint feature="Suggestions" grant="GET:/api/weights/filter-options/supervisors" />
                         </Field>
                         <Field>
                             <FieldLabel htmlFor="weight-filter-site" className="text-muted-foreground">Site</FieldLabel>

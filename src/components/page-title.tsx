@@ -1,4 +1,5 @@
 import { useLocation } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { findNavTrail } from "@/components/nav-data"
 
 /**
@@ -6,8 +7,9 @@ import { findNavTrail } from "@/components/nav-data"
  * Renders nothing for pages outside the menu.
  */
 export const PageTitle = () => {
+    const { t } = useTranslation()
     const { pathname } = useLocation()
-    const title = findNavTrail(pathname).at(-1)?.title
-    if (!title) return null
-    return <h1 className="mb-4 px-4 text-2xl font-semibold tracking-tight lg:px-6">{title}</h1>
+    const titleKey = findNavTrail(pathname).at(-1)?.titleKey
+    if (!titleKey) return null
+    return <h1 className="mb-4 px-4 text-2xl font-semibold tracking-tight lg:px-6">{t(titleKey)}</h1>
 }

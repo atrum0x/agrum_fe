@@ -13,9 +13,11 @@ import { PanelLeftIcon, RefreshCwIcon } from "lucide-react"
 import { Fragment, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Link, useLocation } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { findNavTrail } from "@/components/nav-data"
 
 export function SiteHeader() {
+  const { t } = useTranslation()
   const { toggleSidebar } = useSidebar()
   const { pathname } = useLocation()
   const queryClient = useQueryClient()
@@ -33,7 +35,7 @@ export function SiteHeader() {
 
   // Drop a group crumb that just repeats the page name (e.g. "Sites > Sites")
   const crumbs = findNavTrail(pathname).filter(
-    (crumb, index, trail) => index === trail.length - 1 || crumb.title !== trail[index + 1].title
+    (crumb, index, trail) => index === trail.length - 1 || crumb.titleKey !== trail[index + 1].titleKey
   )
 
   return (
@@ -56,21 +58,21 @@ export function SiteHeader() {
           <BreadcrumbList>
             <BreadcrumbItem>
               {crumbs.length ? (
-                <BreadcrumbLink render={<Link to="/landing" />}>Home</BreadcrumbLink>
+                <BreadcrumbLink render={<Link to="/landing" />}>{t("common.home")}</BreadcrumbLink>
               ) : (
-                <BreadcrumbPage>Home</BreadcrumbPage>
+                <BreadcrumbPage>{t("common.home")}</BreadcrumbPage>
               )}
             </BreadcrumbItem>
             {crumbs.map((crumb, index) => (
-              <Fragment key={crumb.title}>
+              <Fragment key={crumb.titleKey}>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   {index === crumbs.length - 1 ? (
-                    <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
+                    <BreadcrumbPage>{t(crumb.titleKey)}</BreadcrumbPage>
                   ) : crumb.url ? (
-                    <BreadcrumbLink render={<Link to={crumb.url} />}>{crumb.title}</BreadcrumbLink>
+                    <BreadcrumbLink render={<Link to={crumb.url} />}>{t(crumb.titleKey)}</BreadcrumbLink>
                   ) : (
-                    <span>{crumb.title}</span>
+                    <span>{t(crumb.titleKey)}</span>
                   )}
                 </BreadcrumbItem>
               </Fragment>
@@ -82,8 +84,8 @@ export function SiteHeader() {
           className="ml-auto h-8 w-8"
           variant="ghost"
           size="icon"
-          title="Refresh"
-          aria-label="Refresh"
+          title={t("common.refresh")}
+          aria-label={t("common.refresh")}
           disabled={refreshing}
           onClick={refresh}
         >

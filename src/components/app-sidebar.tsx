@@ -6,6 +6,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { NavUser } from "@/components/nav-user"
 import {
@@ -23,6 +24,7 @@ import { useAuth } from "@/context/AuthContext";
 import { filterNav, navData, type NavItem } from "@/components/nav-data";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // 👇 1. Call useAuth INSIDE the component body (fixes the hook error)
@@ -48,8 +50,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <img src={logo} alt="Agrum" className="size-full object-contain" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">Agrum</span>
-                <span className="truncate text-sm">Admin Panel</span>
+                <span className="truncate font-medium">{t("nav.appName")}</span>
+                <span className="truncate text-sm">{t("nav.productName")}</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -70,6 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 }
 
 function Tree({ item }: { item: NavItem }) {
+  const { t } = useTranslation();
   const location = useLocation();
 
   if (!item.items?.length) {
@@ -81,7 +84,7 @@ function Tree({ item }: { item: NavItem }) {
           className="data-[active=true]:bg-transparent"
           render={<Link to={item.url || "#"} />}
         >
-        <File/>{item.title}
+        <File/>{t(item.titleKey)}
       </SidebarMenuButton>
     )
   }
@@ -94,7 +97,7 @@ function Tree({ item }: { item: NavItem }) {
         <CollapsibleTrigger render={<SidebarMenuButton />}>
           <ChevronRight className="transition-transform" />
           <Folder />
-          <span>{item.title}</span>
+          <span>{t(item.titleKey)}</span>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub>

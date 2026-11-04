@@ -1,4 +1,5 @@
 import { toast } from "@/components/ui/toast"
+import i18n from "@/i18n"
 
 declare module "@tanstack/react-query" {
     interface Register {
@@ -8,7 +9,7 @@ declare module "@tanstack/react-query" {
     }
 }
 
-export const errorMessage = (error: unknown, fallback = "Something went wrong.") =>
+export const errorMessage = (error: unknown, fallback: string = i18n.t("common.somethingWentWrong")) =>
     error instanceof Error ? error.message : typeof error === "string" ? error : fallback
 
 export const notifySuccess = (title: string) => {

@@ -1,7 +1,10 @@
 import type { Permission } from "@/lib/permissions";
+import type en from "@/i18n/en.json";
+
+type NavTitleKey = `nav.${keyof typeof en.nav}`;
 
 export type NavItem = {
-  title: string;
+  titleKey: NavTitleKey; // Shown through t()
   url?: string; // The route path
   // The endpoint the page loads its data from; the page is shown only to users granted it (DB-01)
   permission?: Permission;
@@ -10,33 +13,33 @@ export type NavItem = {
 
 export const navData: NavItem[] = [
   {
-    title: "Attendance Management",
+    titleKey: "nav.attendanceManagement",
     items: [
-      { title: "Attendance", url: "/attendance", permission: "GET:/api/attendance" },
+      { titleKey: "nav.attendance", url: "/attendance", permission: "GET:/api/attendance" },
     ],
   },
   {
-    title: "Weight Management",
+    titleKey: "nav.weightManagement",
     items: [
-      { title: "Weight History", url: "/weight-history", permission: "GET:/api/weights" },
-      { title: "Pending Approvals", url: "/weight-approvals", permission: "GET:/api/weight-changes/pending" },
-      { title: "Daily Summary", url: "/daily-weight-summary", permission: "GET:/api/daily-weight-summary" },
+      { titleKey: "nav.weightHistory", url: "/weight-history", permission: "GET:/api/weights" },
+      { titleKey: "nav.pendingApprovals", url: "/weight-approvals", permission: "GET:/api/weight-changes/pending" },
+      { titleKey: "nav.dailySummary", url: "/daily-weight-summary", permission: "GET:/api/daily-weight-summary" },
       // Pickers: granted the /mine endpoints instead of the full ones
-      { title: "My Weighings", url: "/my-weighings", permission: "GET:/api/weights/mine" },
-      { title: "My Daily Summary", url: "/my-daily-summary", permission: "GET:/api/daily-weight-summary/mine" },
+      { titleKey: "nav.myWeighings", url: "/my-weighings", permission: "GET:/api/weights/mine" },
+      { titleKey: "nav.myDailySummary", url: "/my-daily-summary", permission: "GET:/api/daily-weight-summary/mine" },
     ],
   },
   {
-    title: "Sites",
+    titleKey: "nav.sites",
     items: [
-      { title: "Sites", url: "/sites", permission: "GET:/api/estates" },
+      { titleKey: "nav.sites", url: "/sites", permission: "GET:/api/estates" },
     ],
   },
   {
-    title: "Users and Permissions",
+    titleKey: "nav.usersAndPermissions",
     items: [
-      { title: "Users", url: "/users", permission: "GET:/api/employees" },
-      { title: "Permission Sets", url: "/permission-sets", permission: "GET:/api/permissionSet" },
+      { titleKey: "nav.users", url: "/users", permission: "GET:/api/employees" },
+      { titleKey: "nav.permissionSets", url: "/permission-sets", permission: "GET:/api/permissionSet" },
     ],
   },
 ];

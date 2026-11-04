@@ -18,9 +18,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import { LanguageMenuItems } from "@/components/language-switcher"
 import { useAuth } from "@/context/AuthContext";
-import { ChevronsUpDownIcon, SparklesIcon, BadgeCheckIcon, CreditCardIcon, BellIcon, LogOutIcon, SunIcon, MoonIcon, LaptopIcon } from "lucide-react"
+import { ChevronsUpDownIcon, LogOutIcon, SunIcon, MoonIcon, LaptopIcon } from "lucide-react"
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export function NavUser({
   user
@@ -32,8 +34,10 @@ export function NavUser({
   }
 }) {
 
+  const { t } = useTranslation()
   const { isMobile } = useSidebar()
   const { logout } = useAuth();
+  const initials = user.name.slice(0, 2).toUpperCase()
 
   const handleLogout = async () => {
     try {
@@ -81,7 +85,7 @@ export function NavUser({
           >
             <Avatar>
               <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback>CN</AvatarFallback>
+              <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{user.name}</span>
@@ -100,7 +104,7 @@ export function NavUser({
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar>
                     <AvatarImage src={user.avatar} alt={user.name} />
-                    <AvatarFallback>CN</AvatarFallback>
+                    <AvatarFallback>{initials}</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">{user.name}</span>
@@ -110,48 +114,24 @@ export function NavUser({
               </DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <SparklesIcon
-                />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheckIcon
-                />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon
-                />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BellIcon
-                />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <DropdownMenuLabel className="text-sm text-muted-foreground px-2 py-1">Appearance</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-sm text-muted-foreground px-2 py-1">{t("profile.appearance")}</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => setTheme("light")} className={`cursor-pointer ${theme === "light" ? "font-bold bg-muted" : ""}`}>
                 <SunIcon />
-                Light
+                {t("profile.light")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTheme("dark")} className={`cursor-pointer ${theme === "dark" ? "font-bold bg-muted" : ""}`}>
                 <MoonIcon />
-                Dark
+                {t("profile.dark")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setTheme("system")} className={`cursor-pointer ${theme === "system" ? "font-bold bg-muted" : ""}`}>
                 <LaptopIcon />
-                System Default
+                {t("profile.system")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <LanguageMenuItems />
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
@@ -159,7 +139,7 @@ export function NavUser({
                 className="cursor-pointer text-destructive focus:text-destructive">
                 <LogOutIcon
                 />
-                Log out
+                {t("profile.logOut")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

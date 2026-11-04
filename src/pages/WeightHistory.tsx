@@ -3,6 +3,8 @@ import { keepPreviousData } from "@tanstack/react-query"
 import { PageTitle } from "@/components/page-title"
 import { format, isSameDay, startOfToday } from "date-fns"
 import type { DateRange } from "react-day-picker"
+import type { TFunction } from "i18next"
+import { useTranslation } from "react-i18next"
 import {
     IconCalendar,
     IconChevronDown,
@@ -32,16 +34,13 @@ import { WeightChangeCard } from "@/components/weight-change-card"
 import { WeightHistoryCard } from "@/components/weight-history-card"
 import { IdentifiedByCell } from "@/components/weighing-photo"
 import { collectionPointOptions, estateOptions, workTypeOptions } from "@/lib/lov-options"
+import { useCalendarFormatters } from "@/i18n/use-calendar-formatters"
+import { useWeightLabels, type WeightLabels } from "@/lib/weight-labels"
 import {
-    approvalStatusLabels,
     blankToUndefined,
-    categoryLabels,
-    changeTypeLabels,
-    entryTypeLabels,
     formatDateTime,
     formatKg,
     formatVariance,
-    lineStateLabels,
     optionsOf,
     toList,
     unwrap,
@@ -113,17 +112,17 @@ type Column = {
 const isCancelled = (row: WeightHistoryRowDto) => row.lineState === "CANCELLED"
 
 // Every column after the pinned EMP No; each can be hidden with Customize Columns
-const columns: Column[] = [
-    { id: "employeeName", label: "Worker Name", className: "whitespace-nowrap", cell: (row) => row.employeeName },
-    { id: "weighedAt", label: "Date / Time", className: "whitespace-nowrap", cell: (row) => formatDateTime(row.weighedAt) },
-    { id: "entrySequence", label: "Seq", className: "text-right", cell: (row) => row.entrySequence },
+const buildColumns = (t: TFunction, labels: WeightLabels): Column[] => [
+    { id: "employeeName", label: t("fields.workerName"), className: "whitespace-nowrap", cell: (row) => row.employeeName },
+    { id: "weighedAt", label: t("weightHistory.dateTime"), className: "whitespace-nowrap", cell: (row) => formatDateTime(row.weighedAt) },
+    { id: "entrySequence", label: t("weightHistory.seq"), className: "text-right", cell: (row) => row.entrySequence },
     {
-        id: "attendanceCategory", label: "Category",
-        cell: (row) => row.attendanceCategory && <Badge variant="outline">{categoryLabels[row.attendanceCategory]}</Badge>,
+        id: "attendanceCategory", label: t("weightHistory.category"),
+        cell: (row) => row.attendanceCategory && <Badge variant="outline">{labels.category[row.attendanceCategory]}</Badge>,
     },
-    { id: "supervisor", label: "Supervisor", className: "whitespace-nowrap", cell: (row) => row.supervisorName },
+    { id: "supervisor", label: t("fields.supervisor"), className: "whitespace-nowrap", cell: (row) => row.supervisorName },
     {
-        id: "site", label: "Site / Collection Point / Work Type", className: "whitespace-nowrap",
+        id: "site", label: t("weightHistory.siteCpWorkType"), className: "whitespace-nowrap",
         cell: (row) => (
             <>
                 <p>{row.estateName || row.estateId}</p>
@@ -132,39 +131,39 @@ const columns: Column[] = [
         ),
     },
     {
-        id: "weightKg", label: "Weight (kg)", className: "text-right tabular-nums",
+        id: "weightKg", label: t("weightHistory.weightKg"), className: "text-right tabular-nums",
         cell: (row) => <span className={isCancelled(row) ? "line-through" : ""}>{formatKg(row.weightKg)}</span>,
     },
-    { id: "variancePercent", label: "Variance %", className: "text-right tabular-nums", cell: (row) => formatVariance(row.variancePercent) },
+    { id: "variancePercent", label: t("weightHistory.variancePercent"), className: "text-right tabular-nums", cell: (row) => formatVariance(row.variancePercent) },
     {
-        id: "weightAfterVariance", label: "After Variance (kg)", className: "text-right font-medium tabular-nums",
+        id: "weightAfterVariance", label: t("weightHistory.afterVarianceKg"), className: "text-right font-medium tabular-nums",
         cell: (row) => <span className={isCancelled(row) ? "line-through" : ""}>{formatKg(row.weightAfterVariance)}</span>,
     },
-    { id: "entryType", label: "Entry Type", cell: (row) => row.entryType ? entryTypeLabels[row.entryType] : "" },
+    { id: "entryType", label: t("weightHistory.entryType"), cell: (row) => row.entryType ? labels.entryType[row.entryType] : "" },
     // How the phone picked the worker; Face rows have a photo button
-    { id: "identifiedBy", label: "Identified By", cell: (row) => <IdentifiedByCell row={row} /> },
+    { id: "identifiedBy", label: t("weightHistory.identifiedBy"), cell: (row) => <IdentifiedByCell row={row} /> },
     {
-        id: "lineState", label: "Line State",
-        cell: (row) => isCancelled(row) ? <Badge variant="secondary">Cancelled</Badge> : "Recorded",
+        id: "lineState", label: t("weightHistory.lineState"),
+        cell: (row) => isCancelled(row) ? <Badge variant="secondary">{labels.lineState.CANCELLED}</Badge> : labels.lineState.RECORDED,
     },
-    { id: "approvalStatus", label: "Approval Status", cell: (row) => <ApprovalStatusBadge status={row.approvalStatus} /> },
+    { id: "approvalStatus", label: t("weightHistory.approvalStatus"), cell: (row) => <ApprovalStatusBadge status={row.approvalStatus} /> },
     {
-        id: "requested", label: "Requested By / At", className: "whitespace-nowrap",
+        id: "requested", label: t("weightHistory.requestedByAt"), className: "whitespace-nowrap",
         cell: (row) => row.requestedBy ? (
             <>
                 <p>{row.requestedBy}</p>
                 <p className="text-sm text-muted-foreground">
-                    {row.changeType && changeTypeLabels[row.changeType]} · {formatDateTime(row.requestedAt)}
+                    {row.changeType && labels.changeType[row.changeType]} · {formatDateTime(row.requestedAt)}
                 </p>
             </>
         ) : <Empty />,
     },
     {
-        id: "changeComment", label: "Change Comment", className: "max-w-64 truncate",
+        id: "changeComment", label: t("weightHistory.changeComment"), className: "max-w-64 truncate",
         cell: (row) => <span title={row.changeComment}>{row.changeComment || <Empty />}</span>,
     },
     {
-        id: "decided", label: "Approved / Disapproved By / At", className: "whitespace-nowrap",
+        id: "decided", label: t("weightHistory.decidedByAt"), className: "whitespace-nowrap",
         cell: (row) => row.decidedBy ? (
             <>
                 <p>{row.decidedBy}</p>
@@ -173,7 +172,7 @@ const columns: Column[] = [
         ) : <Empty />,
     },
     {
-        id: "weightId", label: "Weight Record ID", className: "font-mono text-sm text-muted-foreground",
+        id: "weightId", label: t("weightHistory.weightRecordId"), className: "font-mono text-sm text-muted-foreground",
         cell: (row) => <span title={row.weightId}>{row.weightId?.slice(0, 8)}</span>,
     },
 ]
@@ -201,6 +200,10 @@ const saveHiddenColumns = (storageKey: string, hidden: string[]) => {
  * no worker filter and no change buttons. The server enforces both through separate endpoints.
  */
 export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
+    const { t } = useTranslation()
+    const labels = useWeightLabels()
+    const calendarFormatters = useCalendarFormatters()
+    const columns = React.useMemo(() => buildColumns(t, labels), [t, labels])
     // Buttons are shown only for granted endpoints; the backend still checks
     const { can } = useAuth()
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false)
@@ -286,8 +289,8 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
     const selected = rows.find((row) => row.weightId === selectedId)
     // WH-04 / WH-05: no change on a cancelled weighing or while a change is pending
     const changeBlockedReason = !selected ? null
-        : selected.lineState === "CANCELLED" ? "This weight record has been cancelled and cannot be changed."
-            : selected.approvalStatus === "PENDING_AUTHORIZATION" ? "A change for this record is already pending authorization."
+        : selected.lineState === "CANCELLED" ? t("weightHistory.blockedCancelled")
+            : selected.approvalStatus === "PENDING_AUTHORIZATION" ? t("weightHistory.blockedPending")
                 : null
     const canChange = Boolean(selected) && !changeBlockedReason
 
@@ -327,7 +330,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                 employeeCode: mine ? undefined : blankToUndefined(filters.employeeCode),
             })
         } catch (error) {
-            notifyError(error, "Export failed.")
+            notifyError(error, t("common.exportFailed"))
         } finally {
             setIsExporting(false)
         }
@@ -358,6 +361,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                         onSelect={selectRange}
                         month={month}
                         onMonthChange={setMonth}
+                        formatters={calendarFormatters}
                         // Weighings are recorded for today only, so there is nothing to see later
                         disabled={{ after: today }}
                         className="mx-auto bg-transparent p-0 [--cell-size:--spacing(8)] [&_button:not(:focus-visible)]:ring-0"
@@ -366,7 +370,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                         <p className="truncate text-sm text-muted-foreground">{formatRange(range)}</p>
                         {!isToday && (
                             <Button variant="ghost" size="sm" onClick={() => selectRange({ from: today, to: today })}>
-                                Today
+                                {t("common.today")}
                             </Button>
                         )}
                     </div>
@@ -380,108 +384,108 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                             search()
                         }}
                     >
-                        <p className="text-sm font-medium">Filters</p>
+                        <p className="text-sm font-medium">{t("common.filters")}</p>
                         {!mine && (
                             <Field>
-                                <FieldLabel htmlFor="weight-filter-employee" className="text-muted-foreground">Worker EMP No</FieldLabel>
+                                <FieldLabel htmlFor="weight-filter-employee" className="text-muted-foreground">{t("fields.workerEmpNo")}</FieldLabel>
                                 <SearchAutocomplete
                                     id="weight-filter-employee"
-                                    placeholder="EMP No"
+                                    placeholder={t("fields.empNo")}
                                     value={draftFilters.employeeCode}
                                     onValueChange={(value) => setDraft("employeeCode", value)}
                                     options={workerOptions}
                                     loading={workersLoading}
                                 />
-                                <MissingAccessHint feature="Suggestions" grant="GET:/api/weights/filter-options/workers" />
+                                <MissingAccessHint feature={t("common.suggestions")} grant="GET:/api/weights/filter-options/workers" />
                             </Field>
                         )}
                         <Field>
-                            <FieldLabel htmlFor="weight-filter-supervisor" className="text-muted-foreground">Supervisor</FieldLabel>
+                            <FieldLabel htmlFor="weight-filter-supervisor" className="text-muted-foreground">{t("fields.supervisor")}</FieldLabel>
                             <SearchAutocomplete
                                 id="weight-filter-supervisor"
-                                placeholder="Supervisor username"
+                                placeholder={t("fields.supervisorUsername")}
                                 value={draftFilters.supervisor}
                                 onValueChange={(value) => setDraft("supervisor", value)}
                                 options={supervisorOptions}
                                 loading={supervisorsLoading}
                             />
-                            <MissingAccessHint feature="Suggestions" grant="GET:/api/weights/filter-options/supervisors" />
+                            <MissingAccessHint feature={t("common.suggestions")} grant="GET:/api/weights/filter-options/supervisors" />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="weight-filter-site" className="text-muted-foreground">Site</FieldLabel>
+                            <FieldLabel htmlFor="weight-filter-site" className="text-muted-foreground">{t("fields.site")}</FieldLabel>
                             <LovSelect
                                 id="weight-filter-site"
                                 value={draftFilters.estateId}
                                 onValueChange={(value) => setDraft("estateId", value)}
                                 options={estateOptions(estates)}
-                                clearLabel="All sites"
+                                clearLabel={t("fields.allSites")}
                             />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="weight-filter-cp" className="text-muted-foreground">Collection Point</FieldLabel>
+                            <FieldLabel htmlFor="weight-filter-cp" className="text-muted-foreground">{t("fields.collectionPoint")}</FieldLabel>
                             <LovSelect
                                 id="weight-filter-cp"
                                 value={draftFilters.cpCode}
                                 onValueChange={(value) => setDraft("cpCode", value)}
                                 options={collectionPointOptions(collectionPoints)}
-                                clearLabel={filterEstateId ? "All collection points" : "Select a site first"}
+                                clearLabel={t(filterEstateId ? "fields.allCollectionPoints" : "fields.selectSiteFirst")}
                                 disabled={!filterEstateId}
                             />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="weight-filter-work-type" className="text-muted-foreground">Work Type</FieldLabel>
+                            <FieldLabel htmlFor="weight-filter-work-type" className="text-muted-foreground">{t("fields.workType")}</FieldLabel>
                             <LovSelect
                                 id="weight-filter-work-type"
                                 value={draftFilters.workType}
                                 onValueChange={(value) => setDraft("workType", value)}
                                 options={workTypeOptions(workTypes)}
-                                clearLabel={filterEstateId ? "All work types" : "Select a site first"}
+                                clearLabel={t(filterEstateId ? "fields.allWorkTypes" : "fields.selectSiteFirst")}
                                 disabled={!filterEstateId}
                             />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="weight-filter-category" className="text-muted-foreground">Employment Category</FieldLabel>
+                            <FieldLabel htmlFor="weight-filter-category" className="text-muted-foreground">{t("weightHistory.employmentCategory")}</FieldLabel>
                             <LovSelect
                                 id="weight-filter-category"
                                 value={draftFilters.attendanceCategory}
                                 onValueChange={(value) => setDraft("attendanceCategory", value)}
-                                options={optionsOf(categoryLabels)}
-                                clearLabel="All categories"
+                                options={optionsOf(labels.category)}
+                                clearLabel={t("weightHistory.allCategories")}
                             />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="weight-filter-entry-type" className="text-muted-foreground">Entry Type</FieldLabel>
+                            <FieldLabel htmlFor="weight-filter-entry-type" className="text-muted-foreground">{t("weightHistory.entryType")}</FieldLabel>
                             <LovSelect
                                 id="weight-filter-entry-type"
                                 value={draftFilters.entryType}
                                 onValueChange={(value) => setDraft("entryType", value)}
-                                options={optionsOf(entryTypeLabels)}
-                                clearLabel="All entry types"
+                                options={optionsOf(labels.entryType)}
+                                clearLabel={t("weightHistory.allEntryTypes")}
                             />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="weight-filter-line-state" className="text-muted-foreground">Line State</FieldLabel>
+                            <FieldLabel htmlFor="weight-filter-line-state" className="text-muted-foreground">{t("weightHistory.lineState")}</FieldLabel>
                             <LovSelect
                                 id="weight-filter-line-state"
                                 value={draftFilters.lineState}
                                 onValueChange={(value) => setDraft("lineState", value)}
-                                options={optionsOf(lineStateLabels)}
-                                clearLabel="All line states"
+                                options={optionsOf(labels.lineState)}
+                                clearLabel={t("weightHistory.allLineStates")}
                             />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="weight-filter-approval" className="text-muted-foreground">Approval Status</FieldLabel>
+                            <FieldLabel htmlFor="weight-filter-approval" className="text-muted-foreground">{t("weightHistory.approvalStatus")}</FieldLabel>
                             <LovSelect
                                 id="weight-filter-approval"
                                 value={draftFilters.approvalStatus}
                                 onValueChange={(value) => setDraft("approvalStatus", value)}
-                                options={optionsOf(approvalStatusLabels)}
-                                clearLabel="All statuses"
+                                options={optionsOf(labels.approvalStatus)}
+                                clearLabel={t("weightHistory.allStatuses")}
                             />
                         </Field>
                         <div className="flex gap-2">
-                            <Button type="submit" className="flex-1">Search</Button>
-                            <Button type="button" variant="outline" className="flex-1" onClick={clear}>Clear</Button>
+                            <Button type="submit" className="flex-1">{t("common.search")}</Button>
+                            <Button type="button" variant="outline" className="flex-1" onClick={clear}>{t("common.clear")}</Button>
                         </div>
                     </form>
                 </ScrollArea>
@@ -497,7 +501,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                         onClick={() => setIsSidebarOpen(true)}
                     >
                         <IconCalendar className="h-4 w-4" />
-                        <span>{formatRange(range)} · Filters</span>
+                        <span>{formatRange(range)} · {t("common.filters")}</span>
                     </Button>
                 </div>
 
@@ -507,32 +511,32 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                         {!mine && can("POST:/api/weights/{weightId}/correction") && (
                             <Button variant="outline" size="lg" disabled={!canChange} onClick={() => openDialog("CORRECTION")}>
                                 <IconEdit />
-                                Correct Weight
+                                {t("weightHistory.correctWeight")}
                             </Button>
                         )}
                         {!mine && can("POST:/api/weights/{weightId}/cancellation") && (
                             <Button variant="outline" size="lg" disabled={!canChange} onClick={() => openDialog("CANCELLATION")}>
                                 <IconTrash />
-                                Request Cancellation
+                                {t("weightHistory.requestCancellation")}
                             </Button>
                         )}
                         {can("GET:/api/weights/{weightId}/history") && (
                             <Button variant="outline" size="lg" disabled={!selected} onClick={() => openDialog("history")}>
                                 <IconHistory />
-                                View History
+                                {t("weightHistory.viewHistory")}
                             </Button>
                         )}
                     </ButtonGroup>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         <p className="text-sm text-muted-foreground">
-                            {totalRows} {totalRows === 1 ? "weighing" : "weighings"} · {formatRange(range)}
+                            {t("weightHistory.count", { count: totalRows })} · {formatRange(range)}
                             {changeBlockedReason && !mine && ` · ${changeBlockedReason}`}
                         </p>
                         <DropdownMenu>
                             <DropdownMenuTrigger className="flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-medium hover:bg-muted">
                                 <IconLayoutColumns />
-                                <span className="hidden lg:inline">Customize Columns</span>
-                                <span className="lg:hidden">Columns</span>
+                                <span className="hidden lg:inline">{t("weightHistory.customizeColumns")}</span>
+                                <span className="lg:hidden">{t("weightHistory.columns")}</span>
                                 <IconChevronDown />
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-64">
@@ -550,7 +554,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                         {can(mine ? "GET:/api/weights/mine/export" : "GET:/api/weights/export") && (
                             <Button variant="outline" size="lg" disabled={isExporting || totalRows === 0} onClick={exportRows}>
                                 <IconDownload />
-                                {isExporting ? "Exporting..." : "Export"}
+                                {isExporting ? t("common.exporting") : t("common.export")}
                             </Button>
                         )}
                     </div>
@@ -578,9 +582,9 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                                     {/* EMP No stays fixed while the wide table scrolls */}
                                     {/* Checkbox and EMP No stay fixed while the wide table scrolls; one row at a time */}
                                     <TableHead className="sticky left-0 z-20 w-10 min-w-10 bg-muted">
-                                        <span className="sr-only">Select</span>
+                                        <span className="sr-only">{t("weightHistory.selectColumn")}</span>
                                     </TableHead>
-                                    <TableHead className="sticky left-10 z-20 bg-muted">EMP No</TableHead>
+                                    <TableHead className="sticky left-10 z-20 bg-muted">{t("fields.empNo")}</TableHead>
                                     {visibleColumns.map((column) => (
                                         <TableHead key={column.id} className={column.className?.includes("text-right") ? "text-right" : undefined}>
                                             {column.label}
@@ -604,7 +608,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                                                 <Checkbox
                                                     checked={isSelected}
                                                     onCheckedChange={(checked) => setSelectedId(checked ? weightId : null)}
-                                                    aria-label={`Select ${row.employeeCode} weighing ${row.entrySequence}`}
+                                                    aria-label={t("weightHistory.selectRow", { code: row.employeeCode, sequence: row.entrySequence })}
                                                 />
                                             </TableCell>
                                             <TableCell className={`sticky left-10 font-medium ${stickyCell}`}>{row.employeeCode}</TableCell>
@@ -617,7 +621,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                                 {rows.length === 0 && (
                                     <TableRow>
                                         <TableCell colSpan={visibleColumns.length + 2} className="h-24 text-center text-muted-foreground">
-                                            {isLoading ? "Loading weighings..." : `No weighings found for ${formatRange(range)}.`}
+                                            {isLoading ? t("weightHistory.loading") : t("weightHistory.empty", { range: formatRange(range) })}
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -627,12 +631,12 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
 
                     {totalPages > 1 && (
                         <div className="flex items-center justify-end gap-2 pt-3">
-                            <p className="text-sm text-muted-foreground">Page {page + 1} of {totalPages}</p>
-                            <Button variant="outline" size="icon-sm" aria-label="Previous page"
+                            <p className="text-sm text-muted-foreground">{t("common.pageOf", { page: page + 1, total: totalPages })}</p>
+                            <Button variant="outline" size="icon-sm" aria-label={t("common.previousPage")}
                                     disabled={page === 0} onClick={() => setPage((current) => current - 1)}>
                                 <IconChevronLeft />
                             </Button>
-                            <Button variant="outline" size="icon-sm" aria-label="Next page"
+                            <Button variant="outline" size="icon-sm" aria-label={t("common.nextPage")}
                                     disabled={page + 1 >= totalPages} onClick={() => setPage((current) => current + 1)}>
                                 <IconChevronRight />
                             </Button>

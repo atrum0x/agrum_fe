@@ -1,4 +1,5 @@
 import { Autocomplete } from "@base-ui/react/autocomplete"
+import { useTranslation } from "react-i18next"
 import { Input } from "@/components/ui/input"
 
 export type AutocompleteOption = {
@@ -25,7 +26,7 @@ export const SearchAutocomplete = ({
     onValueChange,
     options,
     placeholder,
-    emptyText = "No matches. The text you typed is still used as the filter.",
+    emptyText,
     // Options are still on their way, so an empty list doesn't mean there are no matches yet
     loading = false,
 }: {
@@ -36,40 +37,43 @@ export const SearchAutocomplete = ({
     placeholder?: string
     emptyText?: string
     loading?: boolean
-}) => (
-    <Autocomplete.Root
-        items={options}
-        value={value}
-        onValueChange={onValueChange}
-        itemToStringValue={(option: AutocompleteOption) => option.value}
-        // Also applies to lists searched on the server, so the last results narrow while the next ones load
-        filter={matches}
-        // Long lists (all employees) stay quick to render; typing narrows them
-        limit={50}
-    >
-        <Autocomplete.Input render={<Input id={id} placeholder={placeholder} />} />
-        <Autocomplete.Portal>
-            <Autocomplete.Positioner sideOffset={4} className="isolate z-50">
-                <Autocomplete.Popup className="max-h-[min(var(--available-height),18rem)] w-(--anchor-width) overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 empty:hidden">
-                    <Autocomplete.Empty className="px-1.5 py-1 text-sm text-muted-foreground empty:hidden">
-                        {loading ? "Loading suggestions..." : emptyText}
-                    </Autocomplete.Empty>
-                    <Autocomplete.List>
-                        {(option: AutocompleteOption) => (
-                            <Autocomplete.Item
-                                key={option.value}
-                                value={option}
-                                className="flex w-full cursor-default flex-col rounded-md px-1.5 py-1 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground"
-                            >
-                                <span className="font-medium">{option.value}</span>
-                                {option.description && (
-                                    <span className="text-sm text-muted-foreground">{option.description}</span>
-                                )}
-                            </Autocomplete.Item>
-                        )}
-                    </Autocomplete.List>
-                </Autocomplete.Popup>
-            </Autocomplete.Positioner>
-        </Autocomplete.Portal>
-    </Autocomplete.Root>
-)
+}) => {
+    const { t } = useTranslation()
+    return (
+        <Autocomplete.Root
+            items={options}
+            value={value}
+            onValueChange={onValueChange}
+            itemToStringValue={(option: AutocompleteOption) => option.value}
+            // Also applies to lists searched on the server, so the last results narrow while the next ones load
+            filter={matches}
+            // Long lists (all employees) stay quick to render; typing narrows them
+            limit={50}
+        >
+            <Autocomplete.Input render={<Input id={id} placeholder={placeholder} />} />
+            <Autocomplete.Portal>
+                <Autocomplete.Positioner sideOffset={4} className="isolate z-50">
+                    <Autocomplete.Popup className="max-h-[min(var(--available-height),18rem)] w-(--anchor-width) overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 empty:hidden">
+                        <Autocomplete.Empty className="px-1.5 py-1 text-sm text-muted-foreground empty:hidden">
+                            {loading ? t("common.loadingSuggestions") : emptyText ?? t("common.noSuggestions")}
+                        </Autocomplete.Empty>
+                        <Autocomplete.List>
+                            {(option: AutocompleteOption) => (
+                                <Autocomplete.Item
+                                    key={option.value}
+                                    value={option}
+                                    className="flex w-full cursor-default flex-col rounded-md px-1.5 py-1 text-sm outline-hidden select-none data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                                >
+                                    <span className="font-medium">{option.value}</span>
+                                    {option.description && (
+                                        <span className="text-sm text-muted-foreground">{option.description}</span>
+                                    )}
+                                </Autocomplete.Item>
+                            )}
+                        </Autocomplete.List>
+                    </Autocomplete.Popup>
+                </Autocomplete.Positioner>
+            </Autocomplete.Portal>
+        </Autocomplete.Root>
+    )
+}

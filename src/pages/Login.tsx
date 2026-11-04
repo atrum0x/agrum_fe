@@ -1,5 +1,6 @@
 import { LoginForm } from "../components/login-form";
 import logo from "@/assets/logo.png";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import loginImage from "@/assets/login.webp";
 
@@ -16,7 +17,10 @@ export default function Login() {
             </div>
             Agrum
           </a>
-          <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher />
+            <ThemeToggle />
+          </div>
         </div>
         
         <div className="flex flex-1 items-center justify-center">

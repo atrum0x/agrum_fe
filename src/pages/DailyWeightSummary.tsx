@@ -3,6 +3,7 @@ import { keepPreviousData } from "@tanstack/react-query"
 import { PageTitle } from "@/components/page-title"
 import { format, isSameDay, startOfToday, subDays } from "date-fns"
 import type { DateRange } from "react-day-picker"
+import { useTranslation } from "react-i18next"
 import { IconCalendar, IconDownload, IconRefresh } from "@tabler/icons-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { Badge } from "@/components/ui/badge"
@@ -17,9 +18,10 @@ import { MissingAccessHint } from "@/components/missing-access-hint"
 import { SearchAutocomplete, type AutocompleteOption } from "@/components/search-autocomplete"
 import { DayClassificationBadge } from "@/components/weight-badges"
 import { collectionPointOptions, estateOptions, workTypeOptions } from "@/lib/lov-options"
+import { useCalendarFormatters } from "@/i18n/use-calendar-formatters"
+import { useWeightLabels } from "@/lib/weight-labels"
 import {
     blankToUndefined,
-    categoryLabels,
     formatDate,
     formatDateTime,
     formatKg,
@@ -70,6 +72,9 @@ const formatRange = (range: DateRange) => {
  * With `mine`, the picker's own rows only (separate endpoints on the server).
  */
 export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
+    const { t } = useTranslation()
+    const labels = useWeightLabels()
+    const calendarFormatters = useCalendarFormatters()
     const queryClient = useQueryClient()
     // Buttons are shown only for granted endpoints; the backend still checks
     const { can } = useAuth()
@@ -146,7 +151,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
             await downloadFile(mine ? "/api/daily-weight-summary/mine/export" : "/api/daily-weight-summary/export",
                 { ...params, employeeCode })
         } catch (error) {
-            notifyError(error, "Export failed.")
+            notifyError(error, t("common.exportFailed"))
         } finally {
             setIsExporting(false)
         }
@@ -156,8 +161,8 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
         recalculate.mutate(undefined, {
             onSuccess: (dates) => {
                 const count = toList<string>(dates).length
-                if (count) notifySuccess(`Summary recalculated for ${count} ${count === 1 ? "date" : "dates"}.`)
-                else notifyInfo("A recalculation is already running. Try again in a moment.")
+                if (count) notifySuccess(t("dailySummary.recalculated", { count }))
+                else notifyInfo(t("dailySummary.alreadyRunning"))
                 void queryClient.invalidateQueries({ queryKey: getSearchDailyWeightSummaryQueryKey().slice(0, 1) })
             },
         })
@@ -188,6 +193,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                         onSelect={selectRange}
                         month={month}
                         onMonthChange={setMonth}
+                        formatters={calendarFormatters}
                         disabled={{ after: today }}
                         className="mx-auto bg-transparent p-0 [--cell-size:--spacing(8)] [&_button:not(:focus-visible)]:ring-0"
                     />
@@ -195,7 +201,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                         <p className="truncate text-sm text-muted-foreground">{formatRange(range)}</p>
                         {!isYesterday && (
                             <Button variant="ghost" size="sm" onClick={() => selectRange({ from: yesterday, to: yesterday })}>
-                                Yesterday
+                                {t("common.yesterday")}
                             </Button>
                         )}
                     </div>
@@ -209,56 +215,56 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                             search()
                         }}
                     >
-                        <p className="text-sm font-medium">Filters</p>
+                        <p className="text-sm font-medium">{t("common.filters")}</p>
                         {!mine && (
                             <Field>
-                                <FieldLabel htmlFor="summary-filter-employee" className="text-muted-foreground">Worker EMP No</FieldLabel>
+                                <FieldLabel htmlFor="summary-filter-employee" className="text-muted-foreground">{t("fields.workerEmpNo")}</FieldLabel>
                                 <SearchAutocomplete
                                     id="summary-filter-employee"
-                                    placeholder="EMP No"
+                                    placeholder={t("fields.empNo")}
                                     value={draftFilters.employeeCode}
                                     onValueChange={(value) => setDraft("employeeCode", value)}
                                     options={workerOptions}
                                     loading={workersLoading}
                                 />
-                                <MissingAccessHint feature="Suggestions" grant="GET:/api/daily-weight-summary/filter-options/workers" />
+                                <MissingAccessHint feature={t("common.suggestions")} grant="GET:/api/daily-weight-summary/filter-options/workers" />
                             </Field>
                         )}
                         <Field>
-                            <FieldLabel htmlFor="summary-filter-site" className="text-muted-foreground">Site</FieldLabel>
+                            <FieldLabel htmlFor="summary-filter-site" className="text-muted-foreground">{t("fields.site")}</FieldLabel>
                             <LovSelect
                                 id="summary-filter-site"
                                 value={draftFilters.estateId}
                                 onValueChange={(value) => setDraft("estateId", value)}
                                 options={estateOptions(estates)}
-                                clearLabel="All sites"
+                                clearLabel={t("fields.allSites")}
                             />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="summary-filter-cp" className="text-muted-foreground">Collection Point</FieldLabel>
+                            <FieldLabel htmlFor="summary-filter-cp" className="text-muted-foreground">{t("fields.collectionPoint")}</FieldLabel>
                             <LovSelect
                                 id="summary-filter-cp"
                                 value={draftFilters.cpCode}
                                 onValueChange={(value) => setDraft("cpCode", value)}
                                 options={collectionPointOptions(collectionPoints)}
-                                clearLabel={filterEstateId ? "All collection points" : "Select a site first"}
+                                clearLabel={t(filterEstateId ? "fields.allCollectionPoints" : "fields.selectSiteFirst")}
                                 disabled={!filterEstateId}
                             />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="summary-filter-work-type" className="text-muted-foreground">Work Type</FieldLabel>
+                            <FieldLabel htmlFor="summary-filter-work-type" className="text-muted-foreground">{t("fields.workType")}</FieldLabel>
                             <LovSelect
                                 id="summary-filter-work-type"
                                 value={draftFilters.workType}
                                 onValueChange={(value) => setDraft("workType", value)}
                                 options={workTypeOptions(workTypes)}
-                                clearLabel={filterEstateId ? "All work types" : "Select a site first"}
+                                clearLabel={t(filterEstateId ? "fields.allWorkTypes" : "fields.selectSiteFirst")}
                                 disabled={!filterEstateId}
                             />
                         </Field>
                         <div className="flex gap-2">
-                            <Button type="submit" className="flex-1">Search</Button>
-                            <Button type="button" variant="outline" className="flex-1" onClick={clear}>Clear</Button>
+                            <Button type="submit" className="flex-1">{t("common.search")}</Button>
+                            <Button type="button" variant="outline" className="flex-1" onClick={clear}>{t("common.clear")}</Button>
                         </div>
                     </form>
                 </ScrollArea>
@@ -274,31 +280,31 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                         onClick={() => setIsSidebarOpen(true)}
                     >
                         <IconCalendar className="h-4 w-4" />
-                        <span>{formatRange(range)} · Filters</span>
+                        <span>{formatRange(range)} · {t("common.filters")}</span>
                     </Button>
                 </div>
 
                 <div className="mb-2 flex flex-wrap items-center justify-between gap-2 px-4 lg:px-6">
                     <div>
                         <p className="text-sm text-muted-foreground">
-                            {rows.length} {rows.length === 1 ? "row" : "rows"} · {formatRange(range)}
+                            {t("dailySummary.count", { count: rows.length })} · {formatRange(range)}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                            Last updated: {result?.lastCalculatedAt ? formatDateTime(result.lastCalculatedAt) : "not calculated yet"}
-                            {" "}· recalculated every night at 10 pm
+                            {t("dailySummary.lastUpdatedAt", { time: result?.lastCalculatedAt ? formatDateTime(result.lastCalculatedAt) : t("dailySummary.notCalculated") })}
+                            {" "}· {t("dailySummary.schedule")}
                         </p>
                     </div>
                     <div className="flex gap-2">
                         {!mine && can("POST:/api/daily-weight-summary/recalculate") && (
                             <Button variant="outline" size="lg" disabled={recalculate.isPending} onClick={recalculateNow}>
                                 <IconRefresh />
-                                {recalculate.isPending ? "Recalculating..." : "Recalculate Now"}
+                                {recalculate.isPending ? t("dailySummary.recalculating") : t("dailySummary.recalculateNow")}
                             </Button>
                         )}
                         {can(mine ? "GET:/api/daily-weight-summary/mine/export" : "GET:/api/daily-weight-summary/export") && (
                             <Button variant="outline" size="lg" disabled={isExporting || rows.length === 0} onClick={exportRows}>
                                 <IconDownload />
-                                {isExporting ? "Exporting..." : "Export"}
+                                {isExporting ? t("common.exporting") : t("common.export")}
                             </Button>
                         )}
                     </div>
@@ -309,19 +315,19 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                         <Table>
                             <TableHeader className="sticky top-0 z-10 bg-muted">
                                 <TableRow>
-                                    <TableHead>Date</TableHead>
+                                    <TableHead>{t("dailySummary.date")}</TableHead>
                                     {/* EMP No stays fixed while the wide table scrolls */}
-                                    <TableHead className="sticky left-0 z-20 bg-muted">EMP No</TableHead>
-                                    <TableHead>Worker Name</TableHead>
-                                    <TableHead>Attendance Category</TableHead>
-                                    <TableHead>Site</TableHead>
-                                    <TableHead>Collection Point</TableHead>
-                                    <TableHead>Work Type</TableHead>
-                                    <TableHead className="text-right">Transactions</TableHead>
-                                    <TableHead className="text-right">Daily Total (kg)</TableHead>
-                                    <TableHead>Day</TableHead>
-                                    <TableHead className="text-right">Overweight (kg)</TableHead>
-                                    <TableHead>Last Updated</TableHead>
+                                    <TableHead className="sticky left-0 z-20 bg-muted">{t("fields.empNo")}</TableHead>
+                                    <TableHead>{t("fields.workerName")}</TableHead>
+                                    <TableHead>{t("dailySummary.attendanceCategory")}</TableHead>
+                                    <TableHead>{t("fields.site")}</TableHead>
+                                    <TableHead>{t("fields.collectionPoint")}</TableHead>
+                                    <TableHead>{t("fields.workType")}</TableHead>
+                                    <TableHead className="text-right">{t("dailySummary.transactions")}</TableHead>
+                                    <TableHead className="text-right">{t("dailySummary.dailyTotalKg")}</TableHead>
+                                    <TableHead>{t("dailySummary.day")}</TableHead>
+                                    <TableHead className="text-right">{t("dailySummary.overweightKg")}</TableHead>
+                                    <TableHead>{t("fields.lastUpdated")}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -331,7 +337,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                                         <TableCell className={`sticky left-0 font-medium ${stickyCell}`}>{row.employeeCode}</TableCell>
                                         <TableCell className="whitespace-nowrap">{row.employeeName}</TableCell>
                                         <TableCell>
-                                            {row.attendanceCategory && <Badge variant="outline">{categoryLabels[row.attendanceCategory]}</Badge>}
+                                            {row.attendanceCategory && <Badge variant="outline">{labels.category[row.attendanceCategory]}</Badge>}
                                         </TableCell>
                                         <TableCell className="whitespace-nowrap">{row.estateName || row.estateId}</TableCell>
                                         <TableCell className="whitespace-nowrap">{row.cpCode}</TableCell>
@@ -346,7 +352,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                                 {rows.length === 0 && (
                                     <TableRow>
                                         <TableCell colSpan={12} className="h-24 text-center text-muted-foreground">
-                                            {isLoading ? "Loading summary..." : `No summary rows for ${formatRange(range)}.`}
+                                            {isLoading ? t("dailySummary.loading") : t("dailySummary.empty", { range: formatRange(range) })}
                                         </TableCell>
                                     </TableRow>
                                 )}

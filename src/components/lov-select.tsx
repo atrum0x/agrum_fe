@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
@@ -18,7 +19,7 @@ export function LovSelect<T extends string = string>({
     value,
     onValueChange,
     options,
-    placeholder = "Select",
+    placeholder: placeholderProp,
     clearLabel,
     disabled,
     invalid,
@@ -38,6 +39,8 @@ export function LovSelect<T extends string = string>({
     className?: string
     "aria-label"?: string
 }) {
+    const { t } = useTranslation()
+    const placeholder = placeholderProp ?? t("common.select")
     const labelOf = (selected: string | null) => {
         if (!selected) return clearLabel ?? placeholder
         // Fall back to the code while the options are still loading

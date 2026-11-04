@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Trans, useTranslation } from "react-i18next";
 import { IconCalendarCheck, IconHourglass, IconRefresh, IconScale, IconWeight } from "@tabler/icons-react";
 import logo from "@/assets/logo.png";
 import { useAuth } from "@/context/AuthContext";
@@ -11,11 +12,11 @@ import { useGetDashboard, useGetMyDashboard } from "@/api/generated/endpoints/da
 import { useCountPendingWeightChanges } from "@/api/generated/endpoints/weight-approval-controller/weight-approval-controller";
 import type { DashboardDto } from "@/api/generated/models";
 
-function greeting() {
+function greetingKey() {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
+    if (hour < 12) return "landing.goodMorning";
+    if (hour < 17) return "landing.goodAfternoon";
+    return "landing.goodEvening";
 }
 
 const flatten = (items: NavItem[]): NavItem[] =>
@@ -47,6 +48,7 @@ function StatCard({ label, value, unit, icon, to }: {
  * counts and see only their own weighings.
  */
 export default function Landing() {
+    const { t } = useTranslation();
     const { user, can } = useAuth();
     const showAll = can("GET:/api/dashboard");
     const showMine = !showAll && can("GET:/api/dashboard/mine");
@@ -97,39 +99,39 @@ export default function Landing() {
                     <img src={logo} alt="Agrum" className="size-14 object-contain drop-shadow-lg" />
                     <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium text-muted-foreground">
-                            {greeting()}{user?.employeeName || user?.username ? `, ${user.employeeName || user.username}` : ""}
+                            {t(greetingKey())}{user?.employeeName || user?.username ? `, ${user.employeeName || user.username}` : ""}
                         </p>
                         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-                            Welcome to{" "}
-                            <span className="bg-linear-to-r from-lime-600 to-emerald-700 bg-clip-text text-transparent dark:from-lime-400 dark:to-emerald-500">
-                                Agrum
-                            </span>
+                            <Trans
+                                i18nKey="landing.welcomeTo"
+                                components={{ brand: <span className="bg-linear-to-r from-lime-600 to-emerald-700 bg-clip-text text-transparent dark:from-lime-400 dark:to-emerald-500" /> }}
+                            />
                         </h1>
                     </div>
                     {(showAll || showMine || showPending) && (
                         <Button variant="outline" onClick={refresh} disabled={isFetching}>
                             <IconRefresh className={isFetching ? "animate-spin" : undefined} />
-                            Refresh
+                            {t("common.refresh")}
                         </Button>
                     )}
                 </div>
 
                 {(showAll || showMine || showPending) && (
-                    <section aria-label="Today" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <section aria-label={t("landing.todayRegion")} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         {showAll && (
-                            <StatCard label="Attendance Today" icon={<IconCalendarCheck className="size-4" />}
+                            <StatCard label={t("landing.attendanceToday")} icon={<IconCalendarCheck className="size-4" />}
                                       value={dashboard?.attendanceToday?.toString()} />
                         )}
                         {(showAll || showMine) && (
                             <>
-                                <StatCard label={showMine ? "My Weighings Today" : "Weighings Today"} icon={<IconScale className="size-4" />}
+                                <StatCard label={t(showMine ? "landing.myWeighingsToday" : "landing.weighingsToday")} icon={<IconScale className="size-4" />}
                                           value={dashboard?.weighingsToday?.toString()} />
-                                <StatCard label={showMine ? "My Total Today" : "Total Weight Today"} icon={<IconWeight className="size-4" />}
+                                <StatCard label={t(showMine ? "landing.myTotalToday" : "landing.totalWeightToday")} icon={<IconWeight className="size-4" />}
                                           value={dashboard ? formatKg(dashboard.totalWeightTodayKg) : undefined} unit="kg" />
                             </>
                         )}
                         {showPending && (
-                            <StatCard label="Pending Authorizations" icon={<IconHourglass className="size-4" />}
+                            <StatCard label={t("landing.pendingAuthorizations")} icon={<IconHourglass className="size-4" />}
                                       value={pendingCount?.toString()}
                                       to={can("GET:/api/weight-changes/pending") ? "/weight-approvals" : undefined} />
                         )}
@@ -137,17 +139,17 @@ export default function Landing() {
                 )}
 
                 {windows.length > 0 ? (
-                    <section aria-label="Windows" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <section aria-label={t("landing.windowsRegion")} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         {windows.map((item) => (
                             <Link key={item.url} to={item.url!}
                                   className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-14 justify-start bg-background/70 text-base")}>
-                                {item.title}
+                                {t(item.titleKey)}
                             </Link>
                         ))}
                     </section>
                 ) : (
                     <p className="text-sm text-muted-foreground">
-                        You do not have access to any window. Please contact the administrator.
+                        {t("landing.noWindows")}
                     </p>
                 )}
             </div>

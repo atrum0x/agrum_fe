@@ -1,3 +1,4 @@
+import { Trans } from "react-i18next"
 import { FieldDescription } from "@/components/ui/field"
 import { useAuth } from "@/context/AuthContext"
 import type { Permission } from "@/lib/permissions"
@@ -18,8 +19,11 @@ export const MissingAccessHint = ({ grant, feature }: {
     if (can(grant)) return null
     return (
         <FieldDescription className="text-xs">
-            {feature} are off: you don't have access to them. Ask your administrator to grant{" "}
-            <code className="rounded bg-muted px-1 py-0.5 font-mono text-[0.7rem] break-all select-all">{grant}</code>.
+            <Trans
+                i18nKey="common.missingAccess"
+                values={{ feature, grant }}
+                components={{ code: <code className="rounded bg-muted px-1 py-0.5 font-mono text-[0.7rem] break-all select-all" /> }}
+            />
         </FieldDescription>
     )
 }

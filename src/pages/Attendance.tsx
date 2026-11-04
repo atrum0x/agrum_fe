@@ -1,4 +1,5 @@
 import React from "react"
+import { keepPreviousData } from "@tanstack/react-query"
 import { PageTitle } from "@/components/page-title"
 import { format, isSameDay, parseISO, startOfToday } from "date-fns"
 import type { DateRange } from "react-day-picker"
@@ -113,14 +114,15 @@ export const Attendance = () => {
 
     // Suggestions come from the attendance the user can see, searched on the server because the list can be long
     const workerSearch = React.useDeferredValue(draftFilters.employee.trim())
-    const { data: employeesResponse } = useGetAttendanceWorkerOptions({ search: workerSearch || undefined }, {
-        query: { enabled: can("GET:/api/attendance/filter-options/workers") },
+    const { data: employeesResponse, isFetching: workersFetching } = useGetAttendanceWorkerOptions({ search: workerSearch || undefined }, {
+        query: { enabled: can("GET:/api/attendance/filter-options/workers"), placeholderData: keepPreviousData },
     })
+    const workersLoading = workersFetching || workerSearch !== draftFilters.employee.trim()
     const workerOptions = React.useMemo<AutocompleteOption[]>(
         () => toAutocompleteOptions(employeesResponse),
         [employeesResponse])
     // Recorded By is the username, which is the supervisor's employee code
-    const { data: usersResponse } = useGetAttendanceRecorderOptions({
+    const { data: usersResponse, isFetching: recordersLoading } = useGetAttendanceRecorderOptions({
         query: { enabled: can("GET:/api/attendance/filter-options/recorders") },
     })
     const recorderOptions = React.useMemo<AutocompleteOption[]>(
@@ -230,7 +232,7 @@ export const Attendance = () => {
                                 value={draftFilters.employee}
                                 onValueChange={(value) => setDraft("employee", value)}
                                 options={workerOptions}
-                                filterOnServer
+                                loading={workersLoading}
                             />
                             <MissingAccessHint feature="Suggestions" grant="GET:/api/attendance/filter-options/workers" />
                         </Field>
@@ -274,6 +276,7 @@ export const Attendance = () => {
                                 value={draftFilters.recordedBy}
                                 onValueChange={(value) => setDraft("recordedBy", value)}
                                 options={recorderOptions}
+                                loading={recordersLoading}
                             />
                             <MissingAccessHint feature="Suggestions" grant="GET:/api/attendance/filter-options/recorders" />
                         </Field>

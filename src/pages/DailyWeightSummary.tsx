@@ -1,4 +1,5 @@
 import React from "react"
+import { keepPreviousData } from "@tanstack/react-query"
 import { PageTitle } from "@/components/page-title"
 import { format, isSameDay, startOfToday, subDays } from "date-fns"
 import type { DateRange } from "react-day-picker"
@@ -95,9 +96,10 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
     })
     const workTypes = filterEstateId ? toList<WorkTypeDto>(workTypesResponse) : []
     const workerSearch = React.useDeferredValue(draftFilters.employeeCode.trim())
-    const { data: employeesResponse } = useGetSummaryWorkerOptions({ search: workerSearch || undefined }, {
-        query: { enabled: !mine && can("GET:/api/daily-weight-summary/filter-options/workers") },
+    const { data: employeesResponse, isFetching: workersFetching } = useGetSummaryWorkerOptions({ search: workerSearch || undefined }, {
+        query: { enabled: !mine && can("GET:/api/daily-weight-summary/filter-options/workers"), placeholderData: keepPreviousData },
     })
+    const workersLoading = workersFetching || workerSearch !== draftFilters.employeeCode.trim()
     const workerOptions = React.useMemo<AutocompleteOption[]>(
         () => toAutocompleteOptions(employeesResponse),
         [employeesResponse])
@@ -217,7 +219,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                                     value={draftFilters.employeeCode}
                                     onValueChange={(value) => setDraft("employeeCode", value)}
                                     options={workerOptions}
-                                    filterOnServer
+                                    loading={workersLoading}
                                 />
                                 <MissingAccessHint feature="Suggestions" grant="GET:/api/daily-weight-summary/filter-options/workers" />
                             </Field>

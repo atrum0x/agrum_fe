@@ -1,4 +1,5 @@
 import React from "react"
+import { keepPreviousData } from "@tanstack/react-query"
 import { PageTitle } from "@/components/page-title"
 import { format, isSameDay, startOfToday } from "date-fns"
 import type { DateRange } from "react-day-picker"
@@ -239,13 +240,14 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
     // Suggestions come from the weighings the user can see, searched on the server because the list can be long.
     // These endpoints return only code and name, so they're granted with the search instead of the employee/user lists
     const workerSearch = React.useDeferredValue(draftFilters.employeeCode.trim())
-    const { data: employeesResponse } = useGetWeightWorkerOptions({ search: workerSearch || undefined }, {
-        query: { enabled: !mine && can("GET:/api/weights/filter-options/workers") },
+    const { data: employeesResponse, isFetching: workersFetching } = useGetWeightWorkerOptions({ search: workerSearch || undefined }, {
+        query: { enabled: !mine && can("GET:/api/weights/filter-options/workers"), placeholderData: keepPreviousData },
     })
+    const workersLoading = workersFetching || workerSearch !== draftFilters.employeeCode.trim()
     const workerOptions = React.useMemo<AutocompleteOption[]>(
         () => toAutocompleteOptions(employeesResponse),
         [employeesResponse])
-    const { data: usersResponse } = useGetWeightSupervisorOptions({
+    const { data: usersResponse, isFetching: supervisorsLoading } = useGetWeightSupervisorOptions({
         query: { enabled: !mine && can("GET:/api/weights/filter-options/supervisors") },
     })
     const supervisorOptions = React.useMemo<AutocompleteOption[]>(
@@ -388,7 +390,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                                     value={draftFilters.employeeCode}
                                     onValueChange={(value) => setDraft("employeeCode", value)}
                                     options={workerOptions}
-                                    filterOnServer
+                                    loading={workersLoading}
                                 />
                                 <MissingAccessHint feature="Suggestions" grant="GET:/api/weights/filter-options/workers" />
                             </Field>
@@ -401,6 +403,7 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                                 value={draftFilters.supervisor}
                                 onValueChange={(value) => setDraft("supervisor", value)}
                                 options={supervisorOptions}
+                                loading={supervisorsLoading}
                             />
                             <MissingAccessHint feature="Suggestions" grant="GET:/api/weights/filter-options/supervisors" />
                         </Field>

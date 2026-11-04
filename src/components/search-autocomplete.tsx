@@ -26,8 +26,8 @@ export const SearchAutocomplete = ({
     options,
     placeholder,
     emptyText = "No matches. The text you typed is still used as the filter.",
-    // Set when the options are already filtered on the server
-    filterOnServer = false,
+    // Options are still on their way, so an empty list doesn't mean there are no matches yet
+    loading = false,
 }: {
     id?: string
     value: string
@@ -35,14 +35,15 @@ export const SearchAutocomplete = ({
     options: AutocompleteOption[]
     placeholder?: string
     emptyText?: string
-    filterOnServer?: boolean
+    loading?: boolean
 }) => (
     <Autocomplete.Root
         items={options}
         value={value}
         onValueChange={onValueChange}
         itemToStringValue={(option: AutocompleteOption) => option.value}
-        filter={filterOnServer ? null : matches}
+        // Also applies to lists searched on the server, so the last results narrow while the next ones load
+        filter={matches}
         // Long lists (all employees) stay quick to render; typing narrows them
         limit={50}
     >
@@ -51,7 +52,7 @@ export const SearchAutocomplete = ({
             <Autocomplete.Positioner sideOffset={4} className="isolate z-50">
                 <Autocomplete.Popup className="max-h-[min(var(--available-height),18rem)] w-(--anchor-width) overflow-y-auto rounded-lg bg-popover p-1 text-popover-foreground shadow-md ring-1 ring-foreground/10 empty:hidden">
                     <Autocomplete.Empty className="px-1.5 py-1 text-sm text-muted-foreground empty:hidden">
-                        {emptyText}
+                        {loading ? "Loading suggestions..." : emptyText}
                     </Autocomplete.Empty>
                     <Autocomplete.List>
                         {(option: AutocompleteOption) => (

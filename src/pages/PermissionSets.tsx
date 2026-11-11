@@ -159,6 +159,12 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet"
 
+// "EMP001 - Nimal Perera"; falls back to the username for logins with no employee
+const userLabel = (user: AppUserDto) => {
+    const code = user.employeeCode ?? user.username ?? "-"
+    return user.employeeName ? `${code} - ${user.employeeName}` : code
+}
+
 export const PermissionSets = () => {
     const queryClient = useQueryClient()
     // Buttons are shown only for granted endpoints; the backend still checks
@@ -317,9 +323,11 @@ export const PermissionSets = () => {
         onColumnVisibilityChange: setColumnVisibility,
         onPaginationChange: setPagination,
     })
-    const selectedProjectionIds = table.getSelectedRowModel().rows.map(
-        (row) => row.original.id
-    )
+    // rowSelection keeps ids from every page (manual pagination), so ticks made
+    // on page 1 still count after moving to page 2
+    const selectedProjectionIds = Object.entries(rowSelection)
+        .filter(([, selected]) => Boolean(selected))
+        .map(([id]) => id)
     const hasSelectedProjections = selectedProjectionIds.length > 0
     const isUpdatingProjections = isGranting || isRevoking
     const isUpdatingUsers = isGrantingUsers || isRevokingUsers
@@ -402,6 +410,7 @@ export const PermissionSets = () => {
                                     onClick={() => {
                                         setSelectedItemId(item.permissionSetId ?? null)
                                         setPagination((current) => ({ ...current, pageIndex: 0 }))
+                                        setRowSelection({})
                                     }}>
                                     <p className="truncate">{item.permissionSetId}</p>
                                     <p className={` truncate pt-1 text-sm text-muted-foreground ${isSelected ? "font-medium" : ""}`}>
@@ -485,6 +494,7 @@ export const PermissionSets = () => {
                     onValueChange={(nextView) => {
                         setView(nextView)
                         setPagination((current) => ({ ...current, pageIndex: 0 }))
+                        setRowSelection({})
                     }}
                     className="flex flex-col w-full justify-start gap-4"
                 >
@@ -495,7 +505,10 @@ export const PermissionSets = () => {
                         <Select
                             value={view}
                             onValueChange={(value) => {
-                                if (value !== null) setView(value)
+                                if (value === null) return
+                                setView(value)
+                                setPagination((current) => ({ ...current, pageIndex: 0 }))
+                                setRowSelection({})
                             }}
                         >
                             <SelectTrigger
@@ -558,7 +571,7 @@ export const PermissionSets = () => {
                             <div className="flex items-center gap-4">
                                 <Input
                                     type="search"
-                                    placeholder="Search users"
+                                    placeholder="Search by code or name"
                                     value={userSearch}
                                     onChange={(event) => setUserSearch(event.target.value)}
                                     className="max-w-sm"
@@ -580,7 +593,7 @@ export const PermissionSets = () => {
                                         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4">
                                             <Input
                                                 type="search"
-                                                placeholder="Search unassigned users"
+                                                placeholder="Search by code or name"
                                                 value={unassignedUserSearch}
                                                 onChange={(event) => setUnassignedUserSearch(event.target.value)}
                                                 aria-label="Search unassigned users"
@@ -623,7 +636,7 @@ export const PermissionSets = () => {
                                                                     aria-label="Select all unassigned users"
                                                                 />
                                                             </TableHead>
-                                                            <TableHead>Username</TableHead>
+                                                            <TableHead>User</TableHead>
                                                         </TableRow>
                                                     </TableHeader>
                                                     <TableBody>
@@ -641,7 +654,7 @@ export const PermissionSets = () => {
                                                                         aria-label={`Select ${user.username ?? "user"}`}
                                                                     />
                                                                 </TableCell>
-                                                                <TableCell>{user.username ?? "-"}</TableCell>
+                                                                <TableCell>{userLabel(user)}</TableCell>
                                                             </TableRow>
                                                         )) : (
                                                             <TableRow>
@@ -695,7 +708,7 @@ export const PermissionSets = () => {
                                                     aria-label="Select all granted users"
                                                 />
                                             </TableHead>
-                                            <TableHead>Username</TableHead>
+                                            <TableHead>User</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -713,7 +726,7 @@ export const PermissionSets = () => {
                                                         aria-label={`Select ${user.username ?? "user"}`}
                                                     />
                                                 </TableCell>
-                                                <TableCell>{user.username ?? "-"}</TableCell>
+                                                <TableCell>{userLabel(user)}</TableCell>
                                             </TableRow>
                                         )) : (
                                             <TableRow>
@@ -759,7 +772,7 @@ export const PermissionSets = () => {
                                             )
                                         }}
                                     >
-                                        {view === "Granted" ? "Revoke selected" : "Grant selected"}
+                                        {view === "Granted" ? "Revoke selected" : "Grant selected"} ({selectedProjectionIds.length})
                                     </Button>
                                 </div>
                             )}
@@ -805,8 +818,7 @@ export const PermissionSets = () => {
                         </div>
                         <div className="flex items-center justify-between px-4 shrink-0">
                             <div className="hidden flex-1 text-sm text-muted-foreground lg:flex">
-                                {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                                {table.getFilteredRowModel().rows.length} row(s) selected.
+                                {selectedProjectionIds.length} selected across all pages
                             </div>
                             <div className="flex w-full items-center gap-8 lg:w-fit">
                                 <div className="hidden items-center gap-2 lg:flex">

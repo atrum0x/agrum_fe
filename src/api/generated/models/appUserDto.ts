@@ -9,4 +9,5 @@
 export interface AppUserDto {
   username?: string;
   employeeCode?: string;
+  employeeName?: string;
 }

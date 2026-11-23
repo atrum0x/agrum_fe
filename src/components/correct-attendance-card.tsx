@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { LovSelect, type LovOption } from "@/components/lov-select"
-import { collectionPointOptions, estateOptions, workTypeOptions } from "@/lib/lov-options"
+import { divisionOptions, estateOptions, fieldOptions, workTypeOptions } from "@/lib/lov-options"
 import { Textarea } from "@/components/ui/textarea"
 import {
     getGetAvailableWorkersQueryKey,
@@ -20,15 +20,17 @@ import {
     useGetAttendanceHistory,
 } from "@/api/generated/endpoints/attendance-correction-controller/attendance-correction-controller"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
-import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
+import { useGetDivisions } from "@/api/generated/endpoints/division-controller/division-controller"
+import { useGetFields } from "@/api/generated/endpoints/field-controller/field-controller"
 import { useGetWorkTypes } from "@/api/generated/endpoints/work-type-controller/work-type-controller"
 import {
     CorrectAttendanceRequestAttendanceCategory,
     type AttendanceCorrectionDto,
     type AttendanceDto,
     type AttendanceSnapshot,
-    type CollectionPointDto,
+    type DivisionDto,
     type Estate,
+    type FieldDto,
     type WorkTypeDto,
 } from "@/api/generated/models"
 
@@ -60,7 +62,8 @@ const formatDateTime = (value?: string) => value ? format(parseISO(value), "dd/M
 const snapshotFields: { key: keyof AttendanceSnapshot; label: string }[] = [
     { key: "estateId", label: "Site" },
     { key: "workType", label: "Work Type" },
-    { key: "cpCode", label: "Collection Point" },
+    { key: "divisionCode", label: "Division" },
+    { key: "fieldCode", label: "Field" },
     { key: "attendanceCategory", label: "Category" },
 ]
 
@@ -114,7 +117,8 @@ export const CorrectAttendanceCard = ({
     const attendanceId = attendance.attendanceId ?? ""
     const [estateId, setEstateId] = React.useState(attendance.estateId ?? "")
     const [workType, setWorkType] = React.useState(attendance.workType ?? "")
-    const [cpCode, setCpCode] = React.useState(attendance.cpCode ?? "")
+    const [divisionCode, setDivisionCode] = React.useState(attendance.divisionCode ?? "")
+    const [fieldCode, setFieldCode] = React.useState(attendance.fieldCode ?? "")
     const [category, setCategory] = React.useState<Category | "">(attendance.attendanceCategory ?? "")
     const [reason, setReason] = React.useState("")
     const [showInvalid, setShowInvalid] = React.useState(false)
@@ -130,10 +134,13 @@ export const CorrectAttendanceCard = ({
         .filter((estate) => estate.active || estate.id === attendance.estateId)
     const { data: workTypesResponse } = useGetWorkTypes(estateId, { query: { enabled: Boolean(estateId) } })
     const workTypes = estateId ? toList<WorkTypeDto>(workTypesResponse) : []
-    const { data: collectionPointsResponse } = useGetCollectionPoints(estateId, undefined, {
-        query: { enabled: Boolean(estateId) },
+    const { data: divisionsResponse } = useGetDivisions(estateId, { query: { enabled: Boolean(estateId) } })
+    const divisions = estateId ? toList<DivisionDto>(divisionsResponse) : []
+    // AT-09: fields of the selected division
+    const { data: fieldsResponse } = useGetFields(estateId, { divisionCode }, {
+        query: { enabled: Boolean(estateId && divisionCode) },
     })
-    const collectionPoints = estateId ? toList<CollectionPointDto>(collectionPointsResponse) : []
+    const fields = estateId && divisionCode ? toList<FieldDto>(fieldsResponse) : []
     const { data: historyResponse, isLoading: isLoadingHistory } = useGetAttendanceHistory(attendanceId, {
         query: { enabled: showHistory && Boolean(attendanceId) },
     })
@@ -153,16 +160,18 @@ export const CorrectAttendanceCard = ({
 
     const changeEstate = (value: string) => {
         setEstateId(value)
-        // Work types and collection points belong to a site, and codes are unique across sites
+        // Work types, divisions and fields belong to a site
         if (value !== estateId) {
             setWorkType("")
-            setCpCode("")
+            setDivisionCode("")
+            setFieldCode("")
         }
     }
 
     const hasChanges = estateId !== attendance.estateId
         || workType !== attendance.workType
-        || cpCode !== attendance.cpCode
+        || divisionCode !== attendance.divisionCode
+        || fieldCode !== attendance.fieldCode
         || category !== attendance.attendanceCategory
     const trimmedReason = reason.trim()
     // AT-15
@@ -180,10 +189,11 @@ export const CorrectAttendanceCard = ({
     const saveValidationError =
         !estateId ? "Attendance cannot be recorded for an inactive or unassigned site."
             : !workType ? "Please select a Work Type."
-                : !cpCode ? "Please select the Collection Point."
-                    : !category ? "Please select the Attendance Category."
-                        : !hasChanges ? "Nothing was changed."
-                            : reasonError
+                : !divisionCode ? "Please select the Division."
+                    : !fieldCode ? "Please select the Field."
+                        : !category ? "Please select the Attendance Category."
+                            : !hasChanges ? "Nothing was changed."
+                                : reasonError
     // Set on Save / Delete, so the message matches the button that was pressed
     const [validationError, setValidationError] = React.useState<string | null>(null)
 
@@ -198,7 +208,8 @@ export const CorrectAttendanceCard = ({
             data: {
                 estateId,
                 workType,
-                cpCode,
+                divisionCode,
+                fieldCode,
                 attendanceCategory: category as Category,
                 reason: trimmedReason,
                 // AT-18: the server refuses if someone changed it since this list was loaded
@@ -283,14 +294,30 @@ export const CorrectAttendanceCard = ({
                                 />
                             </Field>
                             <Field>
-                                <FieldLabel htmlFor="correct-attendance-cp" className="text-muted-foreground">Collection Point *</FieldLabel>
+                                <FieldLabel htmlFor="correct-attendance-division" className="text-muted-foreground">Division *</FieldLabel>
                                 <LovSelect
-                                    id="correct-attendance-cp"
-                                    value={cpCode}
-                                    onValueChange={setCpCode}
-                                    options={collectionPointOptions(collectionPoints)}
-                                    placeholder="Select a collection point"
-                                    invalid={showInvalid && !cpCode}
+                                    id="correct-attendance-division"
+                                    value={divisionCode}
+                                    onValueChange={(value) => {
+                                        // Fields belong to a division
+                                        if (value !== divisionCode) setFieldCode("")
+                                        setDivisionCode(value)
+                                    }}
+                                    options={divisionOptions(divisions)}
+                                    placeholder="Select a division"
+                                    invalid={showInvalid && !divisionCode}
+                                />
+                            </Field>
+                            <Field>
+                                <FieldLabel htmlFor="correct-attendance-field" className="text-muted-foreground">Field *</FieldLabel>
+                                <LovSelect
+                                    id="correct-attendance-field"
+                                    value={fieldCode}
+                                    onValueChange={setFieldCode}
+                                    options={fieldOptions(fields)}
+                                    placeholder={divisionCode ? "Select a field" : "Select a division first"}
+                                    disabled={!divisionCode}
+                                    invalid={showInvalid && !fieldCode}
                                 />
                             </Field>
                             <Field>

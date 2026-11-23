@@ -57,7 +57,7 @@ export const getGetSetupUrl = () => {
 };
 
 /**
- * @summary Download the sites, work types, collection points, workers and today's weighable attendance the phone keeps for working offline. Give to field supervisors
+ * @summary Download the sites, work types, fields, workers and today's weighable attendance the phone keeps for working offline. Give to field supervisors
  */
 export const getSetup = async (
   options?: Parameters<typeof customFetch>[1],
@@ -160,7 +160,7 @@ export function useGetSetup<
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 /**
- * @summary Download the sites, work types, collection points, workers and today's weighable attendance the phone keeps for working offline. Give to field supervisors
+ * @summary Download the sites, work types, fields, workers and today's weighable attendance the phone keeps for working offline. Give to field supervisors
  */
 
 export function useGetSetup<

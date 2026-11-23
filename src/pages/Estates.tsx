@@ -16,7 +16,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Badge } from "@/components/ui/badge"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { EstateFormCard } from "@/components/estate-form-card"
-import { CollectionPointsTable } from "@/components/collection-points-table"
+import { DivisionsTable } from "@/components/divisions-table"
+import { FieldsTable } from "@/components/fields-table"
 import { WorkTypesTable } from "@/components/work-types-table"
 import { GrantedUsersTable } from "@/components/granted-users-table"
 
@@ -186,11 +187,11 @@ export const Estates = () => {
                             </Badge>
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Standard Full-Day Quantity (kg)</p>
+                            <p className="text-sm text-muted-foreground">Full-Day Qty Norm (kg)</p>
                             <TruncatedCell value={selectedEstate?.fullDayQtyKg != null ? formatKg(selectedEstate.fullDayQtyKg) : "-"} />
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Half-Day Standard Quantity (kg)</p>
+                            <p className="text-sm text-muted-foreground">Half-Day Qty Norm (kg)</p>
                             <TruncatedCell value={selectedEstate?.halfDayQtyKg != null ? formatKg(selectedEstate.halfDayQtyKg) : "-"} />
                         </div>
                         <div className="relative min-w-0 group">
@@ -203,19 +204,29 @@ export const Estates = () => {
                         </div>
                     </div>
                 </div>
-                <Tabs defaultValue="CollectionPoints" className="flex w-full flex-col justify-start gap-4 px-4 pt-8 lg:px-6">
+                <Tabs defaultValue="Divisions" className="flex w-full flex-col justify-start gap-4 px-4 pt-8 lg:px-6">
                     <TabsList>
-                        <TabsTrigger value="CollectionPoints">Collection Points</TabsTrigger>
+                        <TabsTrigger value="Divisions">Divisions</TabsTrigger>
+                        <TabsTrigger value="Fields">Fields</TabsTrigger>
                         <TabsTrigger value="WorkTypes">Work Types</TabsTrigger>
                         <TabsTrigger value="GrantedUsers">Granted Users</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="CollectionPoints" className="flex flex-col gap-4 pb-8 outline-none">
+                    <TabsContent value="Divisions" className="flex flex-col gap-4 pb-8 outline-none">
                         {activeSelectedItemId ? (
                             // key resets search and open forms when another site is selected
-                            <CollectionPointsTable key={activeSelectedItemId} estateId={activeSelectedItemId} />
+                            <DivisionsTable key={activeSelectedItemId} estateId={activeSelectedItemId} />
                         ) : (
                             <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-                                Select a site to view its collection points.
+                                Select a site to view its divisions.
+                            </div>
+                        )}
+                    </TabsContent>
+                    <TabsContent value="Fields" className="flex flex-col gap-4 pb-8 outline-none">
+                        {activeSelectedItemId ? (
+                            <FieldsTable key={activeSelectedItemId} estateId={activeSelectedItemId} />
+                        ) : (
+                            <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                                Select a site to view its fields.
                             </div>
                         )}
                     </TabsContent>

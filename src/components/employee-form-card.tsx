@@ -10,12 +10,13 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { LovSelect, type LovOption } from "@/components/lov-select"
-import { estateOptions } from "@/lib/lov-options"
+import { divisionOptions, estateOptions } from "@/lib/lov-options"
 import { getGetAllEmployeesQueryKey, useCreate1, useUpdate } from "@/api/generated/endpoints/employee-controller/employee-controller"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
-import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
+import { useGetDivisions } from "@/api/generated/endpoints/division-controller/division-controller"
+import { useGetFields } from "@/api/generated/endpoints/field-controller/field-controller"
 import { CreateEmployeeRequestEmployeeCategory, CreateEmployeeRequestEmploymentStatus } from "@/api/generated/models"
-import type { CollectionPointDto, CreateEmployeeRequest, EmployeeDto, Estate, UpdateEmployeeRequest } from "@/api/generated/models"
+import type { CreateEmployeeRequest, DivisionDto, EmployeeDto, Estate, FieldDto, UpdateEmployeeRequest } from "@/api/generated/models"
 
 const emptyForm: CreateEmployeeRequest = {
     employeeCode: "",
@@ -30,7 +31,8 @@ const emptyForm: CreateEmployeeRequest = {
     endDate: "",
     homeEstateId: "",
     defaultEstateId: "",
-    defaultCollectionPointCode: "",
+    defaultDivisionCode: "",
+    defaultFieldCode: "",
     isUserAccount: false,
     password: "",
 }
@@ -52,8 +54,17 @@ const toForm = (employee: EmployeeDto): CreateEmployeeRequest => ({
     endDate: employee.endDate ?? "",
     homeEstateId: employee.homeEstateId ?? "",
     defaultEstateId: employee.defaultEstateId ?? "",
-    defaultCollectionPointCode: employee.defaultCollectionPointCode ?? "",
+    defaultDivisionCode: employee.defaultDivisionCode ?? "",
+    defaultFieldCode: employee.defaultFieldCode ?? "",
 })
+
+const asList = <T,>(response: unknown): T[] => {
+    if (Array.isArray(response)) return response as T[]
+    if (response && typeof response === "object" && "data" in response) {
+        return Array.isArray(response.data) ? response.data as T[] : []
+    }
+    return []
+}
 
 const statusOptions: LovOption<CreateEmployeeRequestEmploymentStatus>[] =
     Object.values(CreateEmployeeRequestEmploymentStatus).map((status) => ({ value: status, label: status }))
@@ -106,21 +117,17 @@ export const EmployeeFormCard = ({
         }
         return []
     }, [estatesResponse])
-    // The default collection point must belong to the default site
+    // The default division belongs to the default site (PB-16), the default field to that division (PB-11)
     const defaultEstateId = form.defaultEstateId ?? ""
-    const { data: collectionPointsResponse } = useGetCollectionPoints(
+    const defaultDivisionCode = form.defaultDivisionCode ?? ""
+    const { data: divisionsResponse } = useGetDivisions(defaultEstateId, { query: { enabled: Boolean(defaultEstateId) } })
+    const divisions = React.useMemo(() => asList<DivisionDto>(divisionsResponse), [divisionsResponse])
+    const { data: fieldsResponse } = useGetFields(
         defaultEstateId,
-        { search: "" },
-        { query: { enabled: Boolean(defaultEstateId) } },
+        { divisionCode: defaultDivisionCode },
+        { query: { enabled: Boolean(defaultEstateId && defaultDivisionCode) } },
     )
-    const collectionPoints = React.useMemo<CollectionPointDto[]>(() => {
-        const response = collectionPointsResponse as unknown
-        if (Array.isArray(response)) return response as CollectionPointDto[]
-        if (response && typeof response === "object" && "data" in response) {
-            return Array.isArray(response.data) ? response.data as CollectionPointDto[] : []
-        }
-        return []
-    }, [collectionPointsResponse])
+    const fields = React.useMemo(() => asList<FieldDto>(fieldsResponse), [fieldsResponse])
 
     React.useEffect(() => {
         // Let Escape close the date picker first instead of the whole card
@@ -166,7 +173,8 @@ export const EmployeeFormCard = ({
                 startDate: data.startDate,
                 endDate: data.endDate,
                 defaultEstateId: data.defaultEstateId,
-                defaultCollectionPointCode: data.defaultCollectionPointCode,
+                defaultDivisionCode: data.defaultDivisionCode,
+                defaultFieldCode: data.defaultFieldCode,
                 homeEstateId: data.homeEstateId,
             }
             updateEmployee({ employeeCode, data: updateData }, { onSuccess })
@@ -295,9 +303,9 @@ export const EmployeeFormCard = ({
                                         onValueChange={(value) => setForm((current) => ({
                                             ...current,
                                             [key]: value,
-                                            // A collection point from the previous default site no longer applies
+                                            // A division and field of the previous default site no longer apply
                                             ...(key === "defaultEstateId" && value !== current.defaultEstateId
-                                                ? { defaultCollectionPointCode: "" }
+                                                ? { defaultDivisionCode: "", defaultFieldCode: "" }
                                                 : {}),
                                         }))}
                                         options={estateOptions(estates)}
@@ -306,22 +314,42 @@ export const EmployeeFormCard = ({
                                 </Field>
                             ))}
                             <Field>
-                                <FieldLabel htmlFor="employee-form-defaultCollectionPointCode" className="text-muted-foreground">
-                                    Default Collection Point
+                                <FieldLabel htmlFor="employee-form-defaultDivisionCode" className="text-muted-foreground">
+                                    Default Division
                                 </FieldLabel>
                                 <LovSelect
-                                    id="employee-form-defaultCollectionPointCode"
-                                    value={form.defaultCollectionPointCode ?? ""}
-                                    onValueChange={(value) => setField("defaultCollectionPointCode", value)}
-                                    options={collectionPoints
-                                        .filter((point) => point.cpCode)
-                                        .map((point) => ({
-                                            value: point.cpCode!,
-                                            label: point.name ?? point.cpCode!,
-                                            hint: point.isDefault ? " (site default)" : undefined,
-                                        }))}
-                                    placeholder={defaultEstateId ? "Select a collection point" : "Select a default site first"}
+                                    id="employee-form-defaultDivisionCode"
+                                    value={defaultDivisionCode}
+                                    onValueChange={(value) => setForm((current) => ({
+                                        ...current,
+                                        defaultDivisionCode: value,
+                                        // A field of the previous division no longer applies
+                                        ...(value !== current.defaultDivisionCode ? { defaultFieldCode: "" } : {}),
+                                    }))}
+                                    options={divisionOptions(divisions)}
+                                    clearLabel={defaultDivisionCode ? "No default division" : undefined}
+                                    placeholder={defaultEstateId ? "Select a division" : "Select a default site first"}
                                     disabled={!defaultEstateId}
+                                />
+                            </Field>
+                            <Field>
+                                <FieldLabel htmlFor="employee-form-defaultFieldCode" className="text-muted-foreground">
+                                    Default Field
+                                </FieldLabel>
+                                <LovSelect
+                                    id="employee-form-defaultFieldCode"
+                                    value={form.defaultFieldCode ?? ""}
+                                    onValueChange={(value) => setField("defaultFieldCode", value)}
+                                    options={fields
+                                        .filter((field) => field.fieldCode)
+                                        .map((field) => ({
+                                            value: field.fieldCode!,
+                                            label: field.description ? `${field.fieldCode} – ${field.description}` : field.fieldCode!,
+                                            hint: field.isDefault ? " (division default)" : undefined,
+                                        }))}
+                                    clearLabel={form.defaultFieldCode ? "No default field" : undefined}
+                                    placeholder={defaultDivisionCode ? "Select a field" : "Select a default division first"}
+                                    disabled={!defaultDivisionCode}
                                 />
                             </Field>
                         </div>

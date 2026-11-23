@@ -1,7 +1,6 @@
 import React from "react"
 import { IconPencil, IconPlus, IconTrash } from "@tabler/icons-react"
 import { useQueryClient } from "@tanstack/react-query"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ButtonGroup } from "@/components/ui/button-group"
 import { errorMessage, notifyError } from "@/lib/notify"
@@ -11,34 +10,31 @@ import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitl
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import {
-    getGetCollectionPointsQueryKey,
-    useCreateCollectionPoint,
-    useDeleteCollectionPoints,
-    useGetCollectionPoints,
-    useUpdateCollectionPoint,
-} from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
-import type { CollectionPointDto } from "@/api/generated/models"
+    getGetDivisionsQueryKey,
+    useCreateDivision,
+    useDeleteDivisions,
+    useGetDivisions,
+    useUpdateDivision,
+} from "@/api/generated/endpoints/division-controller/division-controller"
+import { getGetFieldsQueryKey } from "@/api/generated/endpoints/field-controller/field-controller"
+import type { DivisionDto } from "@/api/generated/models"
 
-/** A row being added or edited in place. `key` is the cpCode for existing rows. */
+const MAX_CODE_LENGTH = 30
+const MAX_DESCRIPTION_LENGTH = 50
+
+/** A row being added or edited in place. `key` is the saved code for existing rows. */
 type Draft = {
     key: string
     isNew: boolean
-    cpCode: string
-    name: string
+    divisionCode: string
     description: string
-    isDefault: boolean
-    /** The row was the default when editing started; a site must keep one, so it cannot be unticked */
-    wasDefault: boolean
 }
 
-const toDraft = (collectionPoint: CollectionPointDto): Draft => ({
-    key: collectionPoint.cpCode ?? "",
+const toDraft = (division: DivisionDto): Draft => ({
+    key: division.divisionCode ?? "",
     isNew: false,
-    cpCode: collectionPoint.cpCode ?? "",
-    name: collectionPoint.name ?? "",
-    description: collectionPoint.description ?? "",
-    isDefault: Boolean(collectionPoint.isDefault),
-    wasDefault: Boolean(collectionPoint.isDefault),
+    divisionCode: division.divisionCode ?? "",
+    description: division.description ?? "",
 })
 
 const ToolbarButton = ({ label, ...props }: { label: string } & React.ComponentProps<typeof Button>) => (
@@ -48,9 +44,9 @@ const ToolbarButton = ({ label, ...props }: { label: string } & React.ComponentP
     </Tooltip>
 )
 
-export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
+/** Site Basic Data – Divisions tab (FSD v2.7 2.3 B.2). */
+export const DivisionsTable = ({ estateId }: { estateId: string }) => {
     const queryClient = useQueryClient()
-    const [search, setSearch] = React.useState("")
     const [selectedCodes, setSelectedCodes] = React.useState<string[]>([])
     const [drafts, setDrafts] = React.useState<Draft[]>([])
     const [showInvalid, setShowInvalid] = React.useState(false)
@@ -58,15 +54,15 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
     const [isDeleteOpen, setIsDeleteOpen] = React.useState(false)
     const nextNewKey = React.useRef(0)
 
-    const { data: response, isLoading } = useGetCollectionPoints(estateId, { search: search || undefined })
-    const { mutateAsync: createCollectionPoint } = useCreateCollectionPoint({ mutation: { meta: { errorToast: false } } })
-    const { mutateAsync: updateCollectionPoint } = useUpdateCollectionPoint({ mutation: { meta: { errorToast: false } } })
-    const { mutate: deleteCollectionPoints, isPending: isDeleting } = useDeleteCollectionPoints()
-    const collectionPoints = React.useMemo<CollectionPointDto[]>(() => {
+    const { data: response, isLoading } = useGetDivisions(estateId)
+    const { mutateAsync: createDivision } = useCreateDivision({ mutation: { meta: { errorToast: false } } })
+    const { mutateAsync: updateDivision } = useUpdateDivision({ mutation: { meta: { errorToast: false } } })
+    const { mutate: deleteDivisions, isPending: isDeleting } = useDeleteDivisions()
+    const divisions = React.useMemo<DivisionDto[]>(() => {
         const value = response as unknown
-        if (Array.isArray(value)) return value as CollectionPointDto[]
+        if (Array.isArray(value)) return value as DivisionDto[]
         if (value && typeof value === "object" && "data" in value) {
-            return Array.isArray(value.data) ? value.data as CollectionPointDto[] : []
+            return Array.isArray(value.data) ? value.data as DivisionDto[] : []
         }
         return []
     }, [response])
@@ -74,30 +70,26 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
     const isEditing = drafts.length > 0
     const draftByKey = new Map(drafts.filter((draft) => !draft.isNew).map((draft) => [draft.key, draft]))
     const newDrafts = drafts.filter((draft) => draft.isNew)
-    const visibleCodes = collectionPoints.map((point) => point.cpCode).filter((code): code is string => Boolean(code))
-    // Selection can outlive a search or refetch; only act on rows that are still listed
+    const visibleCodes = divisions.map((division) => division.divisionCode).filter((code): code is string => Boolean(code))
+    // Selection can outlive a refetch; only act on rows that are still listed
     const activeSelection = selectedCodes.filter((code) => visibleCodes.includes(code))
-    const refresh = () => queryClient.invalidateQueries({ queryKey: getGetCollectionPointsQueryKey(estateId).slice(0, 1) })
+    const refresh = () => Promise.all([
+        queryClient.invalidateQueries({ queryKey: getGetDivisionsQueryKey(estateId) }),
+        // The Fields tab shows division names
+        queryClient.invalidateQueries({ queryKey: getGetFieldsQueryKey(estateId).slice(0, 1) }),
+    ])
 
     const updateDraft = (key: string, changes: Partial<Draft>) =>
-        setDrafts((current) => current.map((draft) => {
-            if (draft.key === key) return { ...draft, ...changes }
-            // Only one row can be the default
-            return changes.isDefault ? { ...draft, isDefault: false } : draft
-        }))
+        setDrafts((current) => current.map((draft) => draft.key === key ? { ...draft, ...changes } : draft))
 
     const addRow = () => {
         const key = `new-${nextNewKey.current++}`
-        // The backend makes the first collection point of a site its default
-        const isFirst = collectionPoints.length === 0 && !search && newDrafts.length === 0
-        setDrafts((current) => [
-            { key, isNew: true, cpCode: "", name: "", description: "", isDefault: isFirst, wasDefault: false },
-            ...current,
-        ])
+        setDrafts((current) => [{ key, isNew: true, divisionCode: "", description: "" }, ...current])
     }
 
     const editSelected = () => {
-        const toEdit = collectionPoints.filter((point) => point.cpCode && activeSelection.includes(point.cpCode) && !draftByKey.has(point.cpCode))
+        const toEdit = divisions.filter((division) => division.divisionCode
+            && activeSelection.includes(division.divisionCode) && !draftByKey.has(division.divisionCode))
         setDrafts((current) => [...current, ...toEdit.map(toDraft)])
     }
 
@@ -106,39 +98,39 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
         setShowInvalid(false)
     }
 
-    const isInvalid = (draft: Draft, field: "cpCode" | "name") => showInvalid && !draft[field].trim()
+    const isInvalid = (draft: Draft, field: "divisionCode" | "description") => showInvalid && !draft[field].trim()
 
     const save = async () => {
-        if (drafts.some((draft) => !draft.cpCode.trim() || !draft.name.trim())) {
+        if (drafts.some((draft) => !draft.divisionCode.trim() || !draft.description.trim())) {
             setShowInvalid(true)
             return
         }
         setIsSaving(true)
-        // Save the new default last so it is the one left standing
-        const ordered = [...drafts].sort((a, b) => Number(a.isDefault && !a.wasDefault) - Number(b.isDefault && !b.wasDefault))
         const failed: Draft[] = []
-        for (const draft of ordered) {
-            const data = { name: draft.name.trim(), description: draft.description.trim() || undefined, isDefault: draft.isDefault }
+        for (const draft of drafts) {
+            const divisionCode = draft.divisionCode.trim()
+            const description = draft.description.trim()
             try {
                 if (draft.isNew) {
-                    await createCollectionPoint({ estateId, data: { cpCode: draft.cpCode.trim(), ...data } })
+                    await createDivision({ estateId, data: { divisionCode, description } })
                 } else {
-                    await updateCollectionPoint({ estateId, cpCode: draft.cpCode, data })
+                    // The code can change only while nothing uses the division (SB-12); the server checks
+                    await updateDivision({ estateId, divisionCode: draft.key, data: { divisionCode, description } })
                 }
             } catch (error) {
                 failed.push(draft)
-                notifyError(`${draft.cpCode.trim()}: ${errorMessage(error, "Save failed")}`)
+                notifyError(`${divisionCode}: ${errorMessage(error, "Save failed")}`)
             }
         }
         await refresh()
-        // Keep only the rows that failed open, in their original order
-        setDrafts(drafts.filter((draft) => failed.includes(draft)))
+        // Keep only the rows that failed open
+        setDrafts(failed)
         setShowInvalid(false)
         setIsSaving(false)
     }
 
     const deleteSelected = () => {
-        deleteCollectionPoints(
+        deleteDivisions(
             { estateId, data: activeSelection },
             {
                 onSuccess: () => {
@@ -162,26 +154,13 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
         <>
             <TableCell>
                 <Input
-                    value={draft.cpCode}
-                    // The code is the primary key and cannot be changed
-                    disabled={!draft.isNew}
+                    value={draft.divisionCode}
                     autoFocus={draft.isNew}
-                    placeholder="Code *"
-                    aria-label="Code"
-                    aria-invalid={isInvalid(draft, "cpCode") || undefined}
-                    onChange={(event) => updateDraft(draft.key, { cpCode: event.target.value })}
-                    onKeyDown={onDraftKeyDown}
-                    className="bg-background"
-                />
-            </TableCell>
-            <TableCell>
-                <Input
-                    value={draft.name}
-                    autoFocus={!draft.isNew}
-                    placeholder="Name *"
-                    aria-label="Name"
-                    aria-invalid={isInvalid(draft, "name") || undefined}
-                    onChange={(event) => updateDraft(draft.key, { name: event.target.value })}
+                    maxLength={MAX_CODE_LENGTH}
+                    placeholder="Division Code *"
+                    aria-label="Division Code"
+                    aria-invalid={isInvalid(draft, "divisionCode") || undefined}
+                    onChange={(event) => updateDraft(draft.key, { divisionCode: event.target.value })}
                     onKeyDown={onDraftKeyDown}
                     className="bg-background"
                 />
@@ -189,19 +168,14 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
             <TableCell>
                 <Input
                     value={draft.description}
-                    placeholder="Description"
-                    aria-label="Description"
+                    autoFocus={!draft.isNew}
+                    maxLength={MAX_DESCRIPTION_LENGTH}
+                    placeholder="Division Description *"
+                    aria-label="Division Description"
+                    aria-invalid={isInvalid(draft, "description") || undefined}
                     onChange={(event) => updateDraft(draft.key, { description: event.target.value })}
                     onKeyDown={onDraftKeyDown}
                     className="bg-background"
-                />
-            </TableCell>
-            <TableCell>
-                <Checkbox
-                    checked={draft.isDefault}
-                    disabled={draft.wasDefault}
-                    onCheckedChange={(checked) => updateDraft(draft.key, { isDefault: Boolean(checked) })}
-                    aria-label={`Make ${draft.cpCode || "new collection point"} the default`}
                 />
             </TableCell>
         </>
@@ -212,16 +186,8 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
     return (
         <>
             <div className="flex flex-wrap items-center gap-4">
-                <Input
-                    type="search"
-                    placeholder="Search collection points"
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    className="max-w-sm"
-                    aria-label="Search collection points"
-                />
                 <ButtonGroup>
-                    <ToolbarButton label="Add collection point" onClick={addRow} disabled={isSaving}>
+                    <ToolbarButton label="Add division" onClick={addRow} disabled={isSaving}>
                         <IconPlus />
                     </ToolbarButton>
                     <ToolbarButton
@@ -255,10 +221,10 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
                         <PopoverContent align="start" className="w-72">
                             <PopoverHeader>
                                 <PopoverTitle>
-                                    Delete {activeSelection.length} collection point{activeSelection.length === 1 ? "" : "s"}?
+                                    Delete {activeSelection.length} division{activeSelection.length === 1 ? "" : "s"}?
                                 </PopoverTitle>
                                 <PopoverDescription>
-                                    {activeSelection.join(", ")}. If the default is deleted, the next collection point becomes the default.
+                                    {activeSelection.join(", ")}. A division that still has fields cannot be deleted.
                                 </PopoverDescription>
                             </PopoverHeader>
                             <div className="flex justify-end gap-2">
@@ -290,13 +256,11 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
                                 <Checkbox
                                     checked={allSelected}
                                     onCheckedChange={(checked) => setSelectedCodes(checked ? visibleCodes : [])}
-                                    aria-label="Select all collection points"
+                                    aria-label="Select all divisions"
                                 />
                             </TableHead>
-                            <TableHead className="w-48">Code</TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead className="w-24">Default</TableHead>
+                            <TableHead className="w-48">Division Code</TableHead>
+                            <TableHead>Division Description</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -306,43 +270,38 @@ export const CollectionPointsTable = ({ estateId }: { estateId: string }) => {
                                 {renderDraftCells(draft)}
                             </TableRow>
                         ))}
-                        {collectionPoints.map((point) => {
-                            const code = point.cpCode ?? ""
+                        {divisions.map((division) => {
+                            const code = division.divisionCode ?? ""
                             const draft = draftByKey.get(code)
+                            const isSelected = activeSelection.includes(code)
                             return (
                                 <TableRow
                                     key={code}
-                                    data-state={activeSelection.includes(code) ? "selected" : undefined}
+                                    data-state={isSelected ? "selected" : undefined}
                                     className={draft ? "bg-muted/50" : undefined}
                                 >
                                     <TableCell>
                                         <Checkbox
-                                            checked={activeSelection.includes(code)}
+                                            checked={isSelected}
                                             onCheckedChange={(checked) => setSelectedCodes((current) => checked
                                                 ? [...new Set([...current, code])]
                                                 : current.filter((selected) => selected !== code))}
-                                            aria-label={`Select ${code}`}
+                                            aria-label={`Select ${code || "division"}`}
                                         />
                                     </TableCell>
                                     {draft ? renderDraftCells(draft) : (
                                         <>
                                             <TableCell>{code || "-"}</TableCell>
-                                            <TableCell>{point.name || "-"}</TableCell>
-                                            <TableCell>{point.description || "-"}</TableCell>
-                                            <TableCell>
-                                                {point.isDefault && (
-                                                    <Badge className="bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">DEFAULT</Badge>
-                                                )}
-                                            </TableCell>
+                                            <TableCell>{division.description || "-"}</TableCell>
                                         </>
                                     )}
                                 </TableRow>
                             )
                         })}
-                        {collectionPoints.length === 0 && newDrafts.length === 0 && (
+                        {divisions.length === 0 && newDrafts.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center">
-                                    {isLoading ? "Loading..." : "No collection points."}
+                                <TableCell colSpan={3} className="h-24 text-center">
+                                    {isLoading ? "Loading..." : "No divisions. Add one before adding fields."}
                                 </TableCell>
                             </TableRow>
                         )}

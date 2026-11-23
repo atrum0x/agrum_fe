@@ -7,6 +7,7 @@
  */
 
 export interface CreateWorkTypeRequest {
-  workType?: string;
+  workTypeCode?: string;
+  name?: string;
   weighingRequired?: boolean;
 }

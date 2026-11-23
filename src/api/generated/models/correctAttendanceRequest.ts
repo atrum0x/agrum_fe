@@ -10,7 +10,8 @@ import type { CorrectAttendanceRequestAttendanceCategory } from "./correctAttend
 export interface CorrectAttendanceRequest {
   estateId?: string;
   workType?: string;
-  cpCode?: string;
+  divisionCode?: string;
+  fieldCode?: string;
   attendanceCategory?: CorrectAttendanceRequestAttendanceCategory;
   reason?: string;
   rowVersion?: number;

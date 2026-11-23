@@ -20,20 +20,23 @@ import {
 } from "@/api/generated/endpoints/work-type-controller/work-type-controller"
 import type { WorkTypeDto } from "@/api/generated/models"
 
-const MAX_WORK_TYPE_LENGTH = 50
+const MAX_CODE_LENGTH = 20
+const MAX_NAME_LENGTH = 50
 
-/** A row being added or edited in place. `key` is the work type code for existing rows. */
+/** A row being added or edited in place. `key` is the Work Type ID for existing rows. */
 type Draft = {
     key: string
     isNew: boolean
-    workType: string
+    workTypeCode: string
+    name: string
     weighingRequired: boolean
 }
 
 const toDraft = (workType: WorkTypeDto): Draft => ({
-    key: workType.workType ?? "",
+    key: workType.workTypeCode ?? "",
     isNew: false,
-    workType: workType.workType ?? "",
+    workTypeCode: workType.workTypeCode ?? "",
+    name: workType.name ?? "",
     weighingRequired: Boolean(workType.weighingRequired),
 })
 
@@ -69,7 +72,7 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
     const isEditing = drafts.length > 0
     const draftByCode = new Map(drafts.filter((draft) => !draft.isNew).map((draft) => [draft.key, draft]))
     const newDrafts = drafts.filter((draft) => draft.isNew)
-    const visibleCodes = workTypes.map((workType) => workType.workType).filter((code): code is string => Boolean(code))
+    const visibleCodes = workTypes.map((workType) => workType.workTypeCode).filter((code): code is string => Boolean(code))
     // Selection can outlive a refetch; only act on rows that are still listed
     const activeSelection = selectedCodes.filter((code) => visibleCodes.includes(code))
     const refresh = () => queryClient.invalidateQueries({ queryKey: getGetWorkTypesQueryKey(estateId) })
@@ -79,11 +82,12 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
 
     const addRow = () => {
         const key = `new-${nextNewKey.current++}`
-        setDrafts((current) => [{ key, isNew: true, workType: "", weighingRequired: false }, ...current])
+        setDrafts((current) => [{ key, isNew: true, workTypeCode: "", name: "", weighingRequired: false }, ...current])
     }
 
     const editSelected = () => {
-        const toEdit = workTypes.filter((workType) => workType.workType && activeSelection.includes(workType.workType) && !draftByCode.has(workType.workType))
+        const toEdit = workTypes.filter((workType) => workType.workTypeCode && activeSelection.includes(workType.workTypeCode)
+            && !draftByCode.has(workType.workTypeCode))
         setDrafts((current) => [...current, ...toEdit.map(toDraft)])
     }
 
@@ -93,23 +97,24 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
     }
 
     const save = async () => {
-        if (drafts.some((draft) => !draft.workType.trim())) {
+        if (drafts.some((draft) => !draft.workTypeCode.trim() || !draft.name.trim())) {
             setShowInvalid(true)
             return
         }
         setIsSaving(true)
         const failed: Draft[] = []
         for (const draft of drafts) {
-            const workType = draft.workType.trim()
+            const workTypeCode = draft.workTypeCode.trim().toUpperCase()
+            const data = { name: draft.name.trim(), weighingRequired: draft.weighingRequired }
             try {
                 if (draft.isNew) {
-                    await createWorkType({ estateId, data: { workType, weighingRequired: draft.weighingRequired } })
+                    await createWorkType({ estateId, data: { workTypeCode, ...data } })
                 } else {
-                    await updateWorkType({ estateId, workType: draft.key, data: { weighingRequired: draft.weighingRequired } })
+                    await updateWorkType({ estateId, workTypeCode: draft.key, data })
                 }
             } catch (error) {
                 failed.push(draft)
-                notifyError(`${workType}: ${errorMessage(error, "Save failed")}`)
+                notifyError(`${workTypeCode}: ${errorMessage(error, "Save failed")}`)
             }
         }
         await refresh()
@@ -144,15 +149,28 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
         <>
             <TableCell>
                 <Input
-                    value={draft.workType}
-                    // The work type code is the key and cannot be changed
+                    value={draft.workTypeCode}
+                    // The Work Type ID is the key and cannot be changed (SB-16); typed in capitals
                     disabled={!draft.isNew}
                     autoFocus={draft.isNew}
-                    maxLength={MAX_WORK_TYPE_LENGTH}
+                    maxLength={MAX_CODE_LENGTH}
+                    placeholder="Work Type ID *"
+                    aria-label="Work Type ID"
+                    aria-invalid={(showInvalid && !draft.workTypeCode.trim()) || undefined}
+                    onChange={(event) => updateDraft(draft.key, { workTypeCode: event.target.value.toUpperCase() })}
+                    onKeyDown={onDraftKeyDown}
+                    className="bg-background uppercase"
+                />
+            </TableCell>
+            <TableCell>
+                <Input
+                    value={draft.name}
+                    autoFocus={!draft.isNew}
+                    maxLength={MAX_NAME_LENGTH}
                     placeholder="Work Type *"
                     aria-label="Work Type"
-                    aria-invalid={(showInvalid && !draft.workType.trim()) || undefined}
-                    onChange={(event) => updateDraft(draft.key, { workType: event.target.value })}
+                    aria-invalid={(showInvalid && !draft.name.trim()) || undefined}
+                    onChange={(event) => updateDraft(draft.key, { name: event.target.value })}
                     onKeyDown={onDraftKeyDown}
                     className="bg-background"
                 />
@@ -161,7 +179,6 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
                 <div className="flex items-center gap-2">
                     <Switch
                         checked={draft.weighingRequired}
-                        autoFocus={!draft.isNew}
                         onCheckedChange={(checked) => updateDraft(draft.key, { weighingRequired: checked })}
                         aria-label="Weighing Required"
                     />
@@ -247,6 +264,7 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
                                     aria-label="Select all work types"
                                 />
                             </TableHead>
+                            <TableHead className="w-48">Work Type ID</TableHead>
                             <TableHead>Work Type</TableHead>
                             <TableHead className="w-48">Weighing Required</TableHead>
                         </TableRow>
@@ -259,7 +277,7 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
                             </TableRow>
                         ))}
                         {workTypes.map((workType) => {
-                            const code = workType.workType ?? ""
+                            const code = workType.workTypeCode ?? ""
                             const draft = draftByCode.get(code)
                             const isSelected = activeSelection.includes(code)
                             return (
@@ -280,6 +298,7 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
                                     {draft ? renderDraftCells(draft) : (
                                         <>
                                             <TableCell>{code || "-"}</TableCell>
+                                            <TableCell>{workType.name || "-"}</TableCell>
                                             <TableCell>
                                                 <Badge className={workType.weighingRequired
                                                     ? "bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300"
@@ -294,7 +313,7 @@ export const WorkTypesTable = ({ estateId }: { estateId: string }) => {
                         })}
                         {workTypes.length === 0 && newDrafts.length === 0 && (
                             <TableRow>
-                                <TableCell colSpan={3} className="h-24 text-center">
+                                <TableCell colSpan={4} className="h-24 text-center">
                                     {isLoading ? "Loading..." : "No work types."}
                                 </TableCell>
                             </TableRow>

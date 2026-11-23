@@ -359,8 +359,12 @@ export const Users = () => {
                             <TruncatedCell value={selectedEmployee?.defaultEstateId ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
-                            <p className="text-sm text-muted-foreground">Default Collection Point</p>
-                            <TruncatedCell value={selectedEmployee?.defaultCollectionPointCode ?? "-"} />
+                            <p className="text-sm text-muted-foreground">Default Division</p>
+                            <TruncatedCell value={selectedEmployee?.defaultDivisionCode ?? "-"} />
+                        </div>
+                        <div className="relative min-w-0 group">
+                            <p className="text-sm text-muted-foreground">Default Field</p>
+                            <TruncatedCell value={selectedEmployee?.defaultFieldCode ?? "-"} />
                         </div>
                         <div className="relative min-w-0 group">
                             <p className="text-sm text-muted-foreground">Has User Account</p>

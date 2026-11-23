@@ -10,7 +10,7 @@ export type LovOption<T extends string = string> = {
 }
 
 /**
- * A Select for a list of values (sites, collection points, enums...).
+ * A Select for a list of values (sites, divisions, fields, enums...).
  * The value is a plain string where "" means nothing is chosen, and the trigger shows the
  * option's label instead of the raw code. Pass `clearLabel` for filters that can go back to "all".
  */

@@ -6,9 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface MobileCollectionPointDto {
-  estateId?: string;
-  cpCode?: string;
-  name?: string;
+export interface CreateFieldRequest {
+  fieldCode?: string;
+  divisionCode?: string;
+  description?: string;
   isDefault?: boolean;
 }

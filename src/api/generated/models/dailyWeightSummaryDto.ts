@@ -15,8 +15,12 @@ export interface DailyWeightSummaryDto {
   attendanceCategory?: DailyWeightSummaryDtoAttendanceCategory;
   estateId?: string;
   estateName?: string;
-  cpCode?: string;
+  divisionCode?: string;
+  divisionDescription?: string;
+  fieldCode?: string;
+  fieldDescription?: string;
   workType?: string;
+  workTypeName?: string;
   transactionCount?: number;
   dailyTotalKg?: number;
   dayClassification?: DailyWeightSummaryDtoDayClassification;

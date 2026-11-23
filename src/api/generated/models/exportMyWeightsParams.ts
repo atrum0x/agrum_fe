@@ -15,7 +15,8 @@ export type ExportMyWeightsParams = {
   dateTo?: string;
   supervisor?: string;
   estateId?: string;
-  cpCode?: string;
+  divisionCode?: string;
+  fieldCode?: string;
   workType?: string;
   attendanceCategory?: ExportMyWeightsAttendanceCategory;
   entryType?: ExportMyWeightsEntryType;

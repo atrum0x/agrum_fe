@@ -6,10 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface CollectionPointDto {
-  cpCode?: string;
-  estateId?: string;
-  name?: string;
+export interface UpdateFieldRequest {
+  fieldCode?: string;
+  divisionCode?: string;
   description?: string;
   isDefault?: boolean;
 }

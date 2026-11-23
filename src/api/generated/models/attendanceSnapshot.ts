@@ -12,6 +12,7 @@ export interface AttendanceSnapshot {
   attendanceDate?: string;
   estateId?: string;
   workType?: string;
-  cpCode?: string;
+  divisionCode?: string;
+  fieldCode?: string;
   attendanceCategory?: AttendanceSnapshotAttendanceCategory;
 }

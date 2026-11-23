@@ -11,6 +11,7 @@ export type SearchDailyWeightSummaryParams = {
   dateTo?: string;
   employeeCode?: string;
   estateId?: string;
-  cpCode?: string;
+  divisionCode?: string;
+  fieldCode?: string;
   workType?: string;
 };

@@ -21,7 +21,8 @@ export interface CreateEmployeeRequest {
   startDate?: string;
   endDate?: string;
   defaultEstateId?: string;
-  defaultCollectionPointCode?: string;
+  defaultDivisionCode?: string;
+  defaultFieldCode?: string;
   homeEstateId?: string;
   isUserAccount?: boolean;
   password?: string;

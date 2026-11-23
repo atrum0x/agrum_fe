@@ -21,7 +21,8 @@ export interface EmployeeDto {
   startDate?: string;
   endDate?: string;
   defaultEstateId?: string;
-  defaultCollectionPointCode?: string;
+  defaultDivisionCode?: string;
+  defaultFieldCode?: string;
   homeEstateId?: string;
   hasUserAccount?: boolean;
 }

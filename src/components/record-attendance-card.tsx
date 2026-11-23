@@ -10,7 +10,7 @@ import { Field, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { LovSelect, type LovOption } from "@/components/lov-select"
-import { collectionPointOptions, estateOptions, workTypeOptions } from "@/lib/lov-options"
+import { divisionOptions, estateOptions, fieldOptions, workTypeOptions } from "@/lib/lov-options"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import {
     getGetAvailableWorkersQueryKey,
@@ -20,14 +20,16 @@ import {
     useRecordAttendance,
 } from "@/api/generated/endpoints/attendance-controller/attendance-controller"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
-import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
+import { useGetDivisions } from "@/api/generated/endpoints/division-controller/division-controller"
+import { useGetFields } from "@/api/generated/endpoints/field-controller/field-controller"
 import { useGetWorkTypes } from "@/api/generated/endpoints/work-type-controller/work-type-controller"
 import {
     AttendanceWorkerRequestAttendanceCategory,
     type AttendanceDefaultsDto,
     type AttendanceWorkerDto,
-    type CollectionPointDto,
+    type DivisionDto,
     type Estate,
+    type FieldDto,
     type WorkTypeDto,
 } from "@/api/generated/models"
 
@@ -61,7 +63,7 @@ const toValue = <T,>(response: unknown): T | undefined => {
 }
 
 /**
- * Record one batch: one working site, work type and collection point for all ticked workers.
+ * Record one batch: one working site, work type, division and field for all ticked workers (FSD 2.6).
  * Mount it only while it should be shown.
  */
 export const RecordAttendanceCard = ({
@@ -75,7 +77,8 @@ export const RecordAttendanceCard = ({
     // null = not chosen by the user yet, so the default applies
     const [chosenEstateId, setChosenEstateId] = React.useState<string | null>(null)
     const [workType, setWorkType] = React.useState("")
-    const [chosenCpCode, setChosenCpCode] = React.useState<string | null>(null)
+    const [chosenDivisionCode, setChosenDivisionCode] = React.useState<string | null>(null)
+    const [chosenFieldCode, setChosenFieldCode] = React.useState<string | null>(null)
     const [search, setSearch] = React.useState("")
     // Keyed by EMP No; kept while the search changes
     const [ticked, setTicked] = React.useState<Map<string, TickedWorker>>(new Map())
@@ -101,13 +104,18 @@ export const RecordAttendanceCard = ({
         query: { enabled: Boolean(estateId) },
     })
     const workTypes = estateId ? toList<WorkTypeDto>(workTypesResponse) : []
-    const { data: collectionPointsResponse, isSuccess: collectionPointsLoaded } = useGetCollectionPoints(estateId, undefined, {
+    const { data: divisionsResponse, isSuccess: divisionsLoaded } = useGetDivisions(estateId, {
         query: { enabled: Boolean(estateId) },
     })
-    const collectionPoints = estateId ? toList<CollectionPointDto>(collectionPointsResponse) : []
+    const divisions = estateId ? toList<DivisionDto>(divisionsResponse) : []
+    // All the site's fields: AT-10 needs at least one, and the list below is cut to the division
+    const { data: fieldsResponse, isSuccess: fieldsLoaded } = useGetFields(estateId, undefined, {
+        query: { enabled: Boolean(estateId) },
+    })
+    const siteFields = estateId ? toList<FieldDto>(fieldsResponse) : []
     // AT-10
-    const isSiteIncomplete = Boolean(estateId) && workTypesLoaded && collectionPointsLoaded
-        && (workTypes.length === 0 || collectionPoints.length === 0)
+    const isSiteIncomplete = Boolean(estateId) && workTypesLoaded && divisionsLoaded && fieldsLoaded
+        && (workTypes.length === 0 || divisions.length === 0 || siteFields.length === 0)
 
     // Workers from all sites, Active, employed today and not yet marked (D-19); searched on the server
     const workerSearch = React.useDeferredValue(search.trim())
@@ -117,13 +125,24 @@ export const RecordAttendanceCard = ({
 
     const tickedWorkers = [...ticked.values()]
 
-    // Collection Point defaults to the ticked workers' personal default when they all share one, else the site default
-    const personalCpCodes = new Set(tickedWorkers.map(({ worker }) => worker.defaultCpCode))
-    const sharedCpCode = personalCpCodes.size === 1 ? [...personalCpCodes][0] : undefined
-    const autoCpCode = sharedCpCode && collectionPoints.some((point) => point.cpCode === sharedCpCode)
-        ? sharedCpCode
-        : collectionPoints.find((point) => point.isDefault)?.cpCode ?? ""
-    const cpCode = chosenCpCode ?? autoCpCode
+    // Division defaults to the ticked workers' Default Division when they all share one (FSD 2.6 B.1)
+    const sharedOf = (codes: (string | undefined)[]) => {
+        const unique = new Set(codes)
+        return unique.size === 1 ? [...unique][0] : undefined
+    }
+    const sharedDivisionCode = sharedOf(tickedWorkers.map(({ worker }) => worker.defaultDivisionCode))
+    const autoDivisionCode = sharedDivisionCode && divisions.some((division) => division.divisionCode === sharedDivisionCode)
+        ? sharedDivisionCode
+        : ""
+    const divisionCode = chosenDivisionCode ?? autoDivisionCode
+    const fields = siteFields.filter((field) => divisionCode && field.divisionCode === divisionCode)
+
+    // Field defaults to the workers' personal Default Field when they all share one, else the division's default
+    const sharedFieldCode = sharedOf(tickedWorkers.map(({ worker }) => worker.defaultFieldCode))
+    const autoFieldCode = sharedFieldCode && fields.some((field) => field.fieldCode === sharedFieldCode)
+        ? sharedFieldCode
+        : fields.find((field) => field.isDefault)?.fieldCode ?? ""
+    const fieldCode = chosenFieldCode ?? autoFieldCode
 
     React.useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
@@ -139,9 +158,10 @@ export const RecordAttendanceCard = ({
 
     const changeEstate = (value: string) => {
         setChosenEstateId(value)
-        // Work types and collection points belong to a site
+        // Work types, divisions and fields belong to a site
         setWorkType("")
-        setChosenCpCode(null)
+        setChosenDivisionCode(null)
+        setChosenFieldCode(null)
         setIsConfirming(false)
     }
 
@@ -169,10 +189,11 @@ export const RecordAttendanceCard = ({
         !estateId ? "Attendance cannot be recorded for an inactive or unassigned site."
             : isSiteIncomplete ? "Site setup is incomplete. Please contact the administrator."
                 : !workType ? "Please select a Work Type."
-                    : !cpCode ? "Please select the Collection Point."
-                        : tickedWorkers.length === 0 ? "Please select at least one worker."
-                            : missingCategory ? "Please select the Attendance Category."
-                                : null
+                    : !divisionCode ? "Please select the Division."
+                        : !fieldCode ? "Please select the Field."
+                            : tickedWorkers.length === 0 ? "Please select at least one worker."
+                                : missingCategory ? "Please select the Attendance Category."
+                                    : null
 
     const handleSubmit = (event: React.FormEvent) => {
         event.preventDefault()
@@ -189,7 +210,8 @@ export const RecordAttendanceCard = ({
             data: {
                 estateId,
                 workType,
-                cpCode,
+                divisionCode,
+                fieldCode,
                 workers: tickedWorkers.map(({ worker, category }) => ({
                     employeeCode: worker.employeeCode,
                     attendanceCategory: category as Category,
@@ -233,7 +255,7 @@ export const RecordAttendanceCard = ({
                             </div>
                         )}
 
-                        <div className="grid gap-4 rounded-xl bg-muted/50 p-4 md:grid-cols-3">
+                        <div className="grid gap-4 rounded-xl bg-muted/50 p-4 sm:grid-cols-2 lg:grid-cols-4">
                             <Field>
                                 <FieldLabel htmlFor="record-attendance-site" className="text-muted-foreground">Working Site *</FieldLabel>
                                 <LovSelect
@@ -261,18 +283,35 @@ export const RecordAttendanceCard = ({
                                 />
                             </Field>
                             <Field>
-                                <FieldLabel htmlFor="record-attendance-cp" className="text-muted-foreground">Collection Point *</FieldLabel>
+                                <FieldLabel htmlFor="record-attendance-division" className="text-muted-foreground">Division *</FieldLabel>
                                 <LovSelect
-                                    id="record-attendance-cp"
-                                    value={cpCode}
+                                    id="record-attendance-division"
+                                    value={divisionCode}
                                     onValueChange={(value) => {
-                                        setChosenCpCode(value)
+                                        setChosenDivisionCode(value)
+                                        // Fields belong to a division
+                                        setChosenFieldCode(null)
                                         setIsConfirming(false)
                                     }}
-                                    options={collectionPointOptions(collectionPoints)}
-                                    placeholder={estateId ? "Select a collection point" : "Select a site first"}
+                                    options={divisionOptions(divisions)}
+                                    placeholder={estateId ? "Select a division" : "Select a site first"}
                                     disabled={!estateId}
-                                    invalid={showInvalid && !cpCode}
+                                    invalid={showInvalid && !divisionCode}
+                                />
+                            </Field>
+                            <Field>
+                                <FieldLabel htmlFor="record-attendance-field" className="text-muted-foreground">Field *</FieldLabel>
+                                <LovSelect
+                                    id="record-attendance-field"
+                                    value={fieldCode}
+                                    onValueChange={(value) => {
+                                        setChosenFieldCode(value)
+                                        setIsConfirming(false)
+                                    }}
+                                    options={fieldOptions(fields)}
+                                    placeholder={divisionCode ? "Select a field" : "Select a division first"}
+                                    disabled={!divisionCode}
+                                    invalid={showInvalid && !fieldCode}
                                 />
                             </Field>
                         </div>

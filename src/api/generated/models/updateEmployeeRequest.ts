@@ -20,6 +20,7 @@ export interface UpdateEmployeeRequest {
   startDate?: string;
   endDate?: string;
   defaultEstateId?: string;
-  defaultCollectionPointCode?: string;
+  defaultDivisionCode?: string;
+  defaultFieldCode?: string;
   homeEstateId?: string;
 }

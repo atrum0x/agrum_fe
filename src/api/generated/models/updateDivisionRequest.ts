@@ -6,8 +6,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export interface UpdateCollectionPointRequest {
-  name?: string;
+export interface UpdateDivisionRequest {
+  divisionCode?: string;
   description?: string;
-  isDefault?: boolean;
 }

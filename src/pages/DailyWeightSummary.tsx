@@ -17,7 +17,7 @@ import { LovSelect } from "@/components/lov-select"
 import { MissingAccessHint } from "@/components/missing-access-hint"
 import { SearchAutocomplete, type AutocompleteOption } from "@/components/search-autocomplete"
 import { DayClassificationBadge } from "@/components/weight-badges"
-import { collectionPointOptions, estateOptions, workTypeOptions } from "@/lib/lov-options"
+import { divisionOptions, estateOptions, fieldOptions, workTypeOptions } from "@/lib/lov-options"
 import { useCalendarFormatters } from "@/i18n/use-calendar-formatters"
 import { useWeightLabels } from "@/lib/weight-labels"
 import {
@@ -31,7 +31,8 @@ import {
 import { downloadFile } from "@/api/download"
 import { notifyError, notifyInfo, notifySuccess } from "@/lib/notify"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
-import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
+import { useGetDivisions } from "@/api/generated/endpoints/division-controller/division-controller"
+import { useGetFields } from "@/api/generated/endpoints/field-controller/field-controller"
 import { useGetWorkTypes } from "@/api/generated/endpoints/work-type-controller/work-type-controller"
 import { toAutocompleteOptions } from "@/lib/filter-options"
 import {
@@ -42,7 +43,8 @@ import {
     useSearchMyDailyWeightSummary,
 } from "@/api/generated/endpoints/daily-weight-summary-controller/daily-weight-summary-controller"
 import type {
-    CollectionPointDto,
+    DivisionDto,
+    FieldDto,
     DailyWeightSummaryResultDto,
     Estate,
     WorkTypeDto,
@@ -51,11 +53,12 @@ import type {
 type Filters = {
     employeeCode: string
     estateId: string
-    cpCode: string
+    divisionCode: string
+    fieldCode: string
     workType: string
 }
 
-const emptyFilters: Filters = { employeeCode: "", estateId: "", cpCode: "", workType: "" }
+const emptyFilters: Filters = { employeeCode: "", estateId: "", divisionCode: "", fieldCode: "", workType: "" }
 
 // Pinned cells need an opaque background so scrolled cells don't show through (see Attendance)
 const stickyCell = "bg-background transition-colors "
@@ -92,10 +95,15 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
     const { data: estatesResponse } = useGetAllEstates()
     const estates = React.useMemo(() => toList<Estate>(estatesResponse), [estatesResponse])
     const filterEstateId = draftFilters.estateId
-    const { data: collectionPointsResponse } = useGetCollectionPoints(filterEstateId, undefined, {
+    const filterDivisionCode = draftFilters.divisionCode
+    const { data: divisionsResponse } = useGetDivisions(filterEstateId, {
         query: { enabled: Boolean(filterEstateId) },
     })
-    const collectionPoints = filterEstateId ? toList<CollectionPointDto>(collectionPointsResponse) : []
+    const divisions = filterEstateId ? toList<DivisionDto>(divisionsResponse) : []
+    const { data: fieldsResponse } = useGetFields(filterEstateId, { divisionCode: filterDivisionCode || undefined }, {
+        query: { enabled: Boolean(filterEstateId) },
+    })
+    const fields = filterEstateId ? toList<FieldDto>(fieldsResponse) : []
     const { data: workTypesResponse } = useGetWorkTypes(filterEstateId, {
         query: { enabled: Boolean(filterEstateId) },
     })
@@ -113,7 +121,8 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
         dateFrom: format(range.from ?? yesterday, "yyyy-MM-dd"),
         dateTo: format(range.to ?? range.from ?? yesterday, "yyyy-MM-dd"),
         estateId: blankToUndefined(filters.estateId),
-        cpCode: blankToUndefined(filters.cpCode),
+        divisionCode: blankToUndefined(filters.divisionCode),
+        fieldCode: blankToUndefined(filters.fieldCode),
         workType: blankToUndefined(filters.workType),
     }
     const employeeCode = mine ? undefined : blankToUndefined(filters.employeeCode)
@@ -126,7 +135,9 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
     const setDraft = (key: keyof Filters, value: string) => setDraftFilters((current) => ({
         ...current,
         [key]: value,
-        ...(key === "estateId" && value !== current.estateId ? { cpCode: "", workType: "" } : {}),
+        // Divisions, fields and work types belong to a site; fields belong to a division
+        ...(key === "estateId" && value !== current.estateId ? { divisionCode: "", fieldCode: "", workType: "" } : {}),
+        ...(key === "divisionCode" && value !== current.divisionCode ? { fieldCode: "" } : {}),
     }))
 
     const selectRange = (next: DateRange) => {
@@ -241,13 +252,24 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                             />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="summary-filter-cp" className="text-muted-foreground">{t("fields.collectionPoint")}</FieldLabel>
+                            <FieldLabel htmlFor="summary-filter-division" className="text-muted-foreground">{t("fields.division")}</FieldLabel>
                             <LovSelect
-                                id="summary-filter-cp"
-                                value={draftFilters.cpCode}
-                                onValueChange={(value) => setDraft("cpCode", value)}
-                                options={collectionPointOptions(collectionPoints)}
-                                clearLabel={t(filterEstateId ? "fields.allCollectionPoints" : "fields.selectSiteFirst")}
+                                id="summary-filter-division"
+                                value={draftFilters.divisionCode}
+                                onValueChange={(value) => setDraft("divisionCode", value)}
+                                options={divisionOptions(divisions)}
+                                clearLabel={t(filterEstateId ? "fields.allDivisions" : "fields.selectSiteFirst")}
+                                disabled={!filterEstateId}
+                            />
+                        </Field>
+                        <Field>
+                            <FieldLabel htmlFor="summary-filter-field" className="text-muted-foreground">{t("fields.field")}</FieldLabel>
+                            <LovSelect
+                                id="summary-filter-field"
+                                value={draftFilters.fieldCode}
+                                onValueChange={(value) => setDraft("fieldCode", value)}
+                                options={fieldOptions(fields)}
+                                clearLabel={t(filterEstateId ? "fields.allFields" : "fields.selectSiteFirst")}
                                 disabled={!filterEstateId}
                             />
                         </Field>
@@ -321,7 +343,8 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                                     <TableHead>{t("fields.workerName")}</TableHead>
                                     <TableHead>{t("dailySummary.attendanceCategory")}</TableHead>
                                     <TableHead>{t("fields.site")}</TableHead>
-                                    <TableHead>{t("fields.collectionPoint")}</TableHead>
+                                    <TableHead>{t("fields.division")}</TableHead>
+                                    <TableHead>{t("fields.field")}</TableHead>
                                     <TableHead>{t("fields.workType")}</TableHead>
                                     <TableHead className="text-right">{t("dailySummary.transactions")}</TableHead>
                                     <TableHead className="text-right">{t("dailySummary.dailyTotalKg")}</TableHead>
@@ -340,8 +363,9 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                                             {row.attendanceCategory && <Badge variant="outline">{labels.category[row.attendanceCategory]}</Badge>}
                                         </TableCell>
                                         <TableCell className="whitespace-nowrap">{row.estateName || row.estateId}</TableCell>
-                                        <TableCell className="whitespace-nowrap">{row.cpCode}</TableCell>
-                                        <TableCell className="whitespace-nowrap">{row.workType}</TableCell>
+                                        <TableCell className="whitespace-nowrap">{row.divisionDescription || row.divisionCode}</TableCell>
+                                        <TableCell className="whitespace-nowrap">{row.fieldDescription || row.fieldCode}</TableCell>
+                                        <TableCell className="whitespace-nowrap">{row.workTypeName || row.workType}</TableCell>
                                         <TableCell className="text-right tabular-nums">{row.transactionCount}</TableCell>
                                         <TableCell className="text-right font-medium tabular-nums">{formatKg(row.dailyTotalKg)}</TableCell>
                                         <TableCell><DayClassificationBadge value={row.dayClassification} /></TableCell>
@@ -351,7 +375,7 @@ export const DailyWeightSummary = ({ mine = false }: { mine?: boolean }) => {
                                 ))}
                                 {rows.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={12} className="h-24 text-center text-muted-foreground">
+                                        <TableCell colSpan={13} className="h-24 text-center text-muted-foreground">
                                             {isLoading ? t("dailySummary.loading") : t("dailySummary.empty", { range: formatRange(range) })}
                                         </TableCell>
                                     </TableRow>

@@ -12,7 +12,8 @@ export interface SyncAttendanceRecord {
   employeeCode?: string;
   estateId?: string;
   workType?: string;
-  cpCode?: string;
+  divisionCode?: string;
+  fieldCode?: string;
   attendanceCategory?: SyncAttendanceRecordAttendanceCategory;
   attendanceDate?: string;
   recordedAt?: string;

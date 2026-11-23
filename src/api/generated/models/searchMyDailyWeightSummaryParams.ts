@@ -10,6 +10,7 @@ export type SearchMyDailyWeightSummaryParams = {
   dateFrom?: string;
   dateTo?: string;
   estateId?: string;
-  cpCode?: string;
+  divisionCode?: string;
+  fieldCode?: string;
   workType?: string;
 };

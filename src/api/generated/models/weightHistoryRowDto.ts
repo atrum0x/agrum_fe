@@ -25,9 +25,12 @@ export interface WeightHistoryRowDto {
   supervisorName?: string;
   estateId?: string;
   estateName?: string;
-  cpCode?: string;
-  cpName?: string;
+  divisionCode?: string;
+  divisionDescription?: string;
+  fieldCode?: string;
+  fieldDescription?: string;
   workType?: string;
+  workTypeName?: string;
   entryType?: WeightHistoryRowDtoEntryType;
   identifiedBy?: WeightHistoryRowDtoIdentifiedBy;
   faceSimilarity?: number;

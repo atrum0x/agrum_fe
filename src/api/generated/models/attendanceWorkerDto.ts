@@ -12,6 +12,7 @@ export interface AttendanceWorkerDto {
   fullName?: string;
   defaultEstateId?: string;
   homeEstateId?: string;
-  defaultCpCode?: string;
+  defaultDivisionCode?: string;
+  defaultFieldCode?: string;
   defaultCategory?: AttendanceWorkerDtoDefaultCategory;
 }

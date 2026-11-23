@@ -17,7 +17,8 @@ export interface WeightRecordDto {
   weighedAt?: string;
   entrySequence?: number;
   estateId?: string;
-  cpCode?: string;
+  divisionCode?: string;
+  fieldCode?: string;
   workType?: string;
   entryType?: WeightRecordDtoEntryType;
   originalWeightKg?: number;

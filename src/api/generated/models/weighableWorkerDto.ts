@@ -12,9 +12,12 @@ export interface WeighableWorkerDto {
   attendanceId?: string;
   estateId?: string;
   estateName?: string;
-  cpCode?: string;
-  cpName?: string;
+  divisionCode?: string;
+  divisionDescription?: string;
+  fieldCode?: string;
+  fieldDescription?: string;
   workType?: string;
+  workTypeName?: string;
   variancePercent?: number;
   entriesToday?: number;
   dailyLimit?: number;

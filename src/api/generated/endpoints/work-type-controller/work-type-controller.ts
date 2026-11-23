@@ -59,16 +59,19 @@ export type updateWorkTypeResponseSuccess = updateWorkTypeResponse200 & {
 };
 export type updateWorkTypeResponse = updateWorkTypeResponseSuccess;
 
-export const getUpdateWorkTypeUrl = (estateId: string, workType: string) => {
-  return `/api/estates/${estateId}/work-types/${workType}`;
+export const getUpdateWorkTypeUrl = (
+  estateId: string,
+  workTypeCode: string,
+) => {
+  return `/api/estates/${estateId}/work-types/${workTypeCode}`;
 };
 
 /**
- * @summary Change a work type (e.g. Weighing Required)
+ * @summary Change a work type (name, Weighing Required)
  */
 export const updateWorkType = async (
   estateId: string,
-  workType: string,
+  workTypeCode: string,
   updateWorkTypeRequest: UpdateWorkTypeRequest,
   options?: Parameters<typeof customFetch>[1],
 ): Promise<updateWorkTypeResponse> => {
@@ -81,7 +84,7 @@ export const updateWorkType = async (
     return h;
   };
   return customFetch<updateWorkTypeResponse>(
-    getUpdateWorkTypeUrl(estateId, workType),
+    getUpdateWorkTypeUrl(estateId, workTypeCode),
     {
       ...options,
       method: "PUT",
@@ -124,9 +127,9 @@ export const getUpdateWorkTypeMutationOptions = <
     Awaited<ReturnType<typeof updateWorkType>>,
     UpdateWorkTypeMutationVariables
   > = (props) => {
-    const { estateId, workType, data } = props ?? {};
+    const { estateId, workTypeCode, data } = props ?? {};
 
-    return updateWorkType(estateId, workType, data, requestOptions);
+    return updateWorkType(estateId, workTypeCode, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -139,12 +142,12 @@ export type UpdateWorkTypeMutationBody = UpdateWorkTypeRequest;
 export type UpdateWorkTypeMutationError = unknown;
 export type UpdateWorkTypeMutationVariables = {
   estateId: string;
-  workType: string;
+  workTypeCode: string;
   data: UpdateWorkTypeRequest;
 };
 
 /**
- * @summary Change a work type (e.g. Weighing Required)
+ * @summary Change a work type (name, Weighing Required)
  */
 export const useUpdateWorkType = <TError = unknown, TContext = unknown>(
   options?: {

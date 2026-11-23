@@ -6,6 +6,8 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type GetCollectionPointsParams = {
-  search?: string;
-};
+export interface MobileDivisionDto {
+  estateId?: string;
+  divisionCode?: string;
+  description?: string;
+}

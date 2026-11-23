@@ -65,7 +65,7 @@ export const getCorrectAttendanceUrl = (attendanceId: string) => {
 };
 
 /**
- * @summary Correct an attendance record: site, work type, collection point or category (administrators)
+ * @summary Correct an attendance record: site, work type, field or category (administrators)
  */
 export const correctAttendance = async (
   attendanceId: string,
@@ -143,7 +143,7 @@ export type CorrectAttendanceMutationVariables = {
 };
 
 /**
- * @summary Correct an attendance record: site, work type, collection point or category (administrators)
+ * @summary Correct an attendance record: site, work type, field or category (administrators)
  */
 export const useCorrectAttendance = <TError = unknown, TContext = unknown>(
   options?: {

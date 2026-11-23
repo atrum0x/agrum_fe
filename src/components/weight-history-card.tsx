@@ -94,7 +94,7 @@ export const WeightHistoryCard = ({ weightId, onClose }: { weightId: string; onC
                             <Detail label={t("weightAudit.afterVariance")}>
                                 {formatKg(weighing.weightAfterVariance)} kg ({formatVariance(weighing.variancePercent)}%)
                             </Detail>
-                            <Detail label={t("fields.site")}>{weighing.estateId} · {weighing.cpCode} · {weighing.workType}</Detail>
+                            <Detail label={t("fields.site")}>{weighing.estateId} · {weighing.divisionCode} · {weighing.fieldCode} · {weighing.workType}</Detail>
                             <Detail label={t("weightHistory.lineState")}>{labels.lineState[weighing.lineState === "CANCELLED" ? "CANCELLED" : "RECORDED"]}</Detail>
                             <Detail label={t("weightAudit.receivedAt")}>{formatDateTime(weighing.receivedAt)}</Detail>
                         </div>

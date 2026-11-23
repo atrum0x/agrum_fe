@@ -33,7 +33,7 @@ import { ApprovalStatusBadge } from "@/components/weight-badges"
 import { WeightChangeCard } from "@/components/weight-change-card"
 import { WeightHistoryCard } from "@/components/weight-history-card"
 import { IdentifiedByCell } from "@/components/weighing-photo"
-import { collectionPointOptions, estateOptions, workTypeOptions } from "@/lib/lov-options"
+import { divisionOptions, estateOptions, fieldOptions, workTypeOptions } from "@/lib/lov-options"
 import { useCalendarFormatters } from "@/i18n/use-calendar-formatters"
 import { useWeightLabels, type WeightLabels } from "@/lib/weight-labels"
 import {
@@ -53,7 +53,8 @@ import {
 import { downloadFile } from "@/api/download"
 import { notifyError, notifySuccess } from "@/lib/notify"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
-import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
+import { useGetDivisions } from "@/api/generated/endpoints/division-controller/division-controller"
+import { useGetFields } from "@/api/generated/endpoints/field-controller/field-controller"
 import { useGetWorkTypes } from "@/api/generated/endpoints/work-type-controller/work-type-controller"
 import { toAutocompleteOptions } from "@/lib/filter-options"
 import {
@@ -63,7 +64,8 @@ import {
     useSearchWeights,
 } from "@/api/generated/endpoints/weight-history-controller/weight-history-controller"
 import type {
-    CollectionPointDto,
+    DivisionDto,
+    FieldDto,
     Estate,
     PageWeightHistoryRowDto,
     WeightHistoryRowDto,
@@ -76,7 +78,8 @@ type Filters = {
     employeeCode: string
     supervisor: string
     estateId: string
-    cpCode: string
+    divisionCode: string
+    fieldCode: string
     workType: string
     attendanceCategory: AttendanceCategory | ""
     entryType: EntryType | ""
@@ -85,7 +88,7 @@ type Filters = {
 }
 
 const emptyFilters: Filters = {
-    employeeCode: "", supervisor: "", estateId: "", cpCode: "", workType: "",
+    employeeCode: "", supervisor: "", estateId: "", divisionCode: "", fieldCode: "", workType: "",
     attendanceCategory: "", entryType: "", lineState: "", approvalStatus: "",
 }
 
@@ -122,11 +125,13 @@ const buildColumns = (t: TFunction, labels: WeightLabels): Column[] => [
     },
     { id: "supervisor", label: t("fields.supervisor"), className: "whitespace-nowrap", cell: (row) => row.supervisorName },
     {
-        id: "site", label: t("weightHistory.siteCpWorkType"), className: "whitespace-nowrap",
+        id: "site", label: t("weightHistory.siteDivisionFieldWorkType"), className: "whitespace-nowrap",
         cell: (row) => (
             <>
                 <p>{row.estateName || row.estateId}</p>
-                <p className="text-sm text-muted-foreground">{row.cpCode} · {row.workType}</p>
+                <p className="text-sm text-muted-foreground">
+                    {row.divisionDescription || row.divisionCode} · {row.fieldDescription || row.fieldCode} · {row.workTypeName || row.workType}
+                </p>
             </>
         ),
     },
@@ -231,10 +236,16 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
     const { data: estatesResponse } = useGetAllEstates()
     const estates = React.useMemo(() => toList<Estate>(estatesResponse), [estatesResponse])
     const filterEstateId = draftFilters.estateId
-    const { data: collectionPointsResponse } = useGetCollectionPoints(filterEstateId, undefined, {
+    const filterDivisionCode = draftFilters.divisionCode
+    const { data: divisionsResponse } = useGetDivisions(filterEstateId, {
         query: { enabled: Boolean(filterEstateId) },
     })
-    const collectionPoints = filterEstateId ? toList<CollectionPointDto>(collectionPointsResponse) : []
+    const divisions = filterEstateId ? toList<DivisionDto>(divisionsResponse) : []
+    // Fields of the selected division (FSD 2.8 B.1), or of the whole site
+    const { data: fieldsResponse } = useGetFields(filterEstateId, { divisionCode: filterDivisionCode || undefined }, {
+        query: { enabled: Boolean(filterEstateId) },
+    })
+    const fields = filterEstateId ? toList<FieldDto>(fieldsResponse) : []
     const { data: workTypesResponse } = useGetWorkTypes(filterEstateId, {
         query: { enabled: Boolean(filterEstateId) },
     })
@@ -265,7 +276,8 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
     const filterParams = {
         supervisor: blankToUndefined(filters.supervisor),
         estateId: blankToUndefined(filters.estateId),
-        cpCode: blankToUndefined(filters.cpCode),
+        divisionCode: blankToUndefined(filters.divisionCode),
+        fieldCode: blankToUndefined(filters.fieldCode),
         workType: blankToUndefined(filters.workType),
         attendanceCategory: filters.attendanceCategory || undefined,
         entryType: filters.entryType || undefined,
@@ -297,8 +309,9 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
     const setDraft = <K extends keyof Filters>(key: K, value: Filters[K]) => setDraftFilters((current) => ({
         ...current,
         [key]: value,
-        // Collection points and work types belong to a site
-        ...(key === "estateId" && value !== current.estateId ? { cpCode: "", workType: "" } : {}),
+        // Divisions, fields and work types belong to a site; fields belong to a division
+        ...(key === "estateId" && value !== current.estateId ? { divisionCode: "", fieldCode: "", workType: "" } : {}),
+        ...(key === "divisionCode" && value !== current.divisionCode ? { fieldCode: "" } : {}),
     }))
 
     const selectRange = (next: DateRange) => {
@@ -422,13 +435,24 @@ export const WeightHistory = ({ mine = false }: { mine?: boolean }) => {
                             />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="weight-filter-cp" className="text-muted-foreground">{t("fields.collectionPoint")}</FieldLabel>
+                            <FieldLabel htmlFor="weight-filter-division" className="text-muted-foreground">{t("fields.division")}</FieldLabel>
                             <LovSelect
-                                id="weight-filter-cp"
-                                value={draftFilters.cpCode}
-                                onValueChange={(value) => setDraft("cpCode", value)}
-                                options={collectionPointOptions(collectionPoints)}
-                                clearLabel={t(filterEstateId ? "fields.allCollectionPoints" : "fields.selectSiteFirst")}
+                                id="weight-filter-division"
+                                value={draftFilters.divisionCode}
+                                onValueChange={(value) => setDraft("divisionCode", value)}
+                                options={divisionOptions(divisions)}
+                                clearLabel={t(filterEstateId ? "fields.allDivisions" : "fields.selectSiteFirst")}
+                                disabled={!filterEstateId}
+                            />
+                        </Field>
+                        <Field>
+                            <FieldLabel htmlFor="weight-filter-field" className="text-muted-foreground">{t("fields.field")}</FieldLabel>
+                            <LovSelect
+                                id="weight-filter-field"
+                                value={draftFilters.fieldCode}
+                                onValueChange={(value) => setDraft("fieldCode", value)}
+                                options={fieldOptions(fields)}
+                                clearLabel={t(filterEstateId ? "fields.allFields" : "fields.selectSiteFirst")}
                                 disabled={!filterEstateId}
                             />
                         </Field>

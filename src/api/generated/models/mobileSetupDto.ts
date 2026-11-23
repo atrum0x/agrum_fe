@@ -6,8 +6,9 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { AttendanceWorkerDto } from "./attendanceWorkerDto";
-import type { MobileCollectionPointDto } from "./mobileCollectionPointDto";
+import type { MobileDivisionDto } from "./mobileDivisionDto";
 import type { MobileEstateDto } from "./mobileEstateDto";
+import type { MobileFieldDto } from "./mobileFieldDto";
 import type { MobileWorkTypeDto } from "./mobileWorkTypeDto";
 import type { WeighableWorkerDto } from "./weighableWorkerDto";
 
@@ -17,7 +18,8 @@ export interface MobileSetupDto {
   defaultEstateId?: string;
   estates?: MobileEstateDto[];
   workTypes?: MobileWorkTypeDto[];
-  collectionPoints?: MobileCollectionPointDto[];
+  divisions?: MobileDivisionDto[];
+  fields?: MobileFieldDto[];
   workers?: AttendanceWorkerDto[];
   attendedToday?: string[];
   weighableToday?: WeighableWorkerDto[];

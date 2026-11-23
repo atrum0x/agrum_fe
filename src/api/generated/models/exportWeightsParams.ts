@@ -16,7 +16,8 @@ export type ExportWeightsParams = {
   employeeCode?: string;
   supervisor?: string;
   estateId?: string;
-  cpCode?: string;
+  divisionCode?: string;
+  fieldCode?: string;
   workType?: string;
   attendanceCategory?: ExportWeightsAttendanceCategory;
   entryType?: ExportWeightsEntryType;

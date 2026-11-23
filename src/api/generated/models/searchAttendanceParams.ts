@@ -11,7 +11,8 @@ export type SearchAttendanceParams = {
   dateTo?: string;
   employee?: string;
   estateId?: string;
-  cpCode?: string;
+  divisionCode?: string;
+  fieldCode?: string;
   workType?: string;
   recordedBy?: string;
 };

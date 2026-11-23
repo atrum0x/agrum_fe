@@ -16,7 +16,8 @@ export type SearchMyWeightsParams = {
   dateTo?: string;
   supervisor?: string;
   estateId?: string;
-  cpCode?: string;
+  divisionCode?: string;
+  fieldCode?: string;
   workType?: string;
   attendanceCategory?: SearchMyWeightsAttendanceCategory;
   entryType?: SearchMyWeightsEntryType;

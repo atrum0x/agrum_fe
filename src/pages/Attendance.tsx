@@ -15,11 +15,12 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldLabel } from "@/components/ui/field"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { LovSelect } from "@/components/lov-select"
-import { collectionPointOptions, estateOptions, workTypeOptions } from "@/lib/lov-options"
+import { divisionOptions, estateOptions, fieldOptions, workTypeOptions } from "@/lib/lov-options"
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useGetAllEstates } from "@/api/generated/endpoints/estate-controller/estate-controller"
-import { useGetCollectionPoints } from "@/api/generated/endpoints/collection-point-controller/collection-point-controller"
+import { useGetDivisions } from "@/api/generated/endpoints/division-controller/division-controller"
+import { useGetFields } from "@/api/generated/endpoints/field-controller/field-controller"
 import { useGetWorkTypes } from "@/api/generated/endpoints/work-type-controller/work-type-controller"
 import { toAutocompleteOptions } from "@/lib/filter-options"
 import {
@@ -30,7 +31,8 @@ import {
 import type {
     AttendanceDto,
     AttendanceDtoAttendanceCategory,
-    CollectionPointDto,
+    DivisionDto,
+    FieldDto,
     Estate,
     WorkTypeDto,
 } from "@/api/generated/models"
@@ -41,12 +43,13 @@ import { notifySuccess } from "@/lib/notify"
 type Filters = {
     employee: string
     estateId: string
-    cpCode: string
+    divisionCode: string
+    fieldCode: string
     workType: string
     recordedBy: string
 }
 
-const emptyFilters: Filters = { employee: "", estateId: "", cpCode: "", workType: "", recordedBy: "" }
+const emptyFilters: Filters = { employee: "", estateId: "", divisionCode: "", fieldCode: "", workType: "", recordedBy: "" }
 
 const categoryLabels: Record<AttendanceDtoAttendanceCategory, string> = {
     REGULAR: "Regular",
@@ -99,12 +102,19 @@ export const Attendance = () => {
     const { data: estatesResponse } = useGetAllEstates()
     const estates = React.useMemo(() => toList<Estate>(estatesResponse), [estatesResponse])
     const filterEstateId = draftFilters.estateId
-    const { data: collectionPointsResponse } = useGetCollectionPoints(filterEstateId, undefined, {
+    const filterDivisionCode = draftFilters.divisionCode
+    const { data: divisionsResponse } = useGetDivisions(filterEstateId, {
         query: { enabled: Boolean(filterEstateId) },
     })
-    const collectionPoints = React.useMemo(
-        () => filterEstateId ? toList<CollectionPointDto>(collectionPointsResponse) : [],
-        [filterEstateId, collectionPointsResponse])
+    const divisions = React.useMemo(
+        () => filterEstateId ? toList<DivisionDto>(divisionsResponse) : [],
+        [filterEstateId, divisionsResponse])
+    const { data: fieldsResponse } = useGetFields(filterEstateId, { divisionCode: filterDivisionCode || undefined }, {
+        query: { enabled: Boolean(filterEstateId) },
+    })
+    const fields = React.useMemo(
+        () => filterEstateId ? toList<FieldDto>(fieldsResponse) : [],
+        [filterEstateId, fieldsResponse])
     const { data: workTypesResponse } = useGetWorkTypes(filterEstateId, {
         query: { enabled: Boolean(filterEstateId) },
     })
@@ -136,7 +146,8 @@ export const Attendance = () => {
         dateTo: format(range.to ?? range.from ?? today, "yyyy-MM-dd"),
         employee: blankToUndefined(filters.employee),
         estateId: blankToUndefined(filters.estateId),
-        cpCode: blankToUndefined(filters.cpCode),
+        divisionCode: blankToUndefined(filters.divisionCode),
+        fieldCode: blankToUndefined(filters.fieldCode),
         workType: blankToUndefined(filters.workType),
         recordedBy: blankToUndefined(filters.recordedBy),
     })
@@ -155,8 +166,9 @@ export const Attendance = () => {
     const setDraft = (key: keyof Filters, value: string) => setDraftFilters((current) => ({
         ...current,
         [key]: value,
-        // Collection points and work types belong to a site
-        ...(key === "estateId" && value !== current.estateId ? { cpCode: "", workType: "" } : {}),
+        // Divisions, fields and work types belong to a site; fields belong to a division
+        ...(key === "estateId" && value !== current.estateId ? { divisionCode: "", fieldCode: "", workType: "" } : {}),
+        ...(key === "divisionCode" && value !== current.divisionCode ? { fieldCode: "" } : {}),
     }))
 
     const selectRange = (next: DateRange) => {
@@ -247,13 +259,24 @@ export const Attendance = () => {
                             />
                         </Field>
                         <Field>
-                            <FieldLabel htmlFor="attendance-filter-cp" className="text-muted-foreground">Collection Point</FieldLabel>
+                            <FieldLabel htmlFor="attendance-filter-division" className="text-muted-foreground">Division</FieldLabel>
                             <LovSelect
-                                id="attendance-filter-cp"
-                                value={draftFilters.cpCode}
-                                onValueChange={(value) => setDraft("cpCode", value)}
-                                options={collectionPointOptions(collectionPoints)}
-                                clearLabel={filterEstateId ? "All collection points" : "Select a site first"}
+                                id="attendance-filter-division"
+                                value={draftFilters.divisionCode}
+                                onValueChange={(value) => setDraft("divisionCode", value)}
+                                options={divisionOptions(divisions)}
+                                clearLabel={filterEstateId ? "All divisions" : "Select a site first"}
+                                disabled={!filterEstateId}
+                            />
+                        </Field>
+                        <Field>
+                            <FieldLabel htmlFor="attendance-filter-field" className="text-muted-foreground">Field</FieldLabel>
+                            <LovSelect
+                                id="attendance-filter-field"
+                                value={draftFilters.fieldCode}
+                                onValueChange={(value) => setDraft("fieldCode", value)}
+                                options={fieldOptions(fields)}
+                                clearLabel={filterEstateId ? "All fields" : "Select a site first"}
                                 disabled={!filterEstateId}
                             />
                         </Field>
@@ -376,7 +399,8 @@ export const Attendance = () => {
                                     <TableHead>Worker Name</TableHead>
                                     <TableHead>Date</TableHead>
                                     <TableHead>Working Site</TableHead>
-                                    <TableHead>Collection Point</TableHead>
+                                    <TableHead>Division</TableHead>
+                                    <TableHead>Field</TableHead>
                                     <TableHead>Work Type</TableHead>
                                     <TableHead>Attendance Category</TableHead>
                                     <TableHead>Recorded By / At</TableHead>
@@ -403,10 +427,17 @@ export const Attendance = () => {
                                             <TableCell className="whitespace-nowrap">{formatDate(row.attendanceDate)}</TableCell>
                                             <TableCell className="whitespace-nowrap">{row.estateName || row.estateId}</TableCell>
                                             <TableCell className="whitespace-nowrap">
-                                                <p>{row.cpCode}</p>
-                                                <p className="text-sm text-muted-foreground">{row.cpName}</p>
+                                                <p>{row.divisionCode}</p>
+                                                <p className="text-sm text-muted-foreground">{row.divisionDescription}</p>
                                             </TableCell>
-                                            <TableCell className="whitespace-nowrap">{row.workType}</TableCell>
+                                            <TableCell className="whitespace-nowrap">
+                                                <p>{row.fieldCode}</p>
+                                                <p className="text-sm text-muted-foreground">{row.fieldDescription}</p>
+                                            </TableCell>
+                                            <TableCell className="whitespace-nowrap">
+                                                <p>{row.workType}</p>
+                                                <p className="text-sm text-muted-foreground">{row.workTypeName}</p>
+                                            </TableCell>
                                             <TableCell>
                                                 {row.attendanceCategory && (
                                                     <Badge variant="outline">{categoryLabels[row.attendanceCategory]}</Badge>
@@ -431,7 +462,7 @@ export const Attendance = () => {
                                 })}
                                 {rows.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
+                                        <TableCell colSpan={11} className="h-24 text-center text-muted-foreground">
                                             {isLoading ? "Loading attendance..." : `No attendance found for ${formatRange(range)}.`}
                                         </TableCell>
                                     </TableRow>

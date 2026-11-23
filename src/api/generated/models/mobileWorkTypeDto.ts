@@ -8,6 +8,7 @@
 
 export interface MobileWorkTypeDto {
   estateId?: string;
-  workType?: string;
+  workTypeCode?: string;
+  name?: string;
   weighingRequired?: boolean;
 }

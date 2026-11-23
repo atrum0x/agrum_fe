@@ -15,9 +15,12 @@ export interface AttendanceDto {
   estateId?: string;
   estateName?: string;
   homeEstateId?: string;
-  cpCode?: string;
-  cpName?: string;
+  divisionCode?: string;
+  divisionDescription?: string;
+  fieldCode?: string;
+  fieldDescription?: string;
   workType?: string;
+  workTypeName?: string;
   attendanceCategory?: AttendanceDtoAttendanceCategory;
   recordedBy?: string;
   recordedAt?: string;

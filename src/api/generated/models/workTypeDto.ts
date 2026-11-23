@@ -7,7 +7,8 @@
  */
 
 export interface WorkTypeDto {
-  workType?: string;
+  workTypeCode?: string;
+  name?: string;
   estateId?: string;
   weighingRequired?: boolean;
 }

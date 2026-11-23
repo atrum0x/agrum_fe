@@ -67,7 +67,7 @@ export const getUpdateEstateUrl = (estateId: string) => {
 };
 
 /**
- * @summary Change a site's settings: standards, variance, daily limit, status
+ * @summary Change a site's settings: qty norms, variance, daily limit, status
  */
 export const updateEstate = async (
   estateId: string,
@@ -142,7 +142,7 @@ export type UpdateEstateMutationVariables = {
 };
 
 /**
- * @summary Change a site's settings: standards, variance, daily limit, status
+ * @summary Change a site's settings: qty norms, variance, daily limit, status
  */
 export const useUpdateEstate = <TError = unknown, TContext = unknown>(
   options?: {

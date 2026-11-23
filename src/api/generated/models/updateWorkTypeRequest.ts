@@ -7,5 +7,6 @@
  */
 
 export interface UpdateWorkTypeRequest {
+  name?: string;
   weighingRequired?: boolean;
 }

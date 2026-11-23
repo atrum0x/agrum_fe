@@ -10,6 +10,7 @@ import type { AttendanceWorkerRequest } from "./attendanceWorkerRequest";
 export interface RecordAttendanceRequest {
   estateId?: string;
   workType?: string;
-  cpCode?: string;
+  divisionCode?: string;
+  fieldCode?: string;
   workers?: AttendanceWorkerRequest[];
 }
